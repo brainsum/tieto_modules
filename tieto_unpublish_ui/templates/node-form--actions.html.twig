@@ -1,0 +1,80 @@
+{{ form.tieto_form_footer|without('tieto_notification_actions', 'republish_button') }}
+
+{% set actionsMetadata = form['#tieto_meta_data']['actions'] %}
+<div class="form-actions-wrapper">
+    <div class="form-actions-info-wrapper">
+        {{ form['#tieto_meta_data']['info']['title'] }}
+        {{ form['#tieto_meta_data']['info']['last_update'] }}
+        {{ form['#tieto_meta_data']['info']['prev_versions'] }}
+    </div>
+    <div class="form-actions-buttons-wrapper">
+        {% for key, actionMeta in actionsMetadata if key != 'moderation_state_unpublished_content' %}
+            {% if form.actions[key] is defined %}
+                {% set action = form.actions[key] %}
+                {% set access = (action['#access'] ?: false) %}
+                {% set hyphenatedKey = key|replace({'_': '-'}) %}
+                <div class="form-action-button-wrapper form-action-{{ hyphenatedKey }}-button-wrapper {% if actionsMetadata[key]['scheduled'] %}scheduled{%endif%}">
+                    {% set showNotification = form.tieto_form_footer.tieto_notification_actions[key]['#displayNotification'] %}
+                    <div class="action-button--action-notification-wrapper {% if showNotification == false %}action-button--hidden-action-wrapper{% endif %}">
+                        {% if access == true %}
+                        {{ form.tieto_form_footer.tieto_notification_actions[key] }}
+                        {% endif %}
+                    </div>
+                    <div class="action-button--action-wrapper {% if showNotification == true %}action-button--hidden-action-wrapper{% endif %}">
+                        {{ action }}
+                    </div>
+                    <span class="action-description {{ hyphenatedKey }}-action-description">
+                    {% if actionsMetadata[key]['description'] and access == true %} {{ actionsMetadata[key]['description'] }} {% endif %}
+                    </span>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+{% if form['#tieto_meta_data']['node']['is_new'] == false %}
+<div class="form-meta-wrapper">
+    <div class="form-meta-title-wrapper">
+        <div class="form-meta-title {% if form['#tieto_meta_data']['node']['has_published_version'] == true %}published{% endif %}">
+            {{ form['#tieto_meta_data']['meta']['title'] }}
+        </div>
+        {% set key = 'moderation_state_unpublished_content' %}
+        {% if actionsMetadata[key] is defined %}
+            {% set hyphenatedKey = key|replace({'_': '-'}) %}
+            <div class="form-action-button-wrapper form-action-{{ hyphenatedKey }}-button-wrapper {% if actionsMetadata[key]['scheduled'] %}scheduled{%endif%}">
+                {% if form['#tieto_meta_data'].node.has_published_version and form.actions[key] is defined  %}
+                    {% set action = form.actions[key] %}
+                    {% set access = (action['#access'] ?: false) %}
+                    {% set showNotification = form.tieto_form_footer.tieto_notification_actions[key]['#displayNotification'] %}
+                    <div class="action-button--action-notification-wrapper {% if showNotification == false %}action-button--hidden-action-wrapper{% endif %}">
+                        {% if access == true %}
+                        {{ form.tieto_form_footer.tieto_notification_actions[key] }}
+                        {% endif %}
+                    </div>
+                    <div class="action-button--action-wrapper {% if showNotification == true %}action-button--hidden-action-wrapper{% endif %}">
+                        {{ action }}
+                    </div>
+                {% endif %}
+                <span class="action-description {{ hyphenatedKey }}-action-description">
+                {% if actionsMetadata[key]['description'] and access == true %} {{ actionsMetadata[key]['description'] }} {% endif %}
+                </span>
+            </div>
+        {% endif %}
+    </div>
+    <div class="form-meta-info-wrapper">
+        {{ form['#tieto_meta_data']['meta']['last_publish_date'] }}
+        {{ form['#tieto_meta_data']['meta']['first_publish_date'] }}
+        {{ form['#tieto_meta_data']['meta']['unpublish_date'] }}
+        {{ form['#tieto_meta_data']['meta']['author'] }}
+        {{ form['#tieto_meta_data']['meta']['view_link'] }}
+    </div>
+    {# @todo: TSP-383 | Disabled until proper way of implementation/notification is determined. #}
+    {#<div class="form-meta-action-wrapper">#}
+        {#<div class="form-meta-action">#}
+            {#{% if form['#tieto_meta_data'].node.can_be_republished %}#}
+                {#{{ form['tieto_form_footer']['republish_button'] }}#}
+            {#{% endif %}#}
+        {#</div>#}
+    {#</div>#}
+</div>
+{% endif %}

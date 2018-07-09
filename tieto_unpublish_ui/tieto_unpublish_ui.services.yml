@@ -1,0 +1,5 @@
+services:
+  tieto_unpublish_ui.node_revision_manager:
+    class: '\Drupal\tieto_unpublish_ui\Service\NodeRevisionManager'
+    arguments:
+      - '@entity_type.manager'

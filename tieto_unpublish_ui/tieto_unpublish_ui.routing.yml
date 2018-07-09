@@ -1,0 +1,6 @@
+tieto_unpublish_ui.revert_node_revision:
+  path: '/node-revision/revert/{revisionId}'
+  defaults:
+    _controller: '\Drupal\tieto_unpublish_ui\Controller\NodeRevisionController::revert'
+  requirements:
+    _custom_access: '\Drupal\tieto_unpublish_ui\Controller\NodeRevisionController::accessRevert'

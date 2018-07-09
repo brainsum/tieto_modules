@@ -1,0 +1,15 @@
+{
+    "name": "brainsum/tieto_unpublish_ui",
+    "description": "Unpublish UI for Tieto sites.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {
+        "drupal/inline_entity_form": "~1.0"
+    }
+}

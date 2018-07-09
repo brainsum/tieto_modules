@@ -1,0 +1,9 @@
+name: Tieto Unpublish UI
+type: module
+description: Module for enhancing the node moderation states.
+core: 8.x
+package: Tieto
+
+dependencies:
+  - drupal:node
+  - inline_entity_form:inline_entity_form
