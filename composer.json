@@ -1,0 +1,13 @@
+{
+    "name": "brainsum/tieto_modules",
+    "description": "Umbrella for Tieto modules.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {}
+}
