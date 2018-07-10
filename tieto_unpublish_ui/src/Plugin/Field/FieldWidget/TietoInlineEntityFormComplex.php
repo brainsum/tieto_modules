@@ -195,7 +195,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
 
         // Make sure entity_access is not checked for unsaved entities.
         $entityId = $entity->id();
-        if (empty($entityId) || $entity->access('update')) {
+        if (empty($entityId) || $entity->access('edit')) {
           $row['actions']['ief_entity_edit'] = [
             '#type' => 'submit',
             '#value' => $this->t('Edit'),
