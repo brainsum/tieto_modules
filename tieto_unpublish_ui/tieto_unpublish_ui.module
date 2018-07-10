@@ -208,11 +208,6 @@ function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterfa
  * Implements hook_ENTITY_TYPE_presave().
  */
 function tieto_unpublish_ui_node_presave(NodeInterface $node) {
-  // Skip new nodes.
-  if (!isset($node->original)) {
-    return;
-  }
-
   $mapping = NotificationsModalForm::getStateMappings();
   $nodeState = $node->get('moderation_state')->target_id;
   /** @var \Drupal\Core\Field\EntityReferenceFieldItemListInterface $scheduledDateField */
