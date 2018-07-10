@@ -2,7 +2,9 @@ tieto_node_forms:
   version: 1.0
   js:
     js/tieto_node_form.js: {}
-  css: {  }
+  css:
+    component:
+        css/main.css: {}
   dependencies:
     - core/jquery
 
@@ -10,7 +12,9 @@ notification_modal:
   version: 1.0
   js:
     js/notification_modal.js: {}
-  css: {  }
+  css:
+    component:
+        css/main.css: {}
   dependencies:
     - core/jquery
     - core/jquery.form

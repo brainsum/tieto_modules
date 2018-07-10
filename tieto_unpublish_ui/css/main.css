@@ -1,0 +1,258 @@
+#tieto-action-notification-modal-form #modal-submit-button {
+  background-color: #28a834;
+  border-color: #28a834;
+}
+
+#tieto-action-notification-modal-form #modal-submit-button:hover {
+  border-color: #1e7f27;
+  background-color: #1e7f27;
+}
+
+.form-actions-wrapper {
+  padding: 30px;
+  background-color: #FAFAFA;
+  height: auto;
+}
+
+.form-actions-wrapper label {
+  display: inline-block;
+  font-weight: normal;
+}
+
+.form-actions-wrapper label::after {
+  content: ":";
+}
+
+.form-actions-wrapper label + span {
+  font-weight: 600;
+}
+
+.form-actions-wrapper > .form-actions-info-wrapper {
+  margin-bottom: 1rem;
+}
+
+.form-actions-wrapper > .form-actions-info-wrapper h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-actions-wrapper > .form-actions-info-wrapper .actions-info--last-update a {
+  text-decoration: underline;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  margin: 0 -5px;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-button-wrapper {
+  -webkit-box-flex: 1;
+      -ms-flex: 1;
+          flex: 1;
+  vertical-align: top;
+  max-width: 140px;
+  padding: 0 5px;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-button-wrapper .button {
+  min-height: 49px;
+  line-height: 49px;
+  padding: 0 16px;
+  display: block;
+  width: 100%;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-button-wrapper .action-description {
+  display: inline-block;
+  text-align: center;
+  font-size: 13px;
+  margin-top: 5px;
+  color: #707070;
+  width: 100%;
+  line-height: 1;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-button-wrapper .action-description.scheduled {
+  color: #5CB85B;
+  font-weight: 600;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-button-wrapper .action-button--hidden-action-wrapper {
+  display: none;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-unpublished-button-wrapper {
+  min-width: 120px;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-unpublished-button-wrapper.scheduled .button {
+  background-color: #28a834;
+  border-color: #28a834;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-unpublished-button-wrapper.scheduled .button:hover {
+  border-color: #1e7f27;
+  background-color: #1e7f27;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-unpublished-button-wrapper.scheduled .action-description {
+  color: #28a834;
+  font-weight: 600;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-preview-button-wrapper .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-preview-button-wrapper .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-trash-button-wrapper .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-trash-button-wrapper .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-delete-button-wrapper .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-delete-button-wrapper .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-published-button-wrapper {
+  min-width: 120px;
+  margin-left: auto;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-published-button-wrapper .button {
+  background-color: #28a834;
+  border-color: #28a834;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-published-button-wrapper .button:hover {
+  border-color: #1e7f27;
+  background-color: #1e7f27;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-published-button-wrapper.scheduled .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+}
+
+.form-actions-wrapper > .form-actions-buttons-wrapper .form-action-moderation-state-published-button-wrapper.scheduled .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+.form-meta-wrapper {
+  padding: 30px;
+  background-color: #F6FBF5;
+  height: auto;
+}
+
+.form-meta-wrapper label {
+  display: inline-block;
+  font-weight: normal;
+}
+
+.form-meta-wrapper label::after {
+  content: ":";
+}
+
+.form-meta-wrapper label + span {
+  font-weight: 600;
+}
+
+.form-meta-wrapper .form-meta-info-wrapper {
+  margin-bottom: 1rem;
+}
+
+.form-meta-wrapper .form-meta-action-wrapper .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+}
+
+.form-meta-wrapper .form-meta-action-wrapper .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper {
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-meta-title h1 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333333;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-meta-title.published h1 {
+  color: #5CB85B;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-meta-title.published h1::before {
+  content: '\2713\0020\0020';
+  font-size: .7em;
+  vertical-align: top;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-action-button-wrapper {
+  position: absolute;
+  max-width: 140px;
+  min-width: 120px;
+  right: 0;
+  top: 0;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-action-button-wrapper .action-button--hidden-action-wrapper {
+  display: none;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-action-button-wrapper .action-description {
+  display: inline-block;
+  text-align: center;
+  font-size: 13px;
+  margin-top: 5px;
+  color: #707070;
+  width: 100%;
+  line-height: 1;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-action-button-wrapper .button {
+  background-color: #EEEEEE;
+  border-color: #E3E3E3;
+  color: #333;
+  min-height: 49px;
+  line-height: 49px;
+  padding: 0 16px;
+  display: block;
+  width: 100%;
+}
+
+.form-meta-wrapper .form-meta-title-wrapper .form-action-button-wrapper .button:hover {
+  border-color: #cacaca;
+  background-color: #d5d5d5;
+}
+
+/*# sourceMappingURL=main.css.map */
