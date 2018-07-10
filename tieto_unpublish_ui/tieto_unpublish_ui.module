@@ -196,7 +196,7 @@ function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterfa
   ));
 
   $status_messages = ['#type' => 'status_messages'];
-  $output = drupal_render_root($status_messages);
+  $output = \Drupal::service('renderer')->renderRoot($status_messages);
   if (!empty($output)) {
     $response->addCommand(new PrependCommand(NULL, $output));
   }
