@@ -50,11 +50,11 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
     $variables['node_meta'] = [
       'date' => [
         'label' => t('Last publish date'),
-        'value' => t('Not available'),
+        'value' => NULL,
       ],
       'author' => [
         'label' => t('Publisher'),
-        'value' => t('Not available'),
+        'value' => NULL,
       ],
     ];
     if (NULL !== $revision) {
@@ -67,11 +67,11 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
     $variables['node_meta'] = [
       'date' => [
         'label' => t('Last unpublish date'),
-        'value' => t('Not available'),
+        'value' => NULL,
       ],
       'author' => [
         'label' => t('Unpublished by'),
-        'value' => t('Not available'),
+        'value' => NULL,
       ],
     ];
     if (NULL !== $revision) {
