@@ -10,128 +10,100 @@
 }
 
 // Unpublish UI
-.form-actions-wrapper {
-  padding:30px;
-  background-color: #FAFAFA;
-  height: auto;
-  label {
-    display: inline-block;
-    font-weight: normal;
-    &::after {
-      content: ":";
-    }
-    & + span {
-      font-weight: 600;
-    }
-  }
-  > .form-actions-info-wrapper {
-    margin-bottom: 1rem;
-    h1 {
-      font-size: 20px;
-      font-weight: 600;
-      color: #333;
-    }
-    .actions-info--last-update {
-      a {
-        text-decoration: underline;
+.module-unpublish-ui {
+  .form-actions-wrapper {
+    padding:30px;
+    margin: 2em 0;
+    background-color: #FAFAFA;
+    height: auto;
+    label {
+      display: inline-block;
+      font-weight: normal;
+      &::after {
+        content: ":";
+      }
+      & + span {
+        font-weight: 600;
       }
     }
-  }
-  > .form-actions-buttons-wrapper {
-    display: flex;
-    margin: 0 -5px;
-    // All buttons
-    .form-action-button-wrapper {
-      flex:1;
-      vertical-align: top;
-      max-width: 140px;
-      padding: 0 5px;
-      .button {
-        min-height: 49px;
-        line-height: 49px;
-        padding: 0 16px;
-        display:block;
-        width: 100%;
+    > .form-actions-info-wrapper {
+      margin-bottom: 1rem;
+      h1 {
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
       }
-      .action-description {
-        display: inline-block;
-        text-align: center;
-        font-size: 13px;
-        margin-top: 5px;
-        color: #707070;
-        width: 100%;
-        line-height: 1;
-        &.scheduled {
-          color: #5CB85B;
-          font-weight: 600;
+      .actions-info--last-update {
+        a {
+          text-decoration: underline;
         }
       }
-      .action-button--hidden-action-wrapper {
-        display:none;
-      }
     }
-    .form-action-moderation-state-unpublished-button-wrapper {
-      min-width: 120px;
-      &.scheduled {
+    > .form-actions-buttons-wrapper {
+      display: flex;
+      margin: 0 -5px;
+      @media (max-width: 767px) {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      // All buttons
+      .form-action-button-wrapper {
+        flex:1;
+        vertical-align: top;
+        max-width: 140px;
+        padding: 0 5px;
+        @media (max-width: 767px) {
+          flex:initial;
+          flex-wrap: wrap;
+          justify-content: center;
+          margin-bottom: 10px;
+          min-width: 120px;
+        }
         .button {
-          background-color: #28a834;
-          border-color: #28a834;
-        }
-        .button:hover {
-          border-color: darken(#28a834, 10%);
-          background-color: darken(#28a834, 10%);
+          min-height: 49px;
+          line-height: 49px;
+          padding: 0 16px;
+          display:block;
+          width: 100%;
         }
         .action-description {
-          color: #28a834;
-          font-weight: 600;
+          display: inline-block;
+          text-align: center;
+          font-size: 13px;
+          margin-top: 5px;
+          color: #707070;
+          width: 100%;
+          line-height: 1;
+          &.scheduled {
+            color: #5CB85B;
+            font-weight: 600;
+          }
+        }
+        .action-button--hidden-action-wrapper {
+          display:none;
         }
       }
-    }
-    .form-action-preview-button-wrapper {
-      .button {
-        background-color: #EEEEEE;
-        border-color: #E3E3E3;
-        color: #333;
+      .form-action-moderation-state-unpublished-button-wrapper {
+        min-width: 120px;
+        @media (max-width: 767px) {
+          //min-width: initial;
+        }
+        &.scheduled {
+          .button {
+            background-color: #28a834;
+            border-color: #28a834;
+          }
+          .button:hover {
+            border-color: darken(#28a834, 10%);
+            background-color: darken(#28a834, 10%);
+          }
+          .action-description {
+            color: #28a834;
+            font-weight: 600;
+          }
+        }
       }
-      .button:hover {
-        border-color: darken(#E3E3E3, 10%);
-        background-color: darken(#EEEEEE, 10%);
-      }
-    }
-    .form-action-moderation-state-trash-button-wrapper {
-      .button {
-        background-color: #EEEEEE;
-        border-color: #E3E3E3;
-        color: #333;
-      }
-      .button:hover {
-        border-color: darken(#E3E3E3, 10%);
-        background-color: darken(#EEEEEE, 10%);
-      }
-    }
-    .form-action-delete-button-wrapper {
-      .button {
-        background-color: #EEEEEE;
-        border-color: #E3E3E3;
-        color: #333;
-      }
-      .button:hover {
-        border-color: darken(#E3E3E3, 10%);
-        background-color: darken(#EEEEEE, 10%);
-      }
-    }
-    .form-action-moderation-state-published-button-wrapper {
-      min-width: 120px;
-      margin-left: auto;
-      .button {
-        background-color: #28a834;
-        border-color: #28a834;
-      }
-      .button:hover {
-        border-color: darken(#28a834, 10%);
-        background-color: darken(#28a834, 10%);
-      }
-      &.scheduled {
+      .form-action-preview-button-wrapper {
         .button {
           background-color: #EEEEEE;
           border-color: #E3E3E3;
@@ -142,91 +114,141 @@
           background-color: darken(#EEEEEE, 10%);
         }
       }
-    }
-  }
-
-}
-
-
-.form-meta-wrapper {
-  padding:30px;
-  background-color: #F6FBF5;
-  height: auto;
-  label {
-    display: inline-block;
-    font-weight: normal;
-    &::after {
-      content: ":";
-    }
-    & + span {
-      font-weight: 600;
-    }
-  }
-  .form-meta-info-wrapper {
-    margin-bottom: 1rem;
-  }
-  .form-meta-action-wrapper {
-    .button {
-      background-color: #EEEEEE;
-      border-color: #E3E3E3;
-      color: #333;
-    }
-    .button:hover {
-      border-color: darken(#E3E3E3, 10%);
-      background-color: darken(#EEEEEE, 10%);
-    }
-  }
-  .form-meta-title-wrapper {
-    margin-bottom: 1rem;
-    position: relative;
-    .form-meta-title {
-      h1 {
-        font-size: 20px;
-        font-weight: 600;
-        color: #333333;
+      .form-action-moderation-state-trash-button-wrapper {
+        .button {
+          background-color: #EEEEEE;
+          border-color: #E3E3E3;
+          color: #333;
+        }
+        .button:hover {
+          border-color: darken(#E3E3E3, 10%);
+          background-color: darken(#EEEEEE, 10%);
+        }
       }
-      &.published {
-        h1 {
-          color: #5CB85B;
-          &::before {
-            content:'\2713\0020\0020';
-            font-size: .7em;
-            vertical-align: top;
+      .form-action-delete-button-wrapper {
+        .button {
+          background-color: #EEEEEE;
+          border-color: #E3E3E3;
+          color: #333;
+        }
+        .button:hover {
+          border-color: darken(#E3E3E3, 10%);
+          background-color: darken(#EEEEEE, 10%);
+        }
+      }
+      .form-action-moderation-state-published-button-wrapper {
+        min-width: 120px;
+        margin-left: auto;
+        @media (max-width: 767px) {
+          //min-width: initial;
+          margin-left: initial;
+        }
+        .button {
+          background-color: #28a834;
+          border-color: #28a834;
+        }
+        .button:hover {
+          border-color: darken(#28a834, 10%);
+          background-color: darken(#28a834, 10%);
+        }
+        &.scheduled {
+          .button {
+            background-color: #EEEEEE;
+            border-color: #E3E3E3;
+            color: #333;
+          }
+          .button:hover {
+            border-color: darken(#E3E3E3, 10%);
+            background-color: darken(#EEEEEE, 10%);
           }
         }
       }
     }
-    .form-action-button-wrapper {
-      position: absolute;
-      max-width: 140px;
-      min-width: 120px;
-      right: 0;
-      top: 0;
-      .action-button--hidden-action-wrapper {
-        display: none;
+  
+  }
+  
+  
+  .form-meta-wrapper {
+    padding:30px;
+    margin: 2em 0;
+    background-color: #F6FBF5;
+    height: auto;
+    label {
+      display: inline-block;
+      font-weight: normal;
+      &::after {
+        content: ":";
       }
-      .action-description {
-        display: inline-block;
-        text-align: center;
-        font-size: 13px;
-        margin-top: 5px;
-        color: #707070;
-        width: 100%;
-        line-height: 1;
+      & + span {
+        font-weight: 600;
       }
+    }
+    .form-meta-info-wrapper {
+      margin-bottom: 1rem;
+    }
+    .form-meta-action-wrapper {
       .button {
         background-color: #EEEEEE;
         border-color: #E3E3E3;
         color: #333;
-        min-height: 49px;
-        line-height: 49px;
-        padding: 0 16px;
-        display: block;
-        width: 100%;
       }
       .button:hover {
         border-color: darken(#E3E3E3, 10%);
         background-color: darken(#EEEEEE, 10%);
+      }
+    }
+    .form-meta-title-wrapper {
+      margin-bottom: 1rem;
+      position: relative;
+      .form-meta-title {
+        h1 {
+          font-size: 20px;
+          font-weight: 600;
+          color: #333333;
+        }
+        &.published {
+          h1 {
+            color: #5CB85B;
+            &::before {
+              content:'\2713\0020\0020';
+              font-size: .7em;
+              vertical-align: top;
+            }
+          }
+        }
+      }
+      .form-action-button-wrapper {
+        position: absolute;
+        max-width: 140px;
+        min-width: 120px;
+        right: 0;
+        top: 0;
+        .action-button--hidden-action-wrapper {
+          display: none;
+        }
+        .action-description {
+          display: inline-block;
+          text-align: center;
+          font-size: 13px;
+          margin-top: 5px;
+          color: #707070;
+          width: 100%;
+          line-height: 1;
+        }
+        .button {
+          background-color: #EEEEEE;
+          border-color: #E3E3E3;
+          color: #333;
+          min-height: 49px;
+          line-height: 49px;
+          padding: 0 16px;
+          display: block;
+          width: 100%;
+        }
+        .button:hover {
+          border-color: darken(#E3E3E3, 10%);
+          background-color: darken(#EEEEEE, 10%);
+        }
       }
     }
   }
