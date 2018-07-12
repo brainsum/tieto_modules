@@ -64,17 +64,17 @@
       $notifElement = $(selectors[index] + ' .action-button--action-notification-wrapper');
       $buttonElement = $(selectors[index] + ' .action-button--action-wrapper');
 
-      var actionDoesExist = actionExists(selectors[index]);
-      if (actionDoesExist) {
-        $(selectors[index] + ' .action-description').html(item.text);
-      }
+      $(selectors[index] + ' .action-description').html(item.text);
 
       if (index === 'scheduled_publish_date') {
         pubSelector = '.form-action-moderation-state-published-button-wrapper';
         $notifElement = $(pubSelector + ' .action-button--action-notification-wrapper');
         $buttonElement = $(pubSelector + ' .action-button--action-wrapper');
       }
-
+      var actionDoesExist = actionExists(selectors[index]);
+      if (pubSelector) {
+        actionDoesExist = actionExists(pubSelector);
+      }
       if (item.date === null) {
         $(selectors[index] + '.scheduled').removeClass('scheduled');
 
