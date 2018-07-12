@@ -43,11 +43,8 @@
     }
   };
 
-  function actionExists(selector) {
-    var notification = $(selector + ' .action-button--action-notification-wrapper');
-    var button = $(selector + ' .action-button--action-wrapper');
-
-    return notification.children().length > 0 && button.children().length > 0;
+  function actionExists(button) {
+    return button.children().length > 0;
   }
 
   $.fn.updateButtonHints = function (scheduledDates) {
@@ -64,7 +61,7 @@
       $notifElement = $(selectors[index] + ' .action-button--action-notification-wrapper');
       $buttonElement = $(selectors[index] + ' .action-button--action-wrapper');
 
-      var actionDoesExist = actionExists(selectors[index]);
+      var actionDoesExist = actionExists($buttonElement);
       if (actionDoesExist === true) {
         $(selectors[index] + ' .action-description').html(item.text);
       }
@@ -76,7 +73,7 @@
       }
 
       if (pubSelector) {
-        actionDoesExist = actionExists(pubSelector);
+        actionDoesExist = actionExists($buttonElement);
       }
       if (item.date === null) {
         $(selectors[index] + '.scheduled').removeClass('scheduled');
