@@ -54,7 +54,7 @@
     var selectors = {
       'scheduled_publish_date': '.form-action-moderation-state-unpublished-button-wrapper',
       'scheduled_unpublish_date': '.form-action-moderation-state-unpublished-content-button-wrapper',
-      'scheduled_trash_date': '.form-action-moderation-state-trash-button-wrapper',
+      'scheduled_trash_date': '.form-action-moderation-state-trash-button-wrapper'
     };
 
     var $notifElement, $buttonElement, pubSelector;
@@ -64,14 +64,17 @@
       $notifElement = $(selectors[index] + ' .action-button--action-notification-wrapper');
       $buttonElement = $(selectors[index] + ' .action-button--action-wrapper');
 
-      $(selectors[index] + ' .action-description').html(item.text);
+      var actionDoesExist = actionExists(selectors[index]);
+      if (actionDoesExist === true) {
+        $(selectors[index] + ' .action-description').html(item.text);
+      }
 
       if (index === 'scheduled_publish_date') {
         pubSelector = '.form-action-moderation-state-published-button-wrapper';
         $notifElement = $(pubSelector + ' .action-button--action-notification-wrapper');
         $buttonElement = $(pubSelector + ' .action-button--action-wrapper');
       }
-      var actionDoesExist = actionExists(selectors[index]);
+
       if (pubSelector) {
         actionDoesExist = actionExists(pubSelector);
       }
