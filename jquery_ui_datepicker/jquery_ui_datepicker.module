@@ -1,0 +1,243 @@
+<?php
+
+/**
+ * @file
+ * JQuery UI Datepicker module.
+ */
+
+use Drupal\Core\Datetime\Element\Datetime;
+use Drupal\Core\Datetime\DrupalDateTime;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Datetime\Entity\DateFormat;
+
+/**
+ * Implements hook_element_info_alter().
+ */
+function jquery_ui_datepicker_element_info_alter(array &$types) {
+  $types['datetime']['#pre_render'][] = 'jquery_ui_datepicker_element_pre_render';
+}
+
+/**
+ * Adds timezone information to datetime element.
+ */
+function jquery_ui_datepicker_element_pre_render($element) {
+
+  if (!empty($element['#jqdp'])) {
+    $element['timezone'] = [
+      '#type' => 'html_tag',
+      '#tag' => 'span',
+      '#value' => Datetime::formatExample('T'),
+      '#attributes' => [
+        'title' => t('The date in the timezone of your account.'),
+      ],
+    ];
+  }
+
+  return $element;
+}
+
+/**
+ * Parse date format.
+ */
+function _date_format_parse($format) {
+  $time_pattern = '/(\s+\-\s+)?(([hH]|[gG])(\s*\:\s*i)(\s*\:\s*s)?(\s*[aA])?)(\s*)(e|T)?/';
+
+  $matches = [];
+  preg_match($time_pattern, $format, $matches);
+
+  if (!empty($matches[2])) {
+    $time_format = $matches[2];
+  }
+  else {
+    $time_format = 'G:i';
+  }
+
+  $date_format = preg_replace($time_pattern, '', $format);
+
+  return [
+    'date' => trim($date_format),
+    'time' => trim($time_format),
+  ];
+}
+
+/**
+ * Convert PHP date format to jQuery Datepicker date format.
+ */
+function _date_format_to_jquery_format($php_format) {
+  $symbols_matching = [
+    // Day symbols.
+    'd' => 'dd',
+    'D' => 'D',
+    'j' => 'd',
+    'l' => 'DD',
+    'N' => '',
+    'S' => '',
+    'w' => '',
+    'z' => 'o',
+    // Week symbols.
+    'W' => '',
+    // Month symbols.
+    'F' => 'MM',
+    'm' => 'mm',
+    'M' => 'M',
+    'n' => 'm',
+    't' => '',
+    // Year symbols.
+    'L' => '',
+    'o' => '',
+    'Y' => 'yy',
+    'y' => 'y',
+    // Time symbols.
+    'a' => '',
+    'A' => '',
+    'B' => '',
+    'g' => '',
+    'G' => 'H',
+    'h' => '',
+    'H' => '',
+    'i' => 'mm',
+    's' => '',
+    'u' => '',
+    'e' => '',
+  ];
+
+  $jqueryui_format = "";
+  $escaping = FALSE;
+  for ($i = 0; $i < strlen($php_format); $i++) {
+    $char = $php_format[$i];
+    if ($char === '\\') {
+      $i++;
+      if ($escaping) {
+        $jqueryui_format .= $php_format[$i];
+      }
+      else {
+        $jqueryui_format .= '\'' . $php_format[$i];
+      }
+      $escaping = TRUE;
+    }
+    else {
+      if ($escaping) {
+        $jqueryui_format .= "'";
+        $escaping = FALSE;
+      }
+      if (isset($symbols_matching[$char])) {
+        $jqueryui_format .= $symbols_matching[$char];
+      }
+      else {
+        $jqueryui_format .= $char;
+      }
+    }
+  }
+
+  return $jqueryui_format;
+}
+
+/**
+ * Copy of Datetime value callback that caused issues.
+ */
+function jquery_ui_datepicker_value_callback(&$element, $input, FormStateInterface $form_state) {
+  if ($input !== FALSE) {
+    $date_input = $element['#date_date_element'] != 'none' && !empty($input['date']) ? $input['date'] : '';
+    $time_input = $element['#date_time_element'] != 'none' && !empty($input['time']) ? $input['time'] : '';
+    $date_format = $element['#date_date_element'] != 'none' ? _jquery_get_date_format($element) : '';
+    $time_format = $element['#date_time_element'] != 'none' ? _jquery_get_time_format($element) : '';
+    $timezone = !empty($element['#date_timezone']) ? $element['#date_timezone'] : NULL;
+
+    // Ensure the time has a seconds portion in case it was omitted or
+    // stripped out by the browser.
+    if (!empty($time_input) && $element['#date_time_element'] === 'time' && strlen($time_input) == 5) {
+      $time_input .= ':00';
+    }
+
+    try {
+      $date_time_format = trim($date_format . ' ' . $time_format);
+      $date_time_input = trim($date_input . ' ' . $time_input);
+      $date = DrupalDateTime::createFromFormat($date_time_format, $date_time_input, $timezone);
+    }
+    catch (\Exception $e) {
+      $date = NULL;
+    }
+    $input = [
+      'date'   => $date_input,
+      'time'   => $time_input,
+      'object' => $date,
+    ];
+  }
+  else {
+    $date = $element['#default_value'];
+    if ($date instanceof DrupalDateTime && !$date->hasErrors()) {
+      $input = [
+        'date'   => $date->format($element['#date_date_format']),
+        'time'   => $date->format($element['#date_time_format']),
+        'object' => $date,
+      ];
+    }
+    else {
+      $input = [
+        'date'   => '',
+        'time'   => '',
+        'object' => NULL,
+      ];
+    }
+  }
+  return $input;
+}
+
+/**
+ * Copy of datetime getHtml5DateFormat.
+ */
+function _jquery_get_date_format($element) {
+  switch ($element['#date_date_element']) {
+    case 'date':
+      return DateFormat::load('html_date')->getPattern();
+
+    case 'datetime':
+    case 'datetime-local':
+      return DateFormat::load('html_datetime')->getPattern();
+
+    default:
+      return $element['#date_date_format'];
+  }
+}
+
+/**
+ * Copy of datetime getHtml5TimeFormat.
+ */
+function _jquery_get_time_format($element) {
+  switch ($element['#date_time_element']) {
+    case 'time':
+      return DateFormat::load('html_time')->getPattern();
+
+    default:
+      return $element['#date_time_format'];
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function jquery_ui_datepicker_form_views_exposed_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  if (isset($form['#id']) && $form['#id'] == 'views-exposed-form-content-content-overview') {
+    $form['#attached']['library'][] = 'jquery_ui_datepicker/datepicker';
+
+    $tieto_date = \Drupal::entityTypeManager()->getStorage('date_format')->load('tieto_date');
+    $pattern = _date_format_parse($tieto_date->getPattern());
+
+    $created_min = &$form['exposed_form']['created_min'];
+    $created_max = &$form['exposed_form']['created_max'];
+
+    $created_min['#type'] = 'textfield';
+    $created_min['#date_date_format'] = $pattern['date'];
+
+    $created_max['#type'] = 'textfield';
+    $created_max['#date_date_format'] = $pattern['date'];
+
+    $form['#attached']['drupalSettings']['jquery_ui_datepicker']['created_min'] = [
+      'dateFormat' => _date_format_to_jquery_format($pattern['date']),
+    ];
+
+    $form['#attached']['drupalSettings']['jquery_ui_datepicker']['created_max'] = [
+      'dateFormat' => _date_format_to_jquery_format($pattern['date']),
+    ];
+  }
+}
