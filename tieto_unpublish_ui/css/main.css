@@ -8,13 +8,9 @@
   background-color: #1e7f27;
 }
 
-.unpublish-ui-wrapper {
-  margin: -15px 0;
-}
-
 .unpublish-ui-wrapper .form-actions-wrapper {
   padding: 30px;
-  margin: 15px 0;
+  margin: 2em 0;
   background-color: #FAFAFA;
   height: auto;
 }
@@ -168,7 +164,7 @@
 
 .unpublish-ui-wrapper .form-meta-wrapper {
   padding: 30px;
-  margin: 15px 0;
+  margin: 2em 0;
   background-color: #F6FBF5;
   height: auto;
 }
