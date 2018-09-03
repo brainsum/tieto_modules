@@ -1,0 +1,3 @@
+'edit all link attributes':
+  title: Edit all attributes
+  description: Allow access for all attributes, not just target (e.g via the link button in editors)
