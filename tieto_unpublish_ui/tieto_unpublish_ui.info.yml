@@ -7,5 +7,6 @@ package: Tieto
 dependencies:
   - drupal:node
   - inline_entity_form:inline_entity_form
+  - metatag:metatag
   - scheduled_updates:scheduled_updates
   - workbench_moderation:workbench_moderation
