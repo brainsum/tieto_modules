@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Build Tieto unpiblish UI related tokens.
+ * Build Tieto unpublish UI related tokens.
  */
 
 use Drupal\Core\Render\BubbleableMetadata;
@@ -36,7 +36,7 @@ function tieto_unpublish_ui_token_info() {
 function tieto_unpublish_ui_tokens($type, $tokens, array $data, array $options, BubbleableMetadata $bubbleable_metadata) {
   $replacements = [];
 
-  if ($type == 'node' && !empty($data['node']) && $data['node']->isPublished()) {
+  if ($type === 'node' && !empty($data['node']) && $data['node']->isPublished()) {
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'unpublish-ui-last-publish-date':
