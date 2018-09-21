@@ -42,7 +42,9 @@ function tieto_unpublish_ui_tokens($type, $tokens, array $data, array $options, 
         case 'unpublish-ui-last-publish-date':
           $revisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
           $revision = $revisionManager->loadLatestPublishedRevision($data['node']);
-          $replacements[$original] = $revision->getChangedTime();
+          if (NULL !== $revision) {
+            $replacements[$original] = $revision->getChangedTime();
+          }
           break;
       }
     }
@@ -50,7 +52,10 @@ function tieto_unpublish_ui_tokens($type, $tokens, array $data, array $options, 
     if ($dateTokens = \Drupal::token()->findWithPrefix($tokens, 'unpublish-ui-last-publish-date')) {
       $revisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
       $revision = $revisionManager->loadLatestPublishedRevision($data['node']);
-      $replacements += \Drupal::token()->generate('date', $dateTokens, ['date' => $revision->getChangedTime()], $options, $bubbleable_metadata);
+      if (NULL !== $revision) {
+        $replacements += \Drupal::token()
+          ->generate('date', $dateTokens, ['date' => $revision->getChangedTime()], $options, $bubbleable_metadata);
+      }
     }
   }
 
