@@ -36,15 +36,16 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
         continue;
       }
       $build[$field] = $this->form[$field];
-      if (
-        isset($build[$field]['#group'])
-        && $build[$field]['#group'] === 'advanced'
-      ) {
-        unset($build[$field]['#group']);
-      }
-    }
 
+      array_walk_recursive($build[$field], [$this, 'removeGroup']);
+    }
     return $build;
+  }
+
+  public function removeGroup(&$item, $key) {
+    if ($key == '#group' && $item == 'advanced') {
+      $item = NULL;
+    }
   }
 
 }
