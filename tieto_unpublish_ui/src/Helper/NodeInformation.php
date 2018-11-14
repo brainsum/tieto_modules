@@ -512,9 +512,8 @@ class NodeInformation extends NodeFormAlterHelperBase {
 
     $scheduledDateField = $this->node()->{$fieldName};
 
-    if (!$scheduledDateField->isEmpty()) {
-      $scheduledDate = $scheduledDateField->entity
-        ->update_timestamp
+    if (!$scheduledDateField->isEmpty() && ($updateTimestamp = $scheduledDateField->entity->update_timestamp)) {
+      $scheduledDate = $updateTimestamp
         ->first()
         ->getValue();
 
