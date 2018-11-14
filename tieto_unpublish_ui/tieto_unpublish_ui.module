@@ -215,11 +215,11 @@ function tieto_unpublish_ui_node_presave(NodeInterface $node) {
     isset($mapping[$nodeState])
     && $node->hasField($mapping[$nodeState]['field'])
     && ($scheduledDateField = $node->get($mapping[$nodeState]['field']))
+    && ($scheduledDate = $scheduledDateField->entity)
     && !$scheduledDateField->isEmpty()
   ) {
-    /** @var \Drupal\scheduled_updates\ScheduledUpdateInterface $scheduledDate */
-    $scheduledDate = $scheduledDateField->entity;
     $node->set($mapping[$nodeState]['field'], NULL);
+    /** @var \Drupal\scheduled_updates\ScheduledUpdateInterface $scheduledDate */
     $scheduledDate->delete();
   }
 }
