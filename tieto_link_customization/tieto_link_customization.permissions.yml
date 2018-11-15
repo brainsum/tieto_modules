@@ -1,3 +1,6 @@
 'edit all link attributes':
   title: Edit all attributes
   description: Allow access for all attributes, not just target (e.g via the link button in editors)
+
+permission_callbacks:
+- Drupal\tieto_link_customization\Permission\LinkPermissions::permissions

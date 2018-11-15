@@ -1,5 +1,5 @@
 name: 'Advanced Link Customization'
-description: 'Customize links'
+description: 'Customize links provided by the "Editor Advanced Link" module'
 type: module
 core: 8.x
 package: Custom

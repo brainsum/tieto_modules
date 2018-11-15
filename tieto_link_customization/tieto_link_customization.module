@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\tieto_link_customization\Permission\LinkPermissions;
 
 /**
  * Implements hook_form_FORM_ID_alter().
@@ -17,19 +18,15 @@ use Drupal\Core\Form\FormStateInterface;
 function tieto_link_customization_form_editor_link_dialog_alter(&$form, FormStateInterface $form_state, $form_id) {
   $currentUser = \Drupal::currentUser();
 
-  $attributes = [
-    'title',
-    'class',
-    'id',
-    'rel',
-  ];
-
-  foreach ($attributes as $attribute) {
+  foreach (LinkPermissions::ATTRIBUTES as $attribute) {
     if (!isset($form['attributes'][$attribute])) {
       continue;
     }
 
     $form['attributes'][$attribute]['#access'] = $form['attributes'][$attribute]['#access']
-      && $currentUser->hasPermission('edit all link attributes');
+      && (
+        $currentUser->hasPermission('edit all link attributes')
+        || $currentUser->hasPermission("edit $attribute link attribute")
+      );
   }
 }
