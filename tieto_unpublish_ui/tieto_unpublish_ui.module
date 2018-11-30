@@ -47,37 +47,23 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
   $revisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
   if ($node->isPublished()) {
     $revision = $revisionManager->loadLatestPublishedRevision($node);
-    $variables['node_meta'] = [
-      'date' => [
-        'label' => t('Last publish date'),
-        'value' => NULL,
-      ],
-      'author' => [
-        'label' => t('Publisher'),
-        'value' => NULL,
-      ],
-    ];
-    if (NULL !== $revision) {
-      $variables['node_meta']['date']['value'] = $dateFormatter->format($revision->getChangedTime(), 'tieto_date');
-      $variables['node_meta']['author']['value'] = $revision->getOwner()->getDisplayName();
-    }
   }
   else {
     $revision = $revisionManager->loadLatestUnpublishedRevision($node);
-    $variables['node_meta'] = [
-      'date' => [
-        'label' => t('Last unpublish date'),
-        'value' => NULL,
-      ],
-      'author' => [
-        'label' => t('Unpublished by'),
-        'value' => NULL,
-      ],
-    ];
-    if (NULL !== $revision) {
-      $variables['node_meta']['date']['value'] = $dateFormatter->format($revision->getChangedTime(), 'tieto_date');
-      $variables['node_meta']['author']['value'] = $revision->getOwner()->getDisplayName();
-    }
+  }
+  $variables['node_meta'] = [
+    'date' => [
+      'label' => t('Edited on'),
+      'value' => NULL,
+    ],
+    'author' => [
+      'label' => t('Edited by'),
+      'value' => NULL,
+    ],
+  ];
+  if (NULL !== $revision) {
+    $variables['node_meta']['date']['value'] = $dateFormatter->format($revision->getChangedTime(), 'tieto_date');
+    $variables['node_meta']['author']['value'] = $revision->getOwner()->getDisplayName();
   }
 }
 
