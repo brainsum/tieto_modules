@@ -65,6 +65,8 @@ function _tieto_general_ui_create_toolbar_library(string $prefix = ''): array {
           'theme' => 'light',
           'parent' => '#header-wrapper',
           'position' => 'relative',
+          'defer' => TRUE,
+          'async' => TRUE,
         ],
       ],
     ],
