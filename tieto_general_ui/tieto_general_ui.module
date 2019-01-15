@@ -56,14 +56,14 @@ function _tieto_general_ui_create_toolbar_library(string $prefix = ''): array {
   $url = '//' . ($prefix ? "$prefix-" : '') . 'topbar.intra.tieto.com/include.js';
 
   return [
-    'version' => 2.1,
+    'version' => 2.2,
     'js' => [
       $url => [
         'type' => 'external',
         'attributes' => [
           'id' => 'tieto-top-menu',
           'theme' => 'light',
-          'parent' => '#header-wrapper',
+          'parent' => '#pre-header--tieto-intra-topbar-wrapper',
           'position' => 'relative',
           'defer' => TRUE,
           'async' => TRUE,
@@ -77,5 +77,13 @@ function _tieto_general_ui_create_toolbar_library(string $prefix = ''): array {
  * Implements hook_preprocess_HOOK().
  */
 function tieto_general_ui_preprocess_page(&$variables) {
+  if (isset($variables['page']['pre_header'])) {
+    $variables['page']['pre_header']['topbar_wrapper'] = [
+      '#type' => 'container',
+      '#attributes' => [
+        'id' => 'pre-header--tieto-intra-topbar-wrapper',
+      ],
+    ];
+  }
   $variables['#attached']['library'][] = 'tieto_general_ui/tieto_intra_topbar';
 }
