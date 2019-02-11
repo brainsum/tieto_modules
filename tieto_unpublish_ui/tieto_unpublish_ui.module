@@ -36,8 +36,7 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
   // @todo: Refactor NodeInformation to prevent these duplications.
   /** @var \Drupal\node\NodeInterface $node */
   $node = $variables['node'];
-  $user = \Drupal::currentUser();
-  if ($node->get('field_first_publish_date')->getValue() && (count($user->getRoles()) > 1 || $user->id() == 1)) {
+  if ($node->get('field_first_publish_date')->getValue()) {
     $variables['first_publish_date'] = strtotime($node->get('field_first_publish_date')
       ->getValue()[0]['value']);
   }
