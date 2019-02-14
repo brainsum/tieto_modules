@@ -25,6 +25,11 @@
         "cweagans/composer-patches": "~1.5",
         "wikimedia/composer-merge-plugin": "^1.4"
     },
+    "replace": {
+        "brainsum/elevation_wysiwyg": "*",
+        "brainsum/tieto_tibr": "*",
+        "tieto/tieto_linkit": "*"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "extra": {
