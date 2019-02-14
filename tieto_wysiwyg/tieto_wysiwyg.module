@@ -1,13 +1,12 @@
 <?php
 
-use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\VideoPopupPlugin;
-use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\ImagePopupPlugin;
-
 /**
  * @file
  * Code for Tieto_wysiwyg module.
  */
 
+use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\VideoPopupPlugin;
+use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\ImagePopupPlugin;
 use Drupal\editor\Entity\Editor;
 
 /**
@@ -16,14 +15,14 @@ use Drupal\editor\Entity\Editor;
 function tieto_wysiwyg_ckeditor_plugin_info_alter(array &$plugins) {
   $plugins['tieto_image'] = [
     'id' => 'tieto_image',
-    'label' => t('Tieto specific plugins'),
+    'label' => \t('Tieto specific plugins'),
     'module' => 'tieto_wysiwyg',
     'class' => ImagePopupPlugin::class,
     'provider' => 'tieto_wysiwyg',
   ];
   $plugins['tieto_video'] = [
     'id' => 'tieto_video',
-    'label' => t('Tieto specific plugins'),
+    'label' => \t('Tieto specific plugins'),
     'module' => 'tieto_wysiwyg',
     'class' => VideoPopupPlugin::class,
     'provider' => 'tieto_wysiwyg',
@@ -34,7 +33,7 @@ function tieto_wysiwyg_ckeditor_plugin_info_alter(array &$plugins) {
  * Implements hook_ckeditor_css_alter().
  */
 function tieto_wysiwyg_ckeditor_css_alter(array &$css, Editor $editor) {
-  $css[] = drupal_get_path('module', 'tieto_wysiwyg') . '/css/wysiwyg_style.css';
+  $css[] = \drupal_get_path('module', 'tieto_wysiwyg') . '/css/wysiwyg_style.css';
 }
 
 /**
