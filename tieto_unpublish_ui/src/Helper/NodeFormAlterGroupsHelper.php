@@ -42,6 +42,14 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
     return $build;
   }
 
+  /**
+   * Remove groups.
+   *
+   * @param string $item
+   *   The item.
+   * @param string $key
+   *   The key.
+   */
   public function removeGroup(&$item, $key) {
     if ($key == '#group' && $item == 'advanced') {
       $item = NULL;

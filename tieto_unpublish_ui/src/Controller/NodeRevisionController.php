@@ -35,8 +35,8 @@ class NodeRevisionController extends ControllerBase {
     // @todo: Only allow from the button?
     $revision = $this->loadNodeRevision($revisionId);
     if (NULL === $revision) {
-      drupal_set_message(t('The requested revision could not be loaded.'), 'error');
-      return new BadRequestHttpException(t('The requested revision could not be loaded.'));
+      drupal_set_message($this->t('The requested revision could not be loaded.'), 'error');
+      return new BadRequestHttpException($this->t('The requested revision could not be loaded.'));
     }
     $revision->setNewRevision();
     $revision->isDefaultRevision(TRUE);
@@ -45,7 +45,7 @@ class NodeRevisionController extends ControllerBase {
       $revision->setRevisionLogMessage($this->t('Reverting to a previously published version.'));
     }
 
-    drupal_set_message(t('The content has been reverted to the previously published version.'));
+    drupal_set_message($this->t('The content has been reverted to the previously published version.'));
     $revision->save();
 
     $redirectUrl = Url::fromRoute('entity.node.canonical', [

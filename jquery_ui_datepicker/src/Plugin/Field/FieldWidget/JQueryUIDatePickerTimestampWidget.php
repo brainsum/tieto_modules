@@ -40,7 +40,7 @@ class JQueryUIDatePickerTimestampWidget extends TimestampDatetimeWidget {
 
     $options = [];
 
-    foreach ($formats as $format_name => $format) {
+    foreach ($formats as $format) {
       $options[$format->getPattern()] = $format->label();
     }
 
