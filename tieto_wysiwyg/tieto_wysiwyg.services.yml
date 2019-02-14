@@ -1,0 +1,3 @@
+services:
+  tieto_wysiwyg.image_helper:
+    class: Drupal\tieto_wysiwyg\Service\ImageHelper

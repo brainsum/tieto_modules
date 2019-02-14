@@ -1,0 +1,60 @@
+<?php
+
+use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\VideoPopupPlugin;
+use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\ImagePopupPlugin;
+
+/**
+ * @file
+ * Code for Tieto_wysiwyg module.
+ */
+
+use Drupal\editor\Entity\Editor;
+
+/**
+ * Implements hook_ckeditor_plugin_info_alter().
+ */
+function tieto_wysiwyg_ckeditor_plugin_info_alter(array &$plugins) {
+  $plugins['tieto_image'] = [
+    'id' => 'tieto_image',
+    'label' => t('Tieto specific plugins'),
+    'module' => 'tieto_wysiwyg',
+    'class' => ImagePopupPlugin::class,
+    'provider' => 'tieto_wysiwyg',
+  ];
+  $plugins['tieto_video'] = [
+    'id' => 'tieto_video',
+    'label' => t('Tieto specific plugins'),
+    'module' => 'tieto_wysiwyg',
+    'class' => VideoPopupPlugin::class,
+    'provider' => 'tieto_wysiwyg',
+  ];
+}
+
+/**
+ * Implements hook_ckeditor_css_alter().
+ */
+function tieto_wysiwyg_ckeditor_css_alter(array &$css, Editor $editor) {
+  $css[] = drupal_get_path('module', 'tieto_wysiwyg') . '/css/wysiwyg_style.css';
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function tieto_wysiwyg_page_attachments(array &$attachments) {
+  $attachments['#attached']['library'][] = 'tieto_wysiwyg/ckeditor_image_video';
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function tieto_wysiwyg_preprocess_page(&$variables) {
+  /* @var \Drupal\node\Entity\Node $node */
+  $node = $variables['node'] ?? NULL;
+
+  if (is_object($node) && $node->hasField('field_side_block')) {
+    $side_block = $node->get('field_side_block');
+    if (!empty($side_block) && $side_block->count() > 0) {
+      $variables['#attached']['library'][] = 'tieto_wysiwyg/double_image';
+    }
+  }
+}

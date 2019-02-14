@@ -1,0 +1,22 @@
+{
+    "name": "brainsum/tieto_wysiwyg",
+    "license": "GPL-2.0+",
+    "description": "Drupal module for custom wysiwyg functionality.",
+    "type": "drupal-module",
+    "authors": [
+        {
+            "name": "mdanko",
+            "email": "mdanko@brainsum.com"
+        }
+    ],
+    "require": {
+        "drupal/video_embed_field": "^1.3"
+    },
+    "extra": {
+        "patches": {
+            "drupal/core": {
+                "Allow extending DrupalImageCaption": "https://www.drupal.org/files/issues/drupal-no_return_value-x-1-D8-NO_ES.patch"
+            }
+        }
+    }
+}

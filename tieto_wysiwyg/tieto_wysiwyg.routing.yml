@@ -1,0 +1,24 @@
+tieto_wysiwyg.image_dialog:
+  path: '/tieto_wysiwyg/dialog/single_image/{editor}'
+  defaults:
+    _form: '\Drupal\tieto_wysiwyg\Form\EditorImagePopupDialog'
+    _title: 'Upload image'
+  requirements:
+    _entity_access: 'editor.use'
+
+tieto_wysiwyg.double_image_dialog:
+  path: '/tieto_wysiwyg/dialog/double_image/{editor}'
+  defaults:
+    _form: '\Drupal\tieto_wysiwyg\Form\EditorDoubleImagePopupDialog'
+    _title: 'Upload side-by-side image'
+  requirements:
+    _entity_access: 'editor.use'
+
+tieto_wysiwyg.video_dialog:
+  path: '/tieto_wysiwyg/dialog/single_video/{filter_format}'
+  defaults:
+    _form: '\Drupal\tieto_wysiwyg\Form\EditorVideoPopupDialog'
+    _title: 'Video Embed'
+  requirements:
+    _entity_access: 'filter_format.use'
+    _access_video_embed_wysiwyg_filter_in_use: 'TRUE'

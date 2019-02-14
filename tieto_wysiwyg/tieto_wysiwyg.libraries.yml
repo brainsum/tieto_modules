@@ -1,0 +1,11 @@
+ckeditor_image_video:
+  version: 1.0
+  css:
+    theme:
+      css/wysiwyg_style.css: {}
+double_image:
+  version: 1.0
+  js:
+    js/double_image.js: {}
+  dependencies:
+    - core/jquery

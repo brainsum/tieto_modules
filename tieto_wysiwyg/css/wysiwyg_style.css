@@ -1,0 +1,52 @@
+.sbs-full-image::after {
+  content: "";
+  clear: both;
+  display: block;
+}
+
+.sbs-full-image .cke_widget_wrapper:hover .cke_image_resizer,
+.sbs-full-image .cke_image_resizer.cke_image_resizing {
+  display: none;
+}
+
+body.cke_editable.cke_editable_themed div.sbs-full-image img,
+div.sbs-full-image img,
+body.cke_editable.cke_editable_themed div.sbs-full-image figure,
+div.sbs-full-image figure {
+  margin: 0;
+}
+
+a > span.cke_button__doubleimage_icon {
+  background-size: 30px auto !important;
+  width: 30px;
+  margin-top: 3px;
+}
+
+/* WYSIWYG */
+.cke_widget_video_embed {
+  width: 310px;
+  float: left;
+  margin: 25px 30px 25px 0;
+}
+
+.cke_widget_video_embed > p {
+  margin: 0;
+}
+
+.cke_widget_video_embed > p > span {
+  padding: 0;
+}
+
+.cke_widget_video_embed > p > span:before {
+  font-size: 80px;
+}
+
+/* Fix masking if video is for wide screen */
+.cke_widget_video_embed > img.cke_widget_mask {
+  max-height: 100%;
+}
+
+/* Fix drag'n'drop */
+.cke_widget_video_embed.cke_widget_selected > span.cke_widget_drag_handler_container {
+  z-index: 10;
+}
