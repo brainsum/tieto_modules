@@ -1,0 +1,7 @@
+name: Linkit customization
+type: module
+description: This module contains some customization for Linkit module.
+core: 8.x
+package: Tieto
+dependencies:
+  - linkit:linkit

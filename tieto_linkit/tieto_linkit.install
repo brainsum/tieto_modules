@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Tieto_linkit module's install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_linkit_install() {
+  module_set_weight("tieto_linkit", 10);
+}

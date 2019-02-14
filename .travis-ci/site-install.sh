@@ -12,6 +12,7 @@ composer config extra.patches-file "composer.patches.json" \
     jquery_ui_datepicker \
     tieto_general_ui \
     tieto_link_customization \
+    tieto_linkit \
     tieto_tibr \
     tieto_unpublish_ui -y \
   && drush cr

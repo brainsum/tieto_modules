@@ -1,0 +1,15 @@
+{
+    "name": "tieto/tieto_linkit",
+    "license": "GPL-2.0+",
+    "description": "This Drupal module contains some customization for Linkit module.",
+    "type": "drupal-module",
+    "authors": [
+        {
+            "name": "mdanko",
+            "email": "mdanko@brainsum.com"
+        }
+    ],
+    "require": {
+        "drupal/linkit": "^4.3"
+    }
+}
