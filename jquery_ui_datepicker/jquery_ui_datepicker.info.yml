@@ -5,7 +5,4 @@ core: 8.x
 type: module
 
 dependencies:
-  - datetime
-
-files:
-  - jquery_ui_datepicker.module
+  - drupal:datetime
