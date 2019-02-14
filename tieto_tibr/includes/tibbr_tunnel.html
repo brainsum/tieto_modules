@@ -1,0 +1,86 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Hub Tunnel</title>
+    <script type="text/javascript">
+        var isNotIE8 = (function () {
+            var rv = 100;
+            if (navigator.appName == 'Microsoft Internet Explorer') {
+                var ua = navigator.userAgent;
+                var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+                if (re.exec(ua) != null) {
+                    rv = parseFloat(RegExp.$1);
+                }
+            }
+            return (rv >= 9) ? true : false;
+        })();
+
+        var TIBR = {};
+        if(window.parent.parent.TIBR.host){
+            TIBR.host = window.parent.parent.TIBR.host;
+        }else{
+            console.warn('tunnel proxy must have a grandparent frame to function');
+        }
+
+        if(isNotIE8){
+            document.writeln('<script src="' + TIBR.host + '/connect/js/pagebus-ie8plus-min.js"></' + 'script>');
+        }else{
+
+
+            document.writeln('<script src="' + TIBR.host + '/connect/js/pagebus.js"></' + 'script>');
+        }
+    </script>
+    <!--<script type="text/javascript" src="http://dshapiro.tibbr.com:3001/connect/js/pagebus-ie8plus-min.js"></script>-->
+    <script>
+        TIBR.xdmInit = function () {
+            var OpenAjax = TIBR.OpenAjax,
+                    smash = TIBR.smash;
+            if (window.postMessage) {
+                var internalID = OpenAjax.hub.IframePMHubClient.queryURLParam("oahj");
+                var origin = OpenAjax.hub.IframePMHubClient.queryURLParam("oaho");
+                var securityToken = OpenAjax.hub.IframePMHubClient.queryURLParam("oaht");
+                window.parent.parent.TIBR.OpenAjax.hub.IframePMContainer._pmListener.connectFromTunnel(internalID, origin, securityToken, window);
+                //window.parent.parent.TIB.OpenAjax.hub.IframePMContainer._pmListener.connectFromTunnel(internalID, origin, securityToken, window);
+            } else {
+                var initialMsg = new RegExp("[\\?&]oahm=([^&#]*)").exec(window.location.search);
+                if (!initialMsg) {
+                    throw new Error(OpenAjax.hub.Error.WrongProtocol);
+                }
+                var url = window.location.href + "#" + initialMsg[1];
+                window.location.replace(url);
+                var commLib = new smash.CommLib(false, window.parent.parent.TIBR.smash.SEComm.instances);
+                //var commLib = new smash.CommLib(false, window.parent.parent.TIB.smash.SEComm.instances);
+            }
+        }
+    </script>
+</head>
+<body onload="TIBR.xdmInit();"></body>
+<!--
+/**
+ * TIBCO PageBus(TM) version 2.0.0
+ *
+ * Copyright (c) 2006-2009, TIBCO Software Inc.
+ * All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0 . Unless
+ * required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ * Includes code from the official reference implementation of the OpenAjax
+ * Hub that is provided by OpenAjax Alliance. Specification is available at:
+ *  http://www.openajax.org/member/wiki/OpenAjax_Hub_Specification
+ * Copyright 2006-2009 OpenAjax Alliance
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy
+ * of the License at http://www.apache.org/licenses/LICENSE-2.0 . Unless
+ * required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ *
+ ******************************************************************************/
+-->
+</html>

@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * @file
+ * Tieto tibr module.
+ *
+ * Usage:
+ *   Add this line
+ *   {% include "@tieto_tibr/tibr.twig.html" ignore missing %}
+ *   to a node related twig.
+ */
+
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\file\Entity\File;
+
+/**
+ * Implements hook_theme().
+ */
+function tieto_tibr_theme() {
+  return [
+    'tibr' => [],
+  ];
+}
+
+/**
+ * Implements hook_library_info_build().
+ */
+function tieto_tibr_library_info_build() {
+  /** @var \Drupal\tieto_tibr\Service\TibrHostResolver $resolver */
+  $resolver = \Drupal::service('tieto_tibr.tibr_host_resolver');
+
+  $libraries = [];
+  $libraries['tieto_intra_tibr'] = [
+    'version' => 'VERSION',
+    'js' => [
+      '//' . $resolver->resolve() . '/tibbr/connect/js/TIB.js' => [
+        'type' => 'external',
+      ],
+    ],
+  ];
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_page_attachments().
+ */
+function tieto_tibr_page_attachments(array &$attachments) {
+  if ('entity.node.canonical' === \Drupal::routeMatch()->getRouteName()) {
+    $attachments['#attached']['library'][] = 'tieto_tibr/tieto_intra_tibr';
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function tieto_tibr_preprocess_node(&$variables) {
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+
+  /** @var \Drupal\tieto_tibr\Service\TibrHostResolver $resolver */
+  $resolver = \Drupal::service('tieto_tibr.tibr_host_resolver');
+  // @todo: We should probably add a form alter and display radio buttons on the
+  // field setting forms instead of using the settings.
+  // E.g 'Tibr mapping, use field as: 'Description', 'Image', ...
+  $mappings = $resolver->getConfig()->get('mappings');
+
+  $tibrOgImageField = $mappings['tibr_og_image'];
+  $tibrOgDescriptionField = $mappings['tibr_og_description'];
+
+  $modulePath = drupal_get_path('module', 'tieto_tibr');
+  $variables['tibr_og_image_absolute_url'] = file_create_url($modulePath . '/images/tibr_placeholder.png');
+  if ($node->hasField($tibrOgImageField) && $fileFieldValue = $node->get($tibrOgImageField)->getValue()) {
+    /** @var \Drupal\file\Entity\File $file */
+    $file = File::load($fileFieldValue[0]['target_id']);
+    // @todo: url() is deprecated.
+    $variables['tibr_og_image_absolute_url'] = $file->url();
+  }
+
+  $variables['tibr_og_title'] = $node->getTitle();
+
+  $variables['tibr_og_description'] = '';
+  if ($node->hasField($tibrOgDescriptionField) && $description = $node->get($tibrOgDescriptionField)->getValue()) {
+    $variables['tibr_og_description'] = reset($description)['value'];
+  }
+
+  $variables['tibr_init_host'] = $resolver->resolve();
+  $variables['tibr_tunnel_html_path'] = $modulePath . '/includes/tibbr_tunnel.html';
+}
+
+/**
+ * Implements hook_entity_bundle_field_info_alter().
+ */
+function tieto_tibr_entity_bundle_field_info_alter(&$fields, EntityTypeInterface $entity_type, $bundle) {
+  /* @var Drupal\field\Entity\FieldConfig $field */
+  foreach ($fields as $field) {
+    // TODO: move this somewhere into the field definition.
+    if ($field->getType() === 'tibbr') {
+      $field->addConstraint('all_or_none');
+    }
+  }
+}

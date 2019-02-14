@@ -1,0 +1,4 @@
+services:
+  tieto_tibr.tibr_host_resolver:
+    class: Drupal\tieto_tibr\Service\TibrHostResolver
+    arguments: ['@request_stack', '@config.factory']

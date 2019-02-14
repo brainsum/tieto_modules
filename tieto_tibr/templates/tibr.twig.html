@@ -1,0 +1,242 @@
+<span tibr-social-bar=""
+      og-url="{{ url('<current>') }}"
+      og-title="{{ tibr_og_title }}"
+      og-image="{{ tibr_og_image_absolute_url }}"
+      og-description="{{ tibr_og_description }}"
+      include="shares likes comments"
+></span>
+<script language="JavaScript">
+    var tibr_init = {
+        plugins: true,
+        host: "//{{ tibr_init_host }}/a",
+        tunnelUrl: window.location.protocol + "//" + window.location.host + "/{{ tibr_tunnel_html_path }}",
+        client_id: 16
+    };
+</script>
+<!-- Tooltips for Tibbr buttons -->
+<script type="text/javascript">
+  function defer(method) {
+    if (window.jQuery) {
+      method();
+    } else {
+      setTimeout(function() { defer(method) }, 50);
+    }
+  }
+
+  defer(function(){(function ($) {
+    $(function () {
+      var TibbrSocialBtnsTooltips;
+      $.extend($.fn, {
+        widthWithPaddings: function () {
+          var leftPadding, rightPadding;
+          leftPadding = parseInt(this.css('padding-left'));
+          rightPadding = parseInt(this.css('padding-right'));
+          return this.width() + leftPadding + rightPadding;
+        }
+      });
+      TibbrSocialBtnsTooltips = (function () {
+
+        function TibbrSocialBtnsTooltips() {
+          this.initButtonTooltips();
+        }
+
+        TibbrSocialBtnsTooltips.prototype.initButtonTooltips = function () {
+          var _this = this;
+          return $(".social .stats").on("mouseenter", "li[ng-show=showLike], li[ng-show=showComment], li[ng-show=showShare], #viewsCount", function (e) {
+            var tooltip, type;
+            type = _this.getButtonType(e.currentTarget);
+            if (type) {
+              tooltip = _this.getTooltipByType(type);
+              return _this.showTooltipOnHover(e.currentTarget, tooltip);
+            }
+          });
+        };
+
+        TibbrSocialBtnsTooltips.prototype.getButtonType = function (el) {
+          if (!el.getAttribute('ng-show')) {
+            return "visits";
+          }
+          return el.getAttribute('ng-show').replace('show', '').toLowerCase();
+        };
+
+        TibbrSocialBtnsTooltips.prototype.getTooltipByType = function (type) {
+          return $("#tibbr-social-button-tooltips ." + type + ".tooltip").clone();
+        };
+
+        TibbrSocialBtnsTooltips.prototype.showTooltipOnHover = function (el, tooltip) {
+          var $el, offset;
+          $el = $(el);
+          $el.append(tooltip);
+          offset = $el.widthWithPaddings() / 2 - tooltip.widthWithPaddings() / 2;
+          tooltip.css({
+            left: offset
+          });
+          return $el.on("mouseleave", $el, function () {
+            return tooltip.remove();
+          });
+        };
+
+        return TibbrSocialBtnsTooltips;
+
+      })();
+      return new TibbrSocialBtnsTooltips();
+    });
+  })(jQuery)});
+</script>
+
+<style>
+
+  #tibbr-social-button-tooltips {
+    display: none;
+  }
+
+  .social .stats {
+    /* padding-left: 48px; */
+  }
+  .social .stats .social {
+    width: 100%;
+  }
+  .social .stats .social .post-section-inline iframe {
+    width: 100%;
+  }
+  .social .stats .tooltip {
+    position: absolute;
+    top: -30px;
+    padding: 5px 8px;
+    background: black;
+    color: white;
+    -webkit-box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    -moz-box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    white-space: nowrap;
+    opacity: 1;
+    filter: 0;
+    font-size: 11px;
+    font-weight: normal;
+  }
+  .social .stats .tooltip .arrow {
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 4px solid black;
+    position: absolute;
+    left: 50%;
+    margin-left: -4px;
+    bottom: -4px;
+  }
+
+  .social .stats .animated {
+    -webkit-animation-fill-mode:both;-moz-animation-fill-mode:both;-ms-animation-fill-mode:both;-o-animation-fill-mode:both;animation-fill-mode:both;-webkit-animation-duration:1s;-moz-animation-duration:1s;-ms-animation-duration:1s;-o-animation-duration:1s;animation-duration:1s;
+  }
+  .animated.hinge {
+    -webkit-animation-duration:1s;-moz-animation-duration:1s;-ms-animation-duration:1s;-o-animation-duration:1s;animation-duration:1s;
+  }
+  @-webkit-keyframes flipInY {
+    0% {
+      -webkit-transform: perspective(400px) rotateY(90deg);
+      opacity: 0;
+    } 40% {
+        -webkit-transform: perspective(400px) rotateY(-10deg);
+      }
+
+    70% {
+      -webkit-transform: perspective(400px) rotateY(10deg);
+    }
+
+    100% {
+      -webkit-transform: perspective(400px) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  @-moz-keyframes flipInY {
+    0% {
+      -moz-transform: perspective(400px) rotateY(90deg);
+      opacity: 0;
+    }
+
+    40% {
+      -moz-transform: perspective(400px) rotateY(-10deg);
+    }
+
+    70% {
+      -moz-transform: perspective(400px) rotateY(10deg);
+    }
+
+    100% {
+      -moz-transform: perspective(400px) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  @-o-keyframes flipInY {
+    0% {
+      -o-transform: perspective(400px) rotateY(90deg);
+      opacity: 0;
+    }
+
+    40% {
+      -o-transform: perspective(400px) rotateY(-10deg);
+    }
+
+    70% {
+      -o-transform: perspective(400px) rotateY(10deg);
+    }
+
+    100% {
+      -o-transform: perspective(400px) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+  @keyframes flipInY {
+    0% {
+      transform: perspective(400px) rotateY(90deg);
+      opacity: 0;
+    }
+
+    40% {
+      transform: perspective(400px) rotateY(-10deg);
+    }
+
+    70% {
+      transform: perspective(400px) rotateY(10deg);
+    }
+
+    100% {
+      transform: perspective(400px) rotateY(0deg);
+      opacity: 1;
+    }
+  }
+
+  .social .stats .flipInY {
+    -webkit-backface-visibility: visible !important;
+    -webkit-animation-name: flipInY;
+    -moz-backface-visibility: visible !important;
+    -moz-animation-name: flipInY;
+    -o-backface-visibility: visible !important;
+    -o-animation-name: flipInY;
+    backface-visibility: visible !important;
+    animation-name: flipInY;
+  }
+
+</style>
+
+<div id="tibbr-social-button-tooltips">
+  <div class="tooltip like animated flipInY">
+    <div class="arrow"></div>
+    Like
+  </div>
+  <div class="tooltip share animated flipInY">
+    <div class="arrow"></div>
+    Share
+  </div>
+  <div class="tooltip comment animated flipInY">
+    <div class="arrow"></div>
+    Comments
+  </div>
+  <div class="tooltip visits animated flipInY">
+    <div class="arrow"></div>
+    Page views
+  </div>
+</div>
+
+<!-- end of Tooltips -->
