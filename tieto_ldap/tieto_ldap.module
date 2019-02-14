@@ -1,0 +1,151 @@
+<?php
+
+/**
+ * @file
+ * Contains tieto_ldap.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\user\Entity\User;
+use Drupal\Core\Database\Database;
+
+/**
+ * Implements hook_help().
+ */
+function tieto_ldap_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the tieto_ldap module.
+    case 'help.page.tieto_ldap':
+      $output = '';
+      $output .= '<h3>' . \t('About') . '</h3>';
+      $output .= '<p>' . \t('LDAP integration with Tieto Active Directory - alfa version. Field mapping in code, only for Location <em>vocabulary</em>.') . '</p>';
+      $output .= '<dl>';
+      $output .= '<dt>' . \t('Field: Active Directory Unique ID') . '</dt>';
+      $output .= '<dd>' . \t('<em>field_ad_uuid</em> is used to identify AD item.') . '</dd>';
+      $output .= '<dt>' . \t('Syncronization') . '</dt>';
+      $output .= '<dd>' . \t('Location Terms are created/updated (update only Term label) depends on <em>field_ad_uuid</em> value. <strong>All Terms (where <em>field_ad_uuid</em> is not empty) are removed</strong> after success LDAP sync.') . '</dd>';
+      $output .= '<dt>' . \t('Syncronization - manual') . '</dt>';
+      $output .= '<dd>' . \t('at /tieto_ldap URL') . '</dd>';
+      $output .= '<dt>' . \t('Syncronization - automatic') . '</dt>';
+      $output .= '<dd>' . \t('<em>cronjob</em> - not implemented yet') . '</dd>';
+      $output .= '</dl>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_entity_base_field_info_alter().
+ *
+ * Remove core UserName constraint for user name, add custom - we allow
+ * valid email address for username.
+ */
+function tieto_ldap_entity_base_field_info_alter(&$fields, EntityTypeInterface $entityType) {
+  if ($entityType->id() === 'user') {
+    $constraints = $fields['name']->getConstraints();
+    unset($constraints['UserName']);
+    $fields['name']->setConstraints($constraints);
+    $fields['name']->addConstraint('TietoLdapUserName', []);
+  }
+}
+
+/**
+ * Implements hook_entity_field_storage_info().
+ *
+ * Define custom field.
+ */
+function tieto_ldap_entity_field_storage_info(EntityTypeInterface $entityType) {
+  if ($entityType->id() === 'taxonomy_term') {
+    $definitions['tieto_ldap_usercount'] = BaseFieldDefinition::create('integer')
+      ->setName('tieto_ldap_usercount')
+      ->setLabel(\t('AD user count'))
+      ->setDescription(\t('The count of users assigned to this term in AD.'))
+      ->setTargetEntityTypeId($entityType->id())
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
+    return $definitions;
+  }
+}
+
+/**
+ * Implements hook_entity_bundle_field_info().
+ *
+ * Add field definition only for specified bundles.
+ */
+function tieto_ldap_entity_bundle_field_info(EntityTypeInterface $entityType, $bundle) {
+  if (
+    $entityType->id() === 'taxonomy_term'
+    && \in_array($bundle, [
+      'unit',
+      'location',
+      'role',
+    ])
+  ) {
+    $definitions['tieto_ldap_usercount'] = \Drupal::service('entity_field.manager')
+      ->getFieldStorageDefinitions($entityType->id())['tieto_ldap_usercount'];
+    return $definitions;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add warning message and disable status field for AD connected users.
+ */
+function tieto_ldap_form_user_form_alter(&$form, FormStateInterface $form_state, $form_id) {
+  $account = $form_state->getFormObject()->getEntity();
+  // Not LDAP excluded LDAP user.
+  if (!$account->get('ldap_user_ldap_exclude')->value && $account->get('ldap_user_puid_sid')->value) {
+    $form['tieto_ldap_message'] = [
+      '#markup' => \t('AD connected user: Full name, Location, Email address, Username, Status are synced from AD.'),
+      '#prefix' => '<div role="contentinfo" aria-label="Warning message" class="messages messages--warning">',
+      '#suffix' => '</div>',
+      '#weight' => -10,
+    ];
+    $form['account']['status']['#disabled'] = 'disabled';
+  }
+}
+
+/**
+ * Implements hook_ldap_user_edit_user_alter().
+ *
+ * Remove empty LDAP tokens on user save for fullname.
+ * Set the field_location term ID depends on token value.
+ */
+function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, array $context) {
+  $config = \Drupal::config('ldap_user.settings');
+  $tokenProcessor = \Drupal::service('ldap.token_processor');
+
+  $fieldName = 'field_user_fullname';
+  $value = $account->get($fieldName)->value;
+  $ldapTokens = \explode(' ', $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr']);
+  foreach ($ldapTokens as $ldapToken) {
+    $value = \str_replace($ldapToken, '', $value);
+  }
+  $value = \trim($value);
+  $account->set($fieldName, $value);
+
+  $fieldName = 'field_location';
+  $ldapToken = $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr'];
+  $location = $tokenProcessor->tokenReplace($ldapUser['attr'], $ldapToken, 'ldap_entry');
+
+  if ($location !== $ldapToken) {
+    $query = Database::getConnection()
+      ->select('taxonomy_term_field_data', 't');
+    $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
+    $query->fields('t', ['tid', 'tieto_ldap_usercount']);
+    $query->condition('t.name', $location);
+    $query->condition('t.vid', 'location');
+    $query->condition('p.parent_target_id', 0);
+    $result = $query->execute()->fetchAll();
+    $data = \reset($result);
+
+    if ($data && $data->tid) {
+      $account->set($fieldName, $data->tid);
+    }
+  }
+}

@@ -1,0 +1,13 @@
+diff --git a/ldap_user/src/Processor/DrupalUserProcessor.php b/ldap_user/src/Processor/DrupalUserProcessor.php
+index c5a7ab8..515aea8 100644
+--- a/ldap_user/src/Processor/DrupalUserProcessor.php
++++ b/ldap_user/src/Processor/DrupalUserProcessor.php
+@@ -19,7 +19,7 @@ use Drupal\user\UserInterface;
+  */
+ class DrupalUserProcessor implements LdapUserAttributesInterface {
+ 
+-  private $config;
++  protected $config;
+ 
+   /**
+    * The Drupal user account.

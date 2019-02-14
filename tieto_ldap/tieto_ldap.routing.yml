@@ -1,0 +1,23 @@
+tieto_ldap.user_settings_form:
+  path: '/admin/config/tieto/user_import'
+  defaults:
+    _title: 'User import settings'
+    _form: '\Drupal\tieto_ldap\Form\UserImportSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
+tieto_ldap.taxonomy_settings_form:
+  path: '/admin/config/tieto/ldap_taxonomy_import'
+  defaults:
+    _title: 'Taxonomy import from AD'
+    _form: '\Drupal\tieto_ldap\Form\TaxonomyImportSettingsForm'
+  requirements:
+    _permission: 'administer site configuration'
+
+tieto_ldap.ldap_query_form:
+  path: '/admin/config/tieto/ldap_query'
+  defaults:
+    _title: 'Run LDAP query'
+    _form: '\Drupal\tieto_ldap\Form\LdapQueryForm'
+  requirements:
+    _permission: 'administer site configuration'

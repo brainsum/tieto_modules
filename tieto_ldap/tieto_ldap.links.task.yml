@@ -1,0 +1,11 @@
+tieto_ldap.user_settings_form:
+  route_name: tieto_ldap.user_settings_form
+  title: 'User import settings'
+  weight: 0
+  base_route: tieto_ldap.taxonomy_settings_form
+
+tieto_ldap.ldap_query_form:
+  route_name: tieto_ldap.ldap_query_form
+  title: 'LDAP query'
+  weight: 1
+  base_route: tieto_ldap.taxonomy_settings_form

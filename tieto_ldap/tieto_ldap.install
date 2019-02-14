@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Update functions for the Tieto LDAP module.
+ */
+
+use Drupal\Core\Database\Database;
+use Drupal\user\Entity\User;
+
+/**
+ * Set ldap_exclude for search engine (IpAuth) user.
+ */
+function tieto_ldap_update_8001() {
+  $name = 'svc_gsasearch';
+  if ($account = user_load_by_name($name)) {
+    $account->set('ldap_user_ldap_exclude', 1);
+    $account->save();
+  }
+}
+
+/**
+ * Update renamed user names based on authname value.
+ */
+function tieto_ldap_update_8002() {
+  $connection = Database::getConnection();
+  $sql = 'SELECT u.uid, u.name, a.authname, u.status FROM {users_field_data} AS u, authmap AS a WHERE u.uid = a.uid AND u.name != a.authname;';
+  $users = $connection->query($sql)->fetchAllAssoc('uid');
+  if (!empty($users)) {
+    $connection->query('UPDATE {authmap} AS a, {users_field_data} AS u SET u.name = a.authname WHERE u.uid = a.uid AND u.name != a.authname AND u.uid IN (:uids[])', [':uids[]' => array_keys($users)]);
+    foreach ($users as $user) {
+      \Drupal::logger('ldap_user_rename')
+        ->info('Username changed from %old to %new for uid: @uid.', [
+          '%old' => $user->name,
+          '%new' => $user->authname,
+          '@uid' => $user->uid,
+        ]);
+      if (!$user->status && $account = User::load($user->uid)) {
+        $account->set('status', 1);
+        $account->save();
+        \Drupal::logger('ldap_user_rename')
+          ->info('User was activated uid: @uid.', [
+            '@uid' => $user->uid,
+          ]);
+      }
+    }
+  }
+}

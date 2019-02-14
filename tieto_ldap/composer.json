@@ -1,0 +1,23 @@
+{
+    "name": "brainsum/tieto_ldap",
+    "description": "LDAP integration with Tieto Active Directory",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {
+        "drupal/ldap": "3.0-beta5"
+    },
+    "extra": {
+        "patches": {
+            "drupal/ldap": {
+                "Enable changing LDAP server on user provisioning": "./patches/ldap_user-provisioning-multiple-server.patch",
+                "LDAP server search filter": "./patches/ldap_server_search_filter-v2.patch"
+            }
+        }
+    }
+}

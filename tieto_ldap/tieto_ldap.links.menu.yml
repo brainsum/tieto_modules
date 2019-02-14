@@ -1,0 +1,13 @@
+tieto_ldap.user_import:
+  title: 'User import'
+  route_name: tieto_ldap.user_settings_form
+  parent: elevation.admin_config_elevation
+  description: 'Configure user import from LDAP.'
+  weight: 1
+
+tieto_ldap.taxonomy_import:
+  title: 'Taxonomy import'
+  route_name: tieto_ldap.taxonomy_settings_form
+  parent: elevation.admin_config_elevation
+  description: 'Configure/run taxonomy import from LDAP.'
+  weight: 2

@@ -1,0 +1,8 @@
+name: Tieto LDAP
+type: module
+description: LDAP integration with Tieto Active Directory
+core: 8.x
+package: Tieto
+dependencies:
+  - ldap:ldap_servers
+  - elevation:elevation

@@ -1,0 +1,49 @@
+diff --git a/ldap_servers/config/schema/server.schema.yml b/ldap_servers/config/schema/server.schema.yml
+index 0a03e1b..961307e 100644
+--- a/ldap_servers/config/schema/server.schema.yml
++++ b/ldap_servers/config/schema/server.schema.yml
+@@ -46,6 +46,9 @@ ldap_servers.server.*:
+     basedn:
+       type: string
+       label: 'Base DNs for LDAP users, groups, and other entries.'
++    search_filter:
++      type: string
++      label: 'Filter for all LDAP search'
+     user_attr:
+       type: string
+       label: 'AuthName attribute'
+diff --git a/ldap_servers/src/Entity/Server.php b/ldap_servers/src/Entity/Server.php
+index cbacd4b..b32ae45 100644
+--- a/ldap_servers/src/Entity/Server.php
++++ b/ldap_servers/src/Entity/Server.php
+@@ -709,6 +709,10 @@ class Server extends ConfigEntityBase implements ServerInterface, LdapProtocolIn
+       }
+     }
+ 
++    if ($this->get('search_filter')) {
++      $filter = '(&' . $this->get('search_filter') . $filter . ')';
++    }
++
+     $this->detailLog->log("LDAP search call with base_dn '%base_dn'. Filter is '%filter' with attributes '%attributes'. Only attributes %attrs_only, size limit %size_limit, time limit %time_limit, dereference %deref, scope %scope.", [
+       '%base_dn' => $base_dn,
+       '%filter' => $filter,
+diff --git a/ldap_servers/src/Form/ServerForm.php b/ldap_servers/src/Form/ServerForm.php
+index 58f230c..6af2030 100644
+--- a/ldap_servers/src/Form/ServerForm.php
++++ b/ldap_servers/src/Form/ServerForm.php
+@@ -177,6 +177,15 @@ class ServerForm extends EntityForm {
+       '#description' => '<div>' . $this->t('DNs that have  relevant entries, e.g. <code>ou=campus accounts,dc=ad,dc=uiuc,dc=edu</code>.<br> Keep in mind that every additional basedn likely doubles the number of queries. <br> Place the more heavily used one first and consider using one higher base DN rather than 2 or more lower base DNs.<br> Enter one per line in case if you need more than one.') . '</div>',
+     ];
+ 
++    $form['users']['search_filter'] = [
++      '#default_value' => $server->get('search_filter'),
++      '#type' => 'textarea',
++      '#cols' => 50,
++      '#rows' => 6,
++      '#title' => $this->t('Filter for all LDAP search'),
++      '#description' => '<div>' . $this->t('E.g. <code>!(mail=test*)</code> or <code>(!(mail=test*)(samaccountname=test*))</code>.<br />This filter will be added for all search on this LDAP server.') . '</div>',
++    ];
++
+     $form['users']['user_attr'] = [
+       '#default_value' => $server->get('user_attr'),
+       '#type' => 'textfield',
