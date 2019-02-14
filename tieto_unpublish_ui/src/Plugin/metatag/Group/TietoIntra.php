@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\static_pages\Plugin\metatag\Group;
+namespace Drupal\tieto_unpublish_ui\Plugin\metatag\Group;
 
 use Drupal\metatag\Plugin\metatag\Group\GroupBase;
 
