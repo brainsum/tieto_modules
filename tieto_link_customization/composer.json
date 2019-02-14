@@ -1,0 +1,15 @@
+{
+    "name": "brainsum/tieto_link_customization",
+    "description": "Link customization module building on editor_advanced_link.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {
+        "drupal/editor_advanced_link": "^1.4"
+    }
+}
