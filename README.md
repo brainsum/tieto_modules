@@ -1,5 +1,9 @@
 # Tieto Modules
 
+[![Build Status](https://travis-ci.org/brainsum/tieto_modules.svg?branch=master)](https://travis-ci.org/brainsum/tieto_modules)
+
+## About
+
 Umbrella repository for Tieto-related modules.
 
 ## Development
