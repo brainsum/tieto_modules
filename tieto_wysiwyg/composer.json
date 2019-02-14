@@ -1,6 +1,6 @@
 {
     "name": "brainsum/tieto_wysiwyg",
-    "license": "GPL-2.0+",
+    "license": "proprietary",
     "description": "Drupal module for custom wysiwyg functionality.",
     "type": "drupal-module",
     "authors": [

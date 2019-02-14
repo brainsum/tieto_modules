@@ -1,0 +1,13 @@
+{
+    "name": "brainsum/jquery_ui_datepicker",
+    "description": "Datetime fieldwidget using jQuery UI datepicker",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {}
+}

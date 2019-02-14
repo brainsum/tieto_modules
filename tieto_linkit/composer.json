@@ -1,6 +1,6 @@
 {
-    "name": "tieto/tieto_linkit",
-    "license": "GPL-2.0+",
+    "name": "brainsum/tieto_linkit",
+    "license": "proprietary",
     "description": "This Drupal module contains some customization for Linkit module.",
     "type": "drupal-module",
     "authors": [

@@ -1,0 +1,13 @@
+{
+    "name": "brainsum/tieto_general_ui",
+    "description": "Module for enhancing and generalizing UI.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {}
+}

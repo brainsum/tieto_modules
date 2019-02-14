@@ -1,0 +1,13 @@
+{
+    "name": "brainsum/tieto_tibr",
+    "description": "Link customization module building on editor_advanced_link.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "require": {}
+}
