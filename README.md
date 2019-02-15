@@ -6,6 +6,35 @@
 
 Umbrella repository for Tieto-related modules.
 
+## Deployment
+- `composer require brainsum/tieto_modules`
+- Add this to the `extra` key of your composer.json
+    - Note: Only add this after `require`
+    - ```json
+        "enable-patching": true,
+        "merge-plugin": {
+            "include": [
+                "web/modules/contrib/tieto_modules/*/composer.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": true,
+            "merge-extra": true,
+            "merge-extra-deep": false,
+            "merge-scripts": false
+        }
+        ```
+- Add this to the `patches` key of your composer.json
+    - ```json
+        "drupal/ldap": {
+            "Enable changing LDAP server on user provisioning": "web/modules/contrib/tieto_modules/patches/ldap_user-provisioning-multiple-server.patch",
+            "LDAP server search filter": "web/modules/contrib/tieto_modules/patches/ldap_server_search_filter-v2.patch"
+        }
+        ```
+- `composer update --lock`
+    - Note: only use this after adding the previous keys
+
 ## Development
 ### Adding new modules
 Make sure, that each module has:
