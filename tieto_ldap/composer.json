@@ -14,6 +14,9 @@
     },
     "extra": {
         "patches": {
+            "drupal/core": {
+                "Hook entity_field_storage_info is broken": "https://www.drupal.org/files/issues/core-entity-sql-content-entity-storage-2583111-1_0.patch"
+            },
             "drupal/ldap": {
                 "Enable changing LDAP server on user provisioning": "./patches/ldap_user-provisioning-multiple-server.patch",
                 "LDAP server search filter": "./patches/ldap_server_search_filter-v2.patch"

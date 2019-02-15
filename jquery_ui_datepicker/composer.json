@@ -9,5 +9,12 @@
             "email": "mhavelant@brainsum.com"
         }
     ],
-    "require": {}
+    "require": {},
+    "extra": {
+        "patches": {
+            "drupal/core": {
+                "Datetime form element cannot validate when using a format without seconds" : "https://www.drupal.org/files/issues/2723159-43.patch"
+            }
+        }
+    }
 }

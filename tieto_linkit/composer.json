@@ -11,5 +11,12 @@
     ],
     "require": {
         "drupal/linkit": "^4.3"
+    },
+    "extra": {
+        "patches": {
+            "drupal/linkit": {
+                "Linkit doesn't work with images": "https://www.drupal.org/files/issues/linkit_8_x_doesn_t_work-2691879-3.patch"
+            }
+        }
     }
 }
