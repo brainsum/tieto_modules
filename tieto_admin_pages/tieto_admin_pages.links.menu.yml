@@ -1,0 +1,9 @@
+tieto_admin_pages.tieto_admin_config:
+  title: 'Tieto'
+  route_name: tieto_admin_pages.tieto_admin_config
+  parent: system.admin_config
+  description: 'Tieto settings.'
+  weight: -10
+  options:
+    attributes:
+      class: 'ui-mode-edit'

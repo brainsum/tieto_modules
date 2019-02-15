@@ -1,0 +1,7 @@
+tieto_admin_pages.tieto_admin_config:
+  path: '/admin/config/tieto'
+  defaults:
+    _controller: '\Drupal\system\Controller\SystemController::systemAdminMenuBlockPage'
+    _title: 'Tieto config'
+  requirements:
+    _permission: 'access administration pages'
