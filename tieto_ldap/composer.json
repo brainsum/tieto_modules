@@ -10,7 +10,7 @@
         }
     ],
     "require": {
-        "drupal/ldap": "3.0-beta5"
+        "drupal/ldap": "^3.0"
     },
     "extra": {
         "patches": {
