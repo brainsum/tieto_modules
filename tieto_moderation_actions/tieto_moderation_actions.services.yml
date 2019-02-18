@@ -1,0 +1,5 @@
+services:
+  tieto_moderation_actions.action_manager:
+    class: Drupal\tieto_moderation_actions\Service\ActionManager
+    arguments:
+      - '@entity_type.manager'

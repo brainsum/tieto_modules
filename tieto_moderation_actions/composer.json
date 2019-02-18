@@ -1,0 +1,16 @@
+{
+    "name": "brainsum/tieto_moderation_actions",
+    "description": "Module for workbench-compatible node actions.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "drupal/workbench_moderation": "^1.5"
+    }
+}

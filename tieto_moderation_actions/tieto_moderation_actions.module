@@ -1,0 +1,26 @@
+<?php
+
+/**
+ * @file
+ * Module file for tieto_moderation_actions.
+ */
+
+use Drupal\workbench_moderation\ModerationStateInterface;
+
+/**
+ * Implements hook_ENTITY_TYPE_insert().
+ */
+function tieto_moderation_actions_moderation_state_insert(ModerationStateInterface $moderationState) {
+  /** @var \Drupal\tieto_moderation_actions\Service\ActionManager $actionManager */
+  $actionManager = \Drupal::service('tieto_moderation_actions.action_manager');
+  $actionManager->createActionFromState($moderationState);
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_delete().
+ */
+function tieto_moderation_actions_moderation_state_delete(ModerationStateInterface $moderationState) {
+  /** @var \Drupal\tieto_moderation_actions\Service\ActionManager $actionManager */
+  $actionManager = \Drupal::service('tieto_moderation_actions.action_manager');
+  $actionManager->deleteActionForState($moderationState);
+}

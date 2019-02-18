@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+    - workbench_moderation
+id: moderation_publish_action
+label: 'Publish selected pages'
+type: node
+plugin: moderation_publish_action
+configuration: {  }

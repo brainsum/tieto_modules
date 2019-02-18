@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for Tieto Moderation Actions module.
+ */
+
+use Drupal\Core\Config\FileStorage;
+
+/**
+ * Import the config for Archive action.
+ */
+function tieto_moderation_actions_update_8001() {
+  $configPath = config_get_config_directory(CONFIG_SYNC_DIRECTORY);
+  $source = new FileStorage($configPath);
+  /* @var \Drupal\Core\Config\ConfigFactoryInterface $configFactory */
+  $configFactory = \Drupal::service('config.factory');
+
+  $config = $configFactory->getEditable('system.action.moderation_archive_action');
+  $config->setData($source->read('system.action.moderation_archive_action'));
+  $config->save();
+}
+
+/**
+ * Generate change_wm_state actions.
+ */
+function tieto_moderation_actions_update_8601() {
+  /** @var \Drupal\workbench_moderation\ModerationStateInterface[] $moderationStates */
+  $moderationStates = \Drupal::entityTypeManager()
+    ->getStorage('moderation_state')
+    ->loadMultiple();
+
+  /** @var \Drupal\tieto_moderation_actions\Service\ActionManager $actionManager */
+  $actionManager = \Drupal::service('tieto_moderation_actions.action_manager');
+
+  foreach ($moderationStates as $state) {
+    $actionManager->createActionFromState($state);
+  }
+}

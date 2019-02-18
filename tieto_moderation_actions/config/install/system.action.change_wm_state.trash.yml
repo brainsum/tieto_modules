@@ -1,0 +1,11 @@
+langcode: en
+status: true
+dependencies:
+  module:
+    - tieto_moderation_actions
+id: change_wm_state.trash
+label: 'Set to Archive'
+type: node
+plugin: change_wm_state
+configuration:
+  wm_state: trash
