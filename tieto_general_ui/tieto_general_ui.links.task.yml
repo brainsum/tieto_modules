@@ -1,0 +1,5 @@
+entity.node.node_clone.prepopulate_node:
+  route_name: node_clone.prepopulate_node
+  base_route: entity.node.canonical
+  title: Copy
+  weight: 2

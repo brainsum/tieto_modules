@@ -9,5 +9,15 @@
             "email": "mhavelant@brainsum.com"
         }
     ],
-    "require": {}
+    "require": {
+        "drupal/node_clone": "dev-1.x"
+    },
+    "extra": {
+        "patches": {
+            "drupal/node_clone": {
+                "Configurations cannot be changed and publishing options missing": "https://www.drupal.org/files/issues/2724919-11.patch",
+                "Missing configure attribute in node_clone.info.yml": "https://www.drupal.org/files/issues/node_clone-configure_attribute-2863623-2-8x.patch"
+            }
+        }
+    }
 }

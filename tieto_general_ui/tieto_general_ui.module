@@ -5,6 +5,11 @@
  * Module file.
  */
 
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Link;
+use Drupal\Core\Url;
+
 /**
  * Implements hook_theme().
  */
@@ -139,4 +144,101 @@ function tieto_general_ui_preprocess(array &$variables) {
   if (\Drupal::currentUser()->hasPermission('toggle edit mode')) {
     $variables['show_edit_toggle'] = TRUE;
   }
+}
+
+/**
+ * Implements hook_entity_operation().
+ *
+ * Add Clone operation to node entities.
+ */
+function tieto_general_ui_entity_operation(EntityInterface $entity) {
+  $operations = [];
+  if ($entity->getEntityTypeId() === 'node') {
+    $operations['clone'] = [
+      'title' => \t('Copy'),
+      'url' => Url::fromRoute('node_clone.prepopulate_node', ['node' => $entity->id()]),
+      'weight' => 15,
+    ];
+  }
+
+  return $operations;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function tieto_general_ui_form_node_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  $form_id
+) {
+  /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */
+  $routeMatch = \Drupal::routeMatch();
+
+  // Alter clone form - page title, node title.
+  if ($routeMatch->getRouteName() === 'node_clone.prepopulate_node') {
+    // Load the current node.
+    $node = $routeMatch->getParameter('node');
+    $form['title']['widget']['0']['value']['#default_value'] = \t('Copy of %title', [
+      '%title' => $node->getTitle(),
+    ]);
+    $form['#title'] = \t('Copy content');
+    \Drupal::messenger()
+      ->addWarning(\t('You are going to create a copy of the page: @title_link', [
+        '@title_link' => Link::createFromRoute(
+          $node->getTitle(),
+          'entity.node.canonical',
+          [
+            'node' => $node->id(),
+          ],
+          [
+            'attributes' => [
+              'target' => '_blank',
+            ],
+          ]
+        )->toString(),
+      ]));
+  }
+}
+
+/**
+ * Implements hook_menu_local_tasks_alter().
+ *
+ * Fix for node_clone: Remove 'Clone' from local TAB if type is omitted.
+ */
+function tieto_general_ui_menu_local_tasks_alter(array &$data, $route_name) {
+  /** @var \Drupal\Core\Cache\CacheableMetadata $cacheability */
+  $cacheability = $data['cacheability'];
+  foreach ($data['tabs'] as &$tab) {
+    foreach ($tab as $route => $item) {
+      if ($route === 'entity.node.node_clone.prepopulate_node') {
+        /** @var \Drupal\node\NodeStorageInterface $nodeStorage */
+        $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+
+        $nid = $item['#link']['url']->getRouteParameters()['node'];
+        /** @var \Drupal\node\NodeInterface $node */
+        $node = $nodeStorage->load($nid);
+        if (NULL === $node) {
+          return;
+        }
+        $type = $node->getType();
+        $omitted = \Drupal::config('node_clone.settings')
+          ->get('node_clone_omitted');
+        if (!empty($omitted[$type])) {
+          unset($tab[$route]);
+        }
+      }
+    }
+  }
+  unset($tab);
+  $data['cacheability'] = $cacheability;
+}
+
+/**
+ * Implements hook_menu_local_actions_alter().
+ *
+ * Fix for node_clone: Remove 'Clone content' - we added to local tasks (TAB).
+ */
+function tieto_general_ui_menu_local_actions_alter(&$local_actions) {
+  unset($local_actions['node_clone.clone_action']);
 }

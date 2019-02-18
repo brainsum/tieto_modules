@@ -6,3 +6,5 @@ package: Tieto
 
 dependencies:
   - drupal:node
+  - drupal:views
+  - node_clone:node_clone
