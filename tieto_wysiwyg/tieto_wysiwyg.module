@@ -10,7 +10,10 @@ use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\VideoPopupPlugin;
 use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\ImagePopupPlugin;
 use Drupal\editor\Entity\Editor;
 
-function tieto_wysiwyg_node_form_alter(
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function tieto_wysiwyg_form_node_form_alter(
   &$form,
   FormStateInterface $form_state,
   $form_id
