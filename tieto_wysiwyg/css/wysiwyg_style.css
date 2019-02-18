@@ -50,3 +50,32 @@ a > span.cke_button__doubleimage_icon {
 .cke_widget_video_embed.cke_widget_selected > span.cke_widget_drag_handler_container {
   z-index: 10;
 }
+
+.text-formatted p,
+.cke_editable p {
+  margin-bottom: 30px;
+  margin-top: 0;
+}
+
+blockquote {
+  margin: 1em 40px;
+  color: #888;
+  position: relative;
+}
+
+blockquote:before {
+  content: "“";
+  line-height: 20px;
+  font-size: 48px;
+  font-weight: bold;
+  font-family: Georgia, "Times New Roman", Times, serif;
+  left: -30px;
+  position: absolute;
+  top: 8px;
+}
+
+/* WYSIWYG */
+/* Show always the y scroll for better and more accurate x width */
+body.cke_editable.cke_editable_themed {
+  overflow-y: scroll;
+}

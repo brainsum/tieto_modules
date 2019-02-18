@@ -3,9 +3,18 @@ ckeditor_image_video:
   css:
     theme:
       css/wysiwyg_style.css: {}
+
 double_image:
   version: 1.0
   js:
     js/double_image.js: {}
   dependencies:
     - core/jquery
+
+ckeditor_modifications:
+  version: 1.0
+  js:
+    js/ckeditor_modifications.js: {}
+  dependencies:
+    - core/jquery
+    - core/drupal

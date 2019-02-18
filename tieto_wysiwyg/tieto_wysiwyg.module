@@ -5,9 +5,18 @@
  * Code for Tieto_wysiwyg module.
  */
 
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\VideoPopupPlugin;
 use Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin\ImagePopupPlugin;
 use Drupal\editor\Entity\Editor;
+
+function tieto_wysiwyg_node_form_alter(
+  &$form,
+  FormStateInterface $form_state,
+  $form_id
+) {
+  $form['#attached']['library'][] = 'tieto_wysiwyg/ckeditor_modifications';
+}
 
 /**
  * Implements hook_ckeditor_plugin_info_alter().
@@ -50,9 +59,9 @@ function tieto_wysiwyg_preprocess_page(&$variables) {
   /* @var \Drupal\node\Entity\Node $node */
   $node = $variables['node'] ?? NULL;
 
-  if (is_object($node) && $node->hasField('field_side_block')) {
+  if (\is_object($node) && $node->hasField('field_side_block')) {
     $side_block = $node->get('field_side_block');
-    if (!empty($side_block) && $side_block->count() > 0) {
+    if ($side_block !== NULL && $side_block->count() > 0) {
       $variables['#attached']['library'][] = 'tieto_wysiwyg/double_image';
     }
   }
