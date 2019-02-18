@@ -28,7 +28,7 @@ class TietoIntranetUserReferenceFormatter extends EntityReferenceFormatterBase {
    *
    * @throws \InvalidArgumentException
    */
-  public function viewElements(FieldItemListInterface $items, $langcode) {
+  public function viewElements(FieldItemListInterface $items, $langcode): array {
     $elements = [];
 
     /** @var \Drupal\Core\Field\FieldItemListInterface|\Drupal\Core\Field\EntityReferenceFieldItemListInterface $items */
@@ -38,11 +38,11 @@ class TietoIntranetUserReferenceFormatter extends EntityReferenceFormatterBase {
       $mail = $entity->getEmail();
       $full = $entity->get('field_user_fullname')->value;
       if (\strlen($name) === 8) {
-        $full_name = $entity->get('field_user_fullname')->value;
+        $fullName = $entity->get('field_user_fullname')->value;
         $uri = Url::fromUri('http://intra.tieto.com/profile/' . $mail);
         $elements[$delta] = [
           '#type' => 'link',
-          '#title' => $full_name ? $full_name : $name,
+          '#title' => $fullName ?: $name,
           '#url' => $uri,
           '#options' => $uri->getOptions(),
         ];
