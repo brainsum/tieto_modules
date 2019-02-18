@@ -1,0 +1,13 @@
+edit_mode:
+  version: 1.0
+  css:
+    state:
+      css/edit_mode.module.css: {}
+    theme:
+      css/edit_mode.theme.css: {}
+  js:
+    js/edit_mode.js: {}
+  dependencies:
+    - core/drupal
+    - core/drupalSettings
+    - core/classList

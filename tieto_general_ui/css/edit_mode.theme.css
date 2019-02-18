@@ -1,0 +1,25 @@
+/**
+ * @file
+ * Styles for Edit mode toggle.
+ * @package: Tieto News
+ */
+
+.edit-mode {
+  font-weight: normal;
+  color: #2173af;
+  font-size: .8em;
+}
+
+.edit-mode.active {
+  font-weight: normal;
+}
+
+.edit-mode input {
+  display: none;
+}
+
+.edit-mode::after {
+  content: attr(data-label);
+  display: inline-block;
+  padding-left: .5em;
+}

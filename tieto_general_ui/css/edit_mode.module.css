@@ -1,0 +1,31 @@
+/**
+ * @file
+ * Hiding stuff for UI View mode.
+ * @package: Tieto News
+ * .ui-mode-view class is added to the body element when user is in UI View mode.
+ */
+
+/**
+ * This class is added elements that is only relevant in edit mode:
+ * 1. Certain user menu items
+ * 2. On home page to the edit buttons when hovering thumbnail image
+ */
+[data-edit-mode="0"] .visible-edit-mode {
+  display: none !important;
+}
+
+[data-edit-mode="0"].page-node-type-profiled-news .block-local-tasks-block,
+[data-edit-mode="0"].page-node-type-corporate-news .block-local-tasks-block,
+[data-edit-mode="0"].page-node-type-content-page .block-local-tasks-block,
+[data-edit-mode="0"].page-node-type-news-link .block-local-tasks-block {
+  margin-top: 1em;
+}
+
+[data-edit-mode="0"].page-node-type-profiled-news .block-local-tasks-block .tabs,
+[data-edit-mode="0"].page-node-type-corporate-news .block-local-tasks-block .tabs,
+[data-edit-mode="0"].page-node-type-content-page .block-local-tasks-block .tabs,
+[data-edit-mode="0"].page-node-type-news-link .block-local-tasks-block .tabs,
+[data-edit-mode="0"].page-node-type-service-alert .block-local-tasks-block .tabs,
+[data-edit-mode="0"] .menu--account {
+  display: none;
+}

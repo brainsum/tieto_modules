@@ -6,6 +6,19 @@
  */
 
 /**
+ * Implements hook_theme().
+ */
+function tieto_general_ui_theme() {
+  return [
+    'edit_toggle' => [
+      'variables' => [
+        'label' => NULL,
+      ],
+    ],
+  ];
+}
+
+/**
  * Implements hook_preprocess_HOOK().
  */
 function tieto_general_ui_preprocess_html(&$variables) {
@@ -13,9 +26,14 @@ function tieto_general_ui_preprocess_html(&$variables) {
   $routeMatch = \Drupal::routeMatch();
   $routeName = $routeMatch->getRouteName();
 
+  // Set `data-edit-mode` attribute for the body element.
+  $variables['attributes']['data-edit-mode'] = (int) $variables['is_edit_mode'];
+
   switch ($routeName) {
     case 'entity.node.edit_form':
       $variables['attributes']['class'][] = 'node--edit';
+      // To be in edit mode.
+      $variables['attributes']['data-edit-mode'] = 1;
       break;
 
     case 'node.add':
@@ -25,6 +43,28 @@ function tieto_general_ui_preprocess_html(&$variables) {
     case 'node_clone.prepopulate_node':
       $variables['attributes']['class'][] = 'node--clone';
       break;
+  }
+
+  $routeWhitelist = [
+    'entity.node.canonical',
+    'entity.node.book_outline_form',
+    'node_clone.prepopulate_node',
+    'view.node_child_pages.child_pages',
+    'entity.node.delete_form',
+    'entity.node.version_history',
+    'public_preview.preview_links_form',
+    'public_preview.preview_link',
+    'static_pages.child_reorder',
+    'entity.node.revision',
+    'entity.node.latest_version',
+    'view.news.page',
+  ];
+
+  // Add edit toggle to page_bottom on these routes.
+  if ($variables['show_edit_toggle'] && \in_array($routeName, $routeWhitelist, TRUE)) {
+    $variables['#attached']['drupalSettings']['tieto_general_ui']['editMode'] = $variables['is_edit_mode'];
+    $variables['#attached']['library'][] = 'tieto_general_ui/edit_mode';
+    $variables['page']['page_bottom'] = ['#theme' => 'edit_toggle'];
   }
 }
 
@@ -86,4 +126,17 @@ function tieto_general_ui_preprocess_page(&$variables) {
     ];
   }
   $variables['#attached']['library'][] = 'tieto_general_ui/tieto_intra_topbar';
+}
+
+/**
+ * Implements hook_preprocess().
+ */
+function tieto_general_ui_preprocess(array &$variables) {
+  // By default, edit mode is always disabled.
+  $variables['is_edit_mode'] = FALSE;
+  $variables['show_edit_toggle'] = FALSE;
+  // Add edit mode variables to all templates.
+  if (\Drupal::currentUser()->hasPermission('toggle edit mode')) {
+    $variables['show_edit_toggle'] = TRUE;
+  }
 }
