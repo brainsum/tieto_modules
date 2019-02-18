@@ -10,7 +10,6 @@ use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\user\Entity\User;
-use Drupal\Core\Database\Database;
 
 /**
  * Implements hook_help().
@@ -134,8 +133,10 @@ function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, a
   $location = $tokenProcessor->tokenReplace($ldapUser['attr'], $ldapToken, 'ldap_entry');
 
   if ($location !== $ldapToken) {
-    $query = Database::getConnection()
-      ->select('taxonomy_term_field_data', 't');
+    /** @var \Drupal\Core\Database\Connection $database */
+    $database = \Drupal::database();
+
+    $query = $database->select('taxonomy_term_field_data', 't');
     $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
     $query->fields('t', ['tid', 'tieto_ldap_usercount']);
     $query->condition('t.name', $location);
@@ -146,6 +147,41 @@ function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, a
 
     if ($data && $data->tid) {
       $account->set($fieldName, $data->tid);
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function tieto_ldap_preprocess_status_messages(&$variables) {
+  /* @note: This is based on the 'Disable Messages' module.
+   * @see: https://www.drupal.org/project/disable_messages
+   *
+   * @note: This should be a patch in the ldap_sso module.
+   * The message is set here: LoginController / loginUserSetFinalize()
+   * It should be configurable on at least a "show/hide" level.
+   */
+  $type = 'status';
+  $text = \t('You have been successfully authenticated');
+
+  // When there are messages of the requested type..
+  if (isset($variables['message_list'][$type])) {
+    /** @var array $messages */
+    $messages = $variables['message_list'][$type];
+
+    // @todo?: maybe use array_filter or smth.
+    foreach ($messages as $key => $message) {
+      $tmpMsg = (\is_string($message) ? $message : $message->__toString());
+      if ($tmpMsg === $text->__toString()) {
+        unset($variables['message_list'][$type][$key]);
+        // If this was the only message, remove the now empty $type sub-array,
+        // to avoid rendering an empty status box.
+        if (empty($variables['message_list'][$type])) {
+          unset($variables['message_list'][$type]);
+        }
+        break;
+      }
     }
   }
 }
