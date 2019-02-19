@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
 use Drupal\tieto_unpublish_ui\Component\RepublishButton;
 use Drupal\tieto_unpublish_ui\Form\NotificationsModalForm;
@@ -37,32 +38,65 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
   /** @var \Drupal\node\NodeInterface $node */
   $node = $variables['node'];
   if ($node->get('field_first_publish_date')->getValue()) {
-    $variables['first_publish_date'] = strtotime($node->get('field_first_publish_date')
+    $variables['first_publish_date'] = \strtotime($node->get('field_first_publish_date')
       ->getValue()[0]['value']);
   }
   /** @var \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter */
   $dateFormatter = \Drupal::service('date.formatter');
   /** @var \Drupal\tieto_unpublish_ui\Service\NodeRevisionManager $revisionManager */
   $revisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
+
   if ($node->isPublished()) {
     $revision = $revisionManager->loadLatestPublishedRevision($node);
   }
   else {
     $revision = $revisionManager->loadLatestUnpublishedRevision($node);
   }
+
   $variables['node_meta'] = [
     'date' => [
-      'label' => t('Edited on'),
+      'label' => \t('Edited on'),
       'value' => NULL,
     ],
     'author' => [
-      'label' => t('Edited by'),
+      'label' => \t('Edited by'),
       'value' => NULL,
     ],
   ];
+
   if (NULL !== $revision) {
     $variables['node_meta']['date']['value'] = $dateFormatter->format($revision->getChangedTime(), 'tieto_date');
     $variables['node_meta']['author']['value'] = $revision->getOwner()->getDisplayName();
+  }
+
+  // Add node author full name for if not exist user name as variable.
+  /** @var \Drupal\user\UserInterface $account */
+  $account = $node->getOwner();
+  if (\is_object($account)) {
+    $username = $account->getDisplayName();
+    $fullName = $account->get('field_user_fullname')->value;
+    $variables['publisher'] = \trim($fullName) !== '' ? $fullName : $username;
+  }
+
+  $viewMode = $variables['view_mode'];
+  if ('full' === $viewMode && \Drupal::currentUser()->hasPermission('view latest version')) {
+    /** @var \Drupal\workbench_moderation\ModerationInformationInterface $moderationInfoService */
+    $moderationInfoService = \Drupal::service('workbench_moderation.moderation_information');
+
+    $defaultRevisionId = $moderationInfoService->getDefaultRevisionId('node', $node->id());
+    $latestRevisionId = $moderationInfoService->getLatestRevisionId('node', $node->id());
+
+    /** @var \Drupal\node\NodeStorageInterface $nodeStorage */
+    $nodeStorage = \Drupal::entityTypeManager()->getStorage('node');
+    /** @var \Drupal\node\NodeInterface $defaultRevision */
+    $defaultRevision = $nodeStorage->loadRevision($defaultRevisionId);
+
+    $defaultRevisionIsPublished = $defaultRevision->isPublished();
+    if (($defaultRevisionId !== $latestRevisionId) && $defaultRevisionIsPublished) {
+      \Drupal::messenger()->addWarning(\t("This article is public, but has un-published <a href='@url'>changes here</a>.", [
+        '@url' => Url::fromRoute('entity.node.latest_version', ['node' => $node->id()])->toString(),
+      ]));
+    }
   }
 }
 
@@ -93,6 +127,15 @@ function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $for
   $form['#validate'][] = [RepublishButton::class, 'validate'];
 
   $form['advanced']['#type'] = 'container';
+
+  if (isset($form['moderation_state']['widget'][0]['#options']['unpublished'])) {
+    $option = $form['moderation_state']['widget'][0]['#options']['unpublished'];
+    unset($form['moderation_state']['widget'][0]['#options']['unpublished']);
+    $form['moderation_state']['widget'][0]['#options'] = [
+        'unpublished' => $option
+      ] + $form['moderation_state']['widget'][0]['#options'];
+  }
+
   // Cleanup the form.
   $fieldsToHide = [
     'path',
@@ -101,14 +144,14 @@ function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $for
     'advanced',
   ];
   foreach ($fieldsToHide as $field) {
-    hide($form[$field]);
+    \hide($form[$field]);
   }
 }
 
 /**
  * Implements hook_field_widget_WIDGET_TYPE_form_alter().
  */
-function tieto_unpublish_ui_field_widget_moderation_state_default_form_alter(&$element, FormStateInterface $form_state, $context) {
+function tieto_unpublish_ui_field_widget_moderation_state_default_form_alter(&$element, FormStateInterface $formState, $context) {
   // This is the only way to reliably alter button titles.
   $element['#process'][] = [ModerationStateProcessor::class, 'processActions'];
 }
@@ -135,32 +178,33 @@ function tieto_unpublish_ui_ief_process($element, FormStateInterface $formState,
 /**
  * Based on inline_entity_form_get_element().
  */
-function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterface $form_state) {
-  $element = inline_entity_form_get_element($form, $form_state);
-  $triggering_element = $form_state->getTriggeringElement();
-  $wrapper = '#' . $triggering_element['#ajax']['wrapper'];
+function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterface $formState) {
+  $element = \inline_entity_form_get_element($form, $formState);
+  $triggeringElement = $formState->getTriggeringElement();
+  $wrapper = '#' . $triggeringElement['#ajax']['wrapper'];
 
-  $ief = $form_state->get('inline_entity_form');
-  $scheduled_dates = [];
+  $ief = $formState->get('inline_entity_form');
+  $scheduledDates = [];
 
+  /** @var \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter */
   $dateFormatter = \Drupal::service('date.formatter');
 
-  foreach ($ief as $widget_data) {
-    $field_name = $widget_data['instance']->get('field_name');
-    $field_label = $widget_data['instance']->get('label');
-    $scheduled_dates[$field_name] = [
+  foreach ($ief as $widgetData) {
+    $fieldName = $widgetData['instance']->get('field_name');
+    $fieldLabel = $widgetData['instance']->get('label');
+    $scheduledDates[$fieldName] = [
       'date' => NULL,
-      'text' => $field_name == 'scheduled_publish_date' ? t('Will not publish') : '',
+      'text' => $fieldName === 'scheduled_publish_date' ? \t('Will not publish') : '',
     ];
 
-    if (!empty($widget_data['entities'])) {
-      $entity = $widget_data['entities'][0]['entity'];
+    if (!empty($widgetData['entities'])) {
+      $entity = $widgetData['entities'][0]['entity'];
       $timestamp = $entity->update_timestamp->first()->getValue()['value'];
 
       if ($timestamp > \Drupal::time()->getRequestTime()) {
-        $scheduled_dates[$field_name] = [
+        $scheduledDates[$fieldName] = [
           'date' => $dateFormatter->format($timestamp, 'tieto_date'),
-          'text' => $field_label . ': ' . '<span>' . $dateFormatter->format($timestamp, 'tieto_date') . '</span>',
+          'text' => $fieldLabel . ': ' . '<span>' . $dateFormatter->format($timestamp, 'tieto_date') . '</span>',
         ];
       }
     }
@@ -172,7 +216,7 @@ function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterfa
   $response->addCommand(new InvokeCommand(
     NULL,
     'updateButtonHints',
-    [$scheduled_dates]
+    [$scheduledDates]
   ));
 
   $response->addCommand(new ReplaceCommand(
