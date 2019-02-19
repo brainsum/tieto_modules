@@ -1,8 +1,9 @@
 name: 'Advanced Link Customization'
-description: 'Customize links provided by the "Editor Advanced Link" module'
 type: module
+description: 'Customize links provided by the "Editor Advanced Link" module'
 core: 8.x
-package: Custom
+package: Tieto
+
 dependencies:
 - drupal:editor
 - editor_advanced_link:editor_advanced_link

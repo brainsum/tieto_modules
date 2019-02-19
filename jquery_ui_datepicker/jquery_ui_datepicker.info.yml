@@ -1,7 +1,8 @@
 name: 'jQuery UI Datepicker'
+type: module
 description: 'Datetime fieldwidget using jQuery UI datepicker'
 core: 8.x
-type: module
+package: Tieto
 
 dependencies:
   - drupal:datetime
