@@ -3,6 +3,7 @@ type: module
 description: LDAP integration with Tieto Active Directory
 core: 8.x
 package: Tieto
+
 dependencies:
   - ldap:ldap_servers
   - tieto_admin_pages:tieto_admin_pages

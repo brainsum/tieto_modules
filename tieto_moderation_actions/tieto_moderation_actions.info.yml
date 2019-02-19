@@ -1,9 +1,9 @@
-# tieto_moderation_actions
 name: Tieto Moderation Actions
 type: module
 description: Module for workbench-compatible node actions.
 core: 8.x
 package: Tieto
+
 dependencies:
   - drupal:node
   - workbench_moderation:workbench_moderation

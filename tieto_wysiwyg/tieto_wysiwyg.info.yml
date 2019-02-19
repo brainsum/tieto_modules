@@ -3,6 +3,7 @@ type: module
 description: Custom modification for wysiwyg (ckeditor).
 core: 8.x
 package: Tieto
+
 dependencies:
   - drupal:editor
   - video_embed_field:video_embed_field

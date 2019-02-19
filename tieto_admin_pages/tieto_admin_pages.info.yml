@@ -3,4 +3,5 @@ type: module
 description: Defines admin menus for Tieto sites.
 core: 8.x
 package: Tieto
+
 dependencies: {  }
