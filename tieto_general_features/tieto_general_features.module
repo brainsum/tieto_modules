@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Access\AccessResult;
+use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\NodeInterface;
 
 /**
@@ -86,5 +87,26 @@ function tieto_general_features_node_presave(NodeInterface $node) {
       // Set created user as reference.
       $node->field_information_owner[] = ['target_id' => $account->id()];
     }
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function tieto_general_features_form_node_form_alter(
+  &$form,
+  FormStateInterface $formState,
+  $form_id
+) {
+  // Add custom property to update node->uid on entity_presave.
+  $buildInfo = $formState->getBuildInfo();
+  if (
+    isset($buildInfo['base_form_id'])
+    && $buildInfo['base_form_id'] === 'node_form'
+  ) {
+    /** @var \Drupal\node\NodeForm $nodeForm */
+    $nodeForm = $formState->getFormObject();
+    $node = $nodeForm->getEntity();
+    $node->elevation_override_author = TRUE;
   }
 }
