@@ -10,7 +10,11 @@
         }
     ],
     "require": {
-        "drupal/node_clone": "dev-1.x"
+        "drupal/node_clone": "dev-1.x",
+        "drupal/pathauto": "^1.0",
+        "drupal/inline_entity_form": "^1.0",
+        "drupal/scheduled_updates": "^1.0",
+        "drupal/metatag": "^1.0"
     },
     "extra": {
         "patches": {

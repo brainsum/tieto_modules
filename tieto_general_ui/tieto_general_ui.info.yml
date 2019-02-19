@@ -7,4 +7,11 @@ package: Tieto
 dependencies:
   - drupal:node
   - drupal:views
+  - drupal:book
+  - drupal:block
   - node_clone:node_clone
+  - workbench_moderation:workbench_moderation
+  - pathauto:pathauto
+  - inline_entity_form:inline_entity_form
+  - scheduled_updates:scheduled_updates
+  - metatag:metatag

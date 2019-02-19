@@ -122,6 +122,10 @@ function _tieto_general_ui_create_toolbar_library(string $prefix = ''): array {
  * Implements hook_preprocess_HOOK().
  */
 function tieto_general_ui_preprocess_page(&$variables) {
+  // Set custom page title depend on the node type.
+  $variables['page_title'] = \Drupal::config('system.site')->get('name');
+  $variables['page_title_url'] = $variables['base_path'];
+
   if (isset($variables['page']['pre_header'])) {
     $variables['page']['pre_header']['topbar_wrapper'] = [
       '#type' => 'container',
@@ -167,10 +171,10 @@ function tieto_general_ui_entity_operation(EntityInterface $entity) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-function tieto_general_ui_form_node_alter(
+function tieto_general_ui_form_node_form_alter(
   array &$form,
-  FormStateInterface $form_state,
-  $form_id
+  FormStateInterface $formState,
+  $formId
 ) {
   /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */
   $routeMatch = \Drupal::routeMatch();
@@ -199,6 +203,28 @@ function tieto_general_ui_form_node_alter(
         )->toString(),
       ]));
   }
+
+  if (isset($form['path']['widget']['0']['pathauto']) && \strpos($formId, 'edit_form') !== FALSE) {
+    $form['path']['widget']['0']['pathauto']['#value'] = TRUE;
+    \hide($form['path']['widget']['0']['pathauto']);
+  }
+
+  if (isset($form['field_side_block']['widget']['text'])) {
+    unset($form['field_side_block']['widget']['text']);
+  }
+
+  // Add placeholder to meta tags from global node settings.
+  $defaultNodeMetaTags = $form['field_meta_tags']['widget'][0]['basic']['description']['#placeholder'] = \Drupal::config('metatag.metatag_defaults.node')->get('tags');
+  foreach ($defaultNodeMetaTags as $key => $configValue) {
+    if ($configValue && isset($form['field_meta_tags']['widget'][0]['basic'][$key])) {
+      $form['field_meta_tags']['widget'][0]['basic'][$key]['#placeholder'] = $configValue;
+    }
+  }
+
+  unset(
+    $form['field_image'],
+    $form['field_thumbnail']
+  );
 }
 
 /**
@@ -206,7 +232,7 @@ function tieto_general_ui_form_node_alter(
  *
  * Fix for node_clone: Remove 'Clone' from local TAB if type is omitted.
  */
-function tieto_general_ui_menu_local_tasks_alter(array &$data, $route_name) {
+function tieto_general_ui_menu_local_tasks_alter(array &$data) {
   /** @var \Drupal\Core\Cache\CacheableMetadata $cacheability */
   $cacheability = $data['cacheability'];
   foreach ($data['tabs'] as &$tab) {
@@ -239,6 +265,148 @@ function tieto_general_ui_menu_local_tasks_alter(array &$data, $route_name) {
  *
  * Fix for node_clone: Remove 'Clone content' - we added to local tasks (TAB).
  */
-function tieto_general_ui_menu_local_actions_alter(&$local_actions) {
-  unset($local_actions['node_clone.clone_action']);
+function tieto_general_ui_menu_local_actions_alter(array &$localActions) {
+  unset($localActions['node_clone.clone_action']);
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ *
+ * Hide node title.
+ */
+function tieto_general_ui_preprocess_page_title(&$variables) {
+  $route = \Drupal::routeMatch();
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $route->getParameter('node');
+  if (NULL === $node) {
+    return;
+  }
+
+  if ('entity.node.canonical' === $route->getRouteName()) {
+    unset($variables['title']);
+  }
+}
+
+/**
+ * Implements hook_preprocess_hook().
+ *
+ * Set Book Navigation block title from actual page's Book title.
+ */
+function tieto_general_ui_preprocess_block(array &$variables) {
+  if (
+    $variables['elements']['#id'] === 'booknavigation'
+    && $variables['configuration']['block_mode'] === 'book pages'
+    /** @var \Drupal\node\NodeInterface $node */
+    && ($node = \Drupal::routeMatch()->getParameter('node'))
+    && !empty($node->book['bid'])
+    /** @var \Drupal\node\NodeStorageInterface $nodeStorage */
+    && ($nodeStorage = \Drupal::entityTypeManager()->getStorage('node'))
+    /** @var \Drupal\node\NodeInterface $book */
+    && ($book = $nodeStorage->load($node->book['bid']))
+    && $book !== NULL
+  ) {
+    $variables['label'] = Link::createFromRoute(
+      $book->get('title')->value,
+      'entity.node.canonical',
+      [
+        'node' => $node->book['bid'],
+      ]
+    )->toString();
+  }
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function tieto_general_ui_preprocess_node(array &$variables) {
+  /** @var \Drupal\Component\Datetime\TimeInterface $time */
+  $time = \Drupal::time();
+  /** @var \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter */
+  $dateFormatter = \Drupal::service('date.formatter');
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $variables['node'];
+
+  // Change creation date to "Time Ago" format.
+  $changed = $node->getChangedTime();
+  $variables['date_raw'] = $dateFormatter->format($changed, 'tieto_date');
+  $variables['date_ago'] = $dateFormatter->formatDiff($changed, $time->getRequestTime(), [
+    'granularity' => 1,
+  ]);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function tieto_general_ui_form_alter(array &$form, FormStateInterface $form_state, $formId) {
+  if ($formId === 'views_form_content_content_overview') {
+    if (isset($form['header']['node_bulk_form']['action']['#options']['node_publish_action'])) {
+      $form['header']['node_bulk_form']['action']['#options']['node_publish_action'] = \t('Set to Published');
+    }
+    if (isset($form['header']['node_bulk_form']['action']['#options']['node_unpublish_action'])) {
+      $form['header']['node_bulk_form']['action']['#options']['node_unpublish_action'] = \t('Set to Unpublished');
+    }
+  }
+
+  if ($formId === 'taxonomy_term_unit_form' && isset($form['field_inactive'])) {
+    $form['field_inactive']['#disabled'] = TRUE;
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function tieto_general_ui_form_views_exposed_form_alter(
+  array &$form,
+  FormStateInterface $form_state,
+  $formId
+) {
+  // Change input type to process date picker.
+  if (\in_array($form['#id'], [
+    'views-exposed-form-content-content-overview',
+    'views-exposed-form-content-trash',
+    'views-exposed-form-news-page',
+    'views-exposed-form-orphaned-page',
+  ], FALSE)) {
+    // Change form element type to date.
+    $form['created_min']['#type'] = $form['created_max']['#type'] = 'date';
+    $form['created_min']['#date_date_format'] = $form['created_max']['#date_date_format'] = 'Y-m-d';
+
+    // Create Details group for Content filters.
+    $form['exposed_form'] = [
+      '#type' => 'details',
+      '#title' => \t('Filters'),
+      '#open' => FALSE,
+    ];
+
+    // Move the filters to the Details group.
+    $form['exposed_form']['title'] = $form['title'];
+    $form['exposed_form']['title']['#title'] = $form['#info']['filter-title']['label'];
+    unset($form['title']);
+    $form['exposed_form']['created_min'] = $form['created_min'];
+    $form['exposed_form']['created_min']['#title'] = $form['#info']['filter-created']['label'];
+    unset($form['created_min']);
+    $form['exposed_form']['created_max'] = $form['created_max'];
+    $form['exposed_form']['created_max']['#title'] = $form['#info']['filter-created_1']['label'];
+    unset($form['created_max']);
+    $form['exposed_form']['uid'] = $form['uid'];
+    $form['exposed_form']['uid']['#title'] = $form['#info']['filter-uid']['label'];
+    unset($form['uid']);
+
+    if (isset($form['moderation_state']) && $form['#id'] !== 'views-exposed-form-content-trash') {
+      $form['exposed_form']['moderation_state'] = $form['moderation_state'];
+      $form['exposed_form']['moderation_state']['#title'] = $form['#info']['filter-moderation_state']['label'];
+      unset($form['moderation_state']);
+    }
+
+    $form['exposed_form']['actions'] = $form['actions'];
+    unset($form['actions']);
+
+    // Unset the 'Status' filter for users without the
+    // 'toggle edit mode' permission.
+    // This means, that anyone with a proper role will have access, but
+    // plain 'authorized' users won't.
+    if ($form['#id'] === 'views-exposed-form-news-page' && !\Drupal::currentUser()->hasPermission('toggle edit mode')) {
+      unset($form['exposed_form']['moderation_state']);
+    }
+  }
 }
