@@ -132,8 +132,8 @@ function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $for
     $option = $form['moderation_state']['widget'][0]['#options']['unpublished'];
     unset($form['moderation_state']['widget'][0]['#options']['unpublished']);
     $form['moderation_state']['widget'][0]['#options'] = [
-        'unpublished' => $option
-      ] + $form['moderation_state']['widget'][0]['#options'];
+      'unpublished' => $option,
+    ] + $form['moderation_state']['widget'][0]['#options'];
   }
 
   // Cleanup the form.
