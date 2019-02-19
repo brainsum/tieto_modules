@@ -1,0 +1,9 @@
+name: Node revision status
+type: module
+description: Adds a views field to display the actual status of a node.
+core: 8.x
+package: Tieto
+
+dependencies:
+  - drupal:views
+  - drupal:node
