@@ -1,0 +1,16 @@
+{
+    "name": "brainsum/tieto_general_features",
+    "description": "Module for enhancing and generalizing backend features.",
+    "type": "drupal-module",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "mhavelant",
+            "email": "mhavelant@brainsum.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "brainsum/inactive_user": "^1.0"
+    }
+}

@@ -1,0 +1,10 @@
+name: Tieto General Features
+type: module
+description: Module for enhancing and generalizing backend features.
+core: 8.x
+package: Tieto
+
+dependencies:
+  - drupal:node
+  - drupal:user
+  - inactive_user:inactive_user

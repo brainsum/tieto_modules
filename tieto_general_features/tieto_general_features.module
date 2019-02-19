@@ -1,0 +1,90 @@
+<?php
+
+/**
+ * @file
+ * Module file for tieto_general_features.
+ */
+
+use Drupal\Core\Access\AccessResult;
+use Drupal\node\NodeInterface;
+
+/**
+ * Implements hook_inactive_user_with_content_alter().
+ */
+function tieto_general_features_inactive_user_with_content_alter(&$other, $uid) {
+  $query = \Drupal::entityQuery('node')
+    ->condition('field_information_owner', $uid);
+
+  $nids = $query->execute();
+
+  $other = \count($nids);
+}
+
+/**
+ * Implements hook_entity_field_access_alter().
+ *
+ * Allow 'view' access for user 'mail' field on entityreference autocomplete
+ * search.
+ */
+function tieto_general_features_entity_field_access_alter(array &$grants, array $context) {
+  $field_definition = $context['field_definition'];
+  $routeName = \Drupal::routeMatch()->getRouteName();
+  if (
+    $field_definition->getName() === 'mail'
+    && $field_definition->getProvider() === 'user'
+    && \in_array($routeName, ['system.entity_autocomplete', 'entity.node.edit_form'], FALSE)
+  ) {
+    $grants[':default'] = AccessResult::allowed()->cachePerPermissions();
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ *
+ * Change $node->uid to actual user.
+ * Create non existing referenced user object (field_information_owner).
+ */
+function tieto_general_features_node_presave(NodeInterface $node) {
+  $currentUser = \Drupal::currentUser();
+  if (
+    isset($node->elevation_override_author)
+    && $node->elevation_override_author
+    && $currentUser->id()
+  ) {
+    $node->setOwnerId($currentUser->id());
+  }
+
+  if (isset($node->elevation_create_information_owner_users)) {
+    /** @var \Drupal\user\UserStorageInterface $userStorage */
+    $userStorage = \Drupal::entityTypeManager()
+      ->getStorage('user');
+    /** @var \Drupal\Core\Logger\LoggerChannelInterface $logger */
+    $logger = \Drupal::logger('elevation');
+    /** @var \Drupal\Core\Messenger\MessengerInterface $messenger */
+    $messenger = \Drupal::messenger();
+
+    foreach ($node->elevation_create_information_owner_users as $emailAddress) {
+      /** @var \Drupal\user\UserInterface $account */
+      $account = $userStorage->create();
+      $account->setPassword(\user_password())
+        ->enforceIsNew()
+        ->setEmail($emailAddress)
+        ->setUsername($emailAddress)
+        ->set('init', $currentUser->getEmail())
+        ->activate()
+        ->save();
+
+      $logger->notice('New user: %email created as non-existing information owner.', [
+        '%email' => '<' . $emailAddress . '>',
+      ]);
+
+      $messenger->addStatus(\t('Created a new user account for <a href="%url">%name</a>. No email has been sent.', [
+        '%url' => '#',
+        '%name' => $account->getDisplayName(),
+      ]));
+
+      // Set created user as reference.
+      $node->field_information_owner[] = ['target_id' => $account->id()];
+    }
+  }
+}
