@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_general_pages_install() {
+  \module_set_weight('tieto_general_pages', 10);
+}

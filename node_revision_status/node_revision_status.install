@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function node_revision_status_install() {
+  \module_set_weight('node_revision_status', 10);
+}

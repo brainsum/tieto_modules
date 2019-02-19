@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Tieto_unpublish_ui module's install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_unpublish_ui_install() {
+  module_set_weight('tieto_unpublish_ui', 11);
+}

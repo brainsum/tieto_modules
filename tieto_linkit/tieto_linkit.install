@@ -9,5 +9,5 @@
  * Implements hook_install().
  */
 function tieto_linkit_install() {
-  module_set_weight("tieto_linkit", 10);
+  module_set_weight('tieto_linkit', 10);
 }

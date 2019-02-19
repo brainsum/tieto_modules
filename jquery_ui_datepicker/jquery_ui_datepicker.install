@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function jquery_ui_datepicker_install() {
+  \module_set_weight('jquery_ui_datepicker', 10);
+}

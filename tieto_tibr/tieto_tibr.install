@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Tieto_tibr module's install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_tibr_install() {
+  module_set_weight('tieto_tibr', 10);
+}

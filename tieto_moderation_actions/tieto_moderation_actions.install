@@ -8,6 +8,13 @@
 use Drupal\Core\Config\FileStorage;
 
 /**
+ * Implements hook_install().
+ */
+function tieto_moderation_actions_install() {
+  module_set_weight('tieto_moderation_actions', 10);
+}
+
+/**
  * Import the config for Archive action.
  */
 function tieto_moderation_actions_update_8001() {

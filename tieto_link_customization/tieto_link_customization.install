@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install and update hooks.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_link_customization_install() {
+  \module_set_weight('tieto_link_customization', 10);
+}

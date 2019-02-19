@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Tieto_wysiwyg module's install file.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_wysiwyg_install() {
+  module_set_weight('tieto_wysiwyg', 10);
+}
