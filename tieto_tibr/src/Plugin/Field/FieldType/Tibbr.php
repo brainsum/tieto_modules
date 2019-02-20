@@ -3,7 +3,6 @@
 namespace Drupal\tieto_tibr\Plugin\Field\FieldType;
 
 use Drupal\Core\Field\FieldItemBase;
-use Drupal\Core\Field\FieldItemInterface;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\TypedData\DataDefinition;
 
@@ -18,7 +17,7 @@ use Drupal\Core\TypedData\DataDefinition;
  *   default_widget = "tibbr_widget",
  * )
  */
-class Tibbr extends FieldItemBase implements FieldItemInterface {
+class Tibbr extends FieldItemBase {
 
   /**
    * Tibbr Subject Name field maximum length.

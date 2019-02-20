@@ -91,10 +91,12 @@ class TaxonomyImporter extends ImporterBase {
         $ldapServer->baseDn = $ldapServerConfig->get('base_dn');
         $ldapServer->filter = '(&(objectCategory=person)(objectClass=user)(mail=*)(employeeID=*)(co=*)(!(employeeNumber=*Restructuring and OTI*))(!(extensionAttribute5=*))(!(userAccountControl:1.2.840.113556.1.4.803:=2))(|(employeeType=Employee)(employeeType=Subcontractor)(employeeType=Temporary)))';
 
-        $attributes = [];
+        $intermittentAttrs = [[]];
         foreach ($attributesStructure as $vocab => $attributeNames) {
-          $attributes = array_merge($attributes, $attributeNames);
+          $intermittentAttrs[] = $attributeNames;
         }
+
+        $attributes = \array_merge(...$intermittentAttrs);
 
         $ldapServer->attributes = $attributes;
         // Should be 1 ?
@@ -264,6 +266,7 @@ class TaxonomyImporter extends ImporterBase {
         'tieto_ldap_usercount' => $userCount,
       ];
 
+      /** @var \Drupal\taxonomy\TermInterface $term */
       $term = $this->termStorage->create($termData);
       $term->save();
       $tid = $term->id();

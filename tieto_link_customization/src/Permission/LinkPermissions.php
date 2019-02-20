@@ -9,7 +9,7 @@ namespace Drupal\tieto_link_customization\Permission;
  */
 class LinkPermissions {
 
-  const ATTRIBUTES = [
+  public const ATTRIBUTES = [
     'title',
     'class',
     'id',

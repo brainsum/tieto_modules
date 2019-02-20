@@ -15,7 +15,7 @@ final class ActionManager {
 
   use StringTranslationTrait;
 
-  const STATE_PLUGIN_NAME = 'change_wm_state';
+  public const STATE_PLUGIN_NAME = 'change_wm_state';
 
   /**
    * Storage for 'Action' items.

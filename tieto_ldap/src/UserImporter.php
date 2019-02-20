@@ -33,10 +33,10 @@ class UserImporter extends ImporterBase {
     $output = '';
 
     if (empty($ldap_servers)) {
-      $ldap_servers = $config->get('ldap_server');
+      $ldap_servers = $config->get('ldap_server') ?? [];
     }
     if (empty($ldap_filter)) {
-      $ldap_filter = $config->get('ldap_filter');
+      $ldap_filter = $config->get('ldap_filter') ?? '';
     }
 
     foreach ($ldap_servers as $sid) {
@@ -63,8 +63,8 @@ class UserImporter extends ImporterBase {
           'sid' => $sid,
           'ldap_context' => 'ldap_user_prov_to_drupal',
         ];
-        $attributes_required_by_user_module_mappings = $processor->alterUserAttributes($attributes, $params);
-        $ldap_server->attributes = \array_keys($attributes_required_by_user_module_mappings);
+        $userAttributes = $processor->alterUserAttributes($attributes, $params);
+        $ldap_server->attributes = \array_keys($userAttributes);
 
         $attrsonly = 0;
         $sizelimit = 0;

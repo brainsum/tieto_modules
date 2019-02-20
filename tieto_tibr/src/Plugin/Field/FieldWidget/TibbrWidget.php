@@ -4,7 +4,6 @@ namespace Drupal\tieto_tibr\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\WidgetBase;
-use Drupal\Core\Field\WidgetInterface;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -18,14 +17,18 @@ use Drupal\Core\Form\FormStateInterface;
  *   }
  * )
  */
-class TibbrWidget extends WidgetBase implements WidgetInterface {
+class TibbrWidget extends WidgetBase {
 
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $element = [];
-
+  public function formElement(
+    FieldItemListInterface $items,
+    $delta,
+    array $element,
+    array &$form,
+    FormStateInterface $form_state
+  ) {
     $element['tibbr_subject_id'] = [
       '#type' => 'number',
       '#title' => $this->t('Subject ID'),

@@ -8,7 +8,7 @@
 /**
  * Implements hook_views_data_alter().
  */
-function tieto_general_ui_views_data_alter(&$data) {
+function tieto_general_ui_views_data_alter(array &$data) {
   $data['node']['tieto_general_ui_clone_link'] = [
     'title' => \t('Link to clone Content'),
     'field' => [

@@ -41,6 +41,7 @@ class NodeRevisionManager {
    *   The latest published revision, or NULL.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function loadLatestPublishedRevision(NodeInterface $node) {
     if ($node->isNew()) {
@@ -74,6 +75,7 @@ class NodeRevisionManager {
    *   The latest published revision, or NULL.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function loadLatestUnpublishedRevision(NodeInterface $node) {
     if ($node->isNew()) {
@@ -108,6 +110,7 @@ class NodeRevisionManager {
    *   TRUE if there are revisions for the node.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function hasRevisions(NodeInterface $node) {
     if ($node->isNew()) {

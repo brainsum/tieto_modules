@@ -16,7 +16,7 @@ class RepublishButton {
 
   use StringTranslationTrait;
 
-  const BUTTON_NAME = 'node-republish-last-published-revision';
+  public const BUTTON_NAME = 'node-republish-last-published-revision';
 
   /**
    * The button build.

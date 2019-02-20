@@ -65,21 +65,21 @@ class JQueryUIDatePickerTimestampWidget extends TimestampDatetimeWidget {
     $element['value']['#jqdp'] = TRUE;
 
     $name = $this->fieldDefinition->getName() . '[' . $delta . ']' . '[value][date]';
-    $time_name = $this->fieldDefinition->getName() . '[' . $delta . ']' . '[value][time]';
+    $timeName = $this->fieldDefinition->getName() . '[' . $delta . ']' . '[value][time]';
 
     $settings = $this->getSettings();
 
-    $date_format = _date_format_parse($settings['date_format']);
+    $dateFormat = _date_format_parse($settings['date_format']);
 
     $element['value']['#date_date_element'] = 'textfield';
     $element['value']['#date_time_element'] = 'textfield';
-    $element['value']['#date_date_format'] = $date_format['date'];
-    $element['value']['#date_time_format'] = $date_format['time'];
+    $element['value']['#date_date_format'] = $dateFormat['date'];
+    $element['value']['#date_time_format'] = $dateFormat['time'];
 
     $element['value']['#value_callback'] = 'jquery_ui_datepicker_value_callback';
 
     $form['#attached']['drupalSettings']['jquery_ui_datepicker'][$name] = [
-      'dateFormat' => _date_format_to_jquery_format($date_format['date']),
+      'dateFormat' => _date_format_to_jquery_format($dateFormat['date']),
     ];
 
     if ($element['value']['#default_value'] instanceof DrupalDateTime) {
@@ -90,8 +90,8 @@ class JQueryUIDatePickerTimestampWidget extends TimestampDatetimeWidget {
     }
 
     // TODO: Update this to use configured settings.
-    $form['#attached']['drupalSettings']['jquery_timepicker'][$time_name] = [
-      'timeFormat' => _date_format_to_jquery_format($date_format['time']),
+    $form['#attached']['drupalSettings']['jquery_timepicker'][$timeName] = [
+      'timeFormat' => _date_format_to_jquery_format($dateFormat['time']),
       'interval' => 60,
       'minTime' => '00:00',
       'maxTime' => '23:59',
@@ -109,27 +109,6 @@ class JQueryUIDatePickerTimestampWidget extends TimestampDatetimeWidget {
     }
 
     return $element;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
-    foreach ($values as &$item) {
-      // @todo The structure is different whether access is denied or not, to
-      //   be fixed in https://www.drupal.org/node/2326533.
-      if (isset($item['value']) && $item['value'] instanceof DrupalDateTime) {
-        $date = $item['value'];
-      }
-      elseif (isset($item['value']['object']) && $item['value']['object'] instanceof DrupalDateTime) {
-        $date = $item['value']['object'];
-      }
-      else {
-        $date = new DrupalDateTime();
-      }
-      $item['value'] = $date->getTimestamp();
-    }
-    return $values;
   }
 
 }

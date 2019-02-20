@@ -24,19 +24,6 @@ use Drupal\inline_entity_form\Element\InlineEntityForm;
 class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
 
   /**
-   * Returns the options for the match operator.
-   *
-   * @return array
-   *   List of options.
-   */
-  protected function getMatchOperatorOptions() {
-    return [
-      'STARTS_WITH' => $this->t('Starts with'),
-      'CONTAINS' => $this->t('Contains'),
-    ];
-  }
-
-  /**
    * {@inheritdoc}
    */
   public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
@@ -509,8 +496,15 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
 
   /**
    * An #element_validate callback for validating a scheduled date.
+   *
+   * @param array $element
+   *   Element.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   Form state.
+   *
+   * @throws \Exception
    */
-  public static function validateElementDate($element, FormStateInterface $formState) {
+  public static function validateElementDate(array $element, FormStateInterface $formState): void {
     $iefId = $element['#ief_id'];
     /** @var \Drupal\field\FieldConfigInterface $field */
     $field = $formState->get(['inline_entity_form', $iefId, 'instance']);
@@ -532,8 +526,15 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
 
   /**
    * Validate callback for the AJAX form "save" button.
+   *
+   * @param array $form
+   *   The form.
+   * @param \Drupal\Core\Form\FormStateInterface $formState
+   *   The form state.
+   *
+   * @throws \Exception
    */
-  public static function validateFormDate(array &$form, FormStateInterface $formState) {
+  public static function validateFormDate(array &$form, FormStateInterface $formState): void {
     $trigger = $formState->getTriggeringElement();
     if (!isset($trigger['#ief_submit_trigger']) || FALSE === $trigger['#ief_submit_trigger']) {
       return;
@@ -574,6 +575,8 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
    *
    * @return int|null
    *   The timestamp or NULL.
+   *
+   * @throws \Exception
    */
   public static function getScheduledUpdateTimestamp($iefId, FormStateInterface $formState) {
     /** @var \Drupal\field\FieldConfigInterface $field */

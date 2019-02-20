@@ -102,8 +102,6 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
- *
- * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
  */
 function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $formState, $form_id) {
   $form['revision_information']['#type'] = 'container';

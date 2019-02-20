@@ -39,7 +39,7 @@ class TietoTermMatcher extends TietoEntityMatcher {
    * {@inheritdoc}
    */
   protected function buildDescription($entity) {
-    $description = \Drupal::token()->replace($this->configuration['result_description'], ['term' => $entity], []);
+    $description = \Drupal::token()->replace($this->configuration['result_description'], ['term' => $entity]);
     return LinkitXss::descriptionFilter($description);
   }
 

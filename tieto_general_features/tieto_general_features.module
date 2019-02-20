@@ -79,8 +79,7 @@ function tieto_general_features_node_presave(NodeInterface $node) {
         '%email' => '<' . $emailAddress . '>',
       ]);
 
-      $messenger->addStatus(\t('Created a new user account for <a href="%url">%name</a>. No email has been sent.', [
-        '%url' => '#',
+      $messenger->addStatus(\t('Created a new user account for <a href="#">%name</a>. No email has been sent.', [
         '%name' => $account->getDisplayName(),
       ]));
 
@@ -95,9 +94,8 @@ function tieto_general_features_node_presave(NodeInterface $node) {
  */
 function tieto_general_features_form_node_form_alter(
   &$form,
-  FormStateInterface $formState,
-  $form_id
-) {
+  FormStateInterface $formState
+  ) {
   // Add custom property to update node->uid on entity_presave.
   $buildInfo = $formState->getBuildInfo();
   if (

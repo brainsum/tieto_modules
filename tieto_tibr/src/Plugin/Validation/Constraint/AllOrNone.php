@@ -21,6 +21,6 @@ class AllOrNone extends Constraint {
    *
    * @var string
    */
-  public $notAllOrNone = 'From Tibbr Subject Name and ID all values needs to be set or none of them';
+  public $notAllOrNone = 'The Tibr Subject Name and ID both need to be filled, or both need to be left empty.';
 
 }

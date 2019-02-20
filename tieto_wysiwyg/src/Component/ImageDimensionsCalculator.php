@@ -62,7 +62,7 @@ final class ImageDimensionsCalculator {
    * @param \Drupal\tieto_wysiwyg\Model\PopupImage $image
    *   The image.
    *
-   * @return \Drupal\tieto_wysiwyg\Service\ImageDimensionsCalculator
+   * @return \Drupal\tieto_wysiwyg\Component\ImageDimensionsCalculator
    *   Returns the class for chaining.
    */
   public function setFirstImage(PopupImage $image): ImageDimensionsCalculator {
@@ -76,7 +76,7 @@ final class ImageDimensionsCalculator {
    * @param \Drupal\tieto_wysiwyg\Model\PopupImage $image
    *   The image.
    *
-   * @return \Drupal\tieto_wysiwyg\Service\ImageDimensionsCalculator
+   * @return \Drupal\tieto_wysiwyg\Component\ImageDimensionsCalculator
    *   Returns the class for chaining.
    */
   public function setSecondImage(PopupImage $image): ImageDimensionsCalculator {

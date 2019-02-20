@@ -12,7 +12,7 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
   /**
    * The fields that need to be unset.
    */
-  const FIELDS = [
+  public const FIELDS = [
     'path',
     'path_settings',
     'url_redirects',
@@ -25,7 +25,7 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
    * @return array
    *   The render array.
    */
-  public function createNodeGroups() {
+  public function createNodeGroups(): array {
     $build = [
       '#type' => 'container',
       '#weight' => 0,
@@ -37,21 +37,21 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
       }
       $build[$field] = $this->form[$field];
 
-      array_walk_recursive($build[$field], [$this, 'removeGroup']);
+      \array_walk_recursive($build[$field], [$this, 'removeGroup']);
     }
     return $build;
   }
 
   /**
-   * Remove groups.
+   * Callback for removing groups.
    *
-   * @param string $item
+   * @param string|null $item
    *   The item.
    * @param string $key
    *   The key.
    */
-  public function removeGroup(&$item, $key) {
-    if ($key == '#group' && $item == 'advanced') {
+  public function removeGroup(&$item, $key): void {
+    if ($key === '#group' && $item === 'advanced') {
       $item = NULL;
     }
   }

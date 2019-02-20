@@ -4,6 +4,7 @@ namespace Drupal\tieto_unpublish_ui\Helper;
 
 use Drupal\Core\Link;
 use Drupal\Core\Url;
+use Drupal\node\NodeInterface;
 
 /**
  * Class NodeInformation.
@@ -19,8 +20,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The metadata array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function getMetaData() {
+  public function getMetaData(): array {
     $build = [
       'node' => [
         'is_new' => $this->node()->isNew(),
@@ -57,8 +59,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The render array, or null.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getMetaUnpublishDate() {
+  protected function getMetaUnpublishDate(): ?array {
     $revision = $this->nodeRevisionManager->loadLatestUnpublishedRevision($this->node());
     if (NULL === $revision || !$revision->isDefaultRevision()) {
       return [];
@@ -106,8 +109,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   Author render array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getMetaAuthor() {
+  protected function getMetaAuthor(): array {
     $build = [
       '#type' => 'container',
       '#weight' => 15,
@@ -158,8 +162,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   TRUE, if the default revision is published.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function hasPublishedVersion() {
+  protected function hasPublishedVersion(): bool {
     $revision = $this->getCurrentRevision();
     if (NULL === $revision) {
       return FALSE;
@@ -175,8 +180,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The title render array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getMetaTitle() {
+  protected function getMetaTitle(): array {
     return [
       '#prefix' => '<h1>',
       '#suffix' => '</h1>',
@@ -192,19 +198,17 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The latest published revision, or NULL.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getCurrentRevision() {
+  protected function getCurrentRevision():? NodeInterface {
     if ($this->node()->isNew()) {
       return NULL;
     }
 
     /** @var \Drupal\node\NodeStorageInterface $nodeStorage */
     $nodeStorage = $this->entityTypeManager->getStorage('node');
+    /** @var \Drupal\node\NodeInterface $data */
     $data = $nodeStorage->load($this->node()->id());
-
-    if (empty($data)) {
-      return NULL;
-    }
     return $data;
   }
 
@@ -215,8 +219,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The date as array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getLastPublishDate() {
+  protected function getLastPublishDate(): array {
     $lastPublishDate = $this->t('Not available');
     if ($this->node()->isNew()) {
       $lastPublishDate = $this->t('Not saved yet');
@@ -267,7 +272,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return array
    *   The date as array.
    */
-  protected function getFirstPublishDate() {
+  protected function getFirstPublishDate(): array {
     $firstPublishValue = $this->node()->get('field_first_publish_date')->getValue();
     // TODO: review why can $firstPublishValueItem just 0 value.
     // (hint: I created a new node, saved, than I edited and saved again, and
@@ -317,8 +322,11 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *
    * @return array
    *   The last updated render array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getInfoPrevVersions() {
+  protected function getInfoPrevVersions(): array {
     if (!$this->nodeRevisionManager->hasRevisions($this->node())) {
       return [];
     }
@@ -351,7 +359,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return array
    *   The last updated render array.
    */
-  protected function getInfoLastUpdated() {
+  protected function getInfoLastUpdated(): array {
     return [
       '#type' => 'container',
       '#weight' => 1,
@@ -392,8 +400,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The title render array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getInfoTitle() {
+  protected function getInfoTitle(): array {
     if ($this->node()->isNew()) {
       $titleText = $this->t('The content above is not been saved yet.');
     }
@@ -450,8 +459,8 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return string
    *   The button description.
    */
-  protected function getSaveDescription() {
-    $date = $this->getScheduledDate('publish');
+  protected function getSaveDescription(): string {
+    $date = $this->getScheduledDate();
 
     if ($date) {
       return $this->t('Scheduled publish date: <span>@date</span>', [
@@ -468,7 +477,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return string
    *   The button description.
    */
-  protected function getArchiveDescription() {
+  protected function getArchiveDescription(): string {
     $date = $this->getScheduledDate('trash');
 
     if ($date) {
@@ -486,7 +495,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return string
    *   The button description.
    */
-  protected function getUnpublishDescription() {
+  protected function getUnpublishDescription(): string {
     $date = $this->getScheduledDate('unpublish');
 
     if ($date) {
@@ -507,7 +516,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return string
    *   The date timestamp.
    */
-  protected function getScheduledDate(string $type = 'publish') {
+  protected function getScheduledDate(string $type = 'publish'): string {
     $fieldName = "scheduled_{$type}_date";
 
     $scheduledDateField = $this->node()->{$fieldName};
@@ -517,7 +526,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
         ->first()
         ->getValue();
 
-      if (\Drupal::time()->getRequestTime() < $scheduledDate['value']) {
+      if ($this->time->getRequestTime() < $scheduledDate['value']) {
         return $scheduledDate['value'];
       }
     }
@@ -532,14 +541,15 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The actions array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getActions() {
+  protected function getActions(): array {
     return [
       'moderation_state_unpublished' => [
         'enable_notifications' => FALSE,
         'title' => $this->t('Save'),
         'hyphenated_key' => 'moderation-state-unpublished',
-        'scheduled' => NULL !== $this->getScheduledDate('publish'),
+        'scheduled' => NULL !== $this->getScheduledDate(),
         'description' => $this->getSaveDescription(),
         'field' => 'scheduled_unpublish_date',
       ],
@@ -557,7 +567,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
         'enable_notifications' => TRUE,
         'title' => $this->t('Publish'),
         'hyphenated_key' => 'moderation-state-published',
-        'scheduled' => NULL !== $this->getScheduledDate('publish'),
+        'scheduled' => NULL !== $this->getScheduledDate(),
         'description' => $this->hasPublishedVersion() ? $this->t('Replaces the published version') : '',
         'field' => 'scheduled_publish_date',
       ],
@@ -579,8 +589,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   The button render arrays.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getNotificationActions() {
+  protected function getNotificationActions(): array {
     $notifications = [];
     $actions = $this->getActions();
     foreach ($actions as $key => $action) {
@@ -625,8 +636,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @return bool
    *   Whether we should display it, or not.
    */
-  protected function displayNotificationAction($field) {
+  protected function displayNotificationAction($field): bool {
     $scheduleState = $this->form[$field]['widget']['entities'];
+
     if (isset($scheduleState['0']['#label'])) {
       return TRUE;
     }
@@ -640,8 +652,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   TRUE if it can be re-published.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function canBeRepublished() {
+  protected function canBeRepublished(): bool {
     $revision = $this->nodeRevisionManager->loadLatestPublishedRevision($this->node());
     if (NULL === $revision) {
       return FALSE;
@@ -657,8 +670,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
    *   Empty array if the node is new, or the view link array.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getNodeViewLink() {
+  protected function getNodeViewLink(): array {
     if ($this->node()->isNew()) {
       return [];
     }

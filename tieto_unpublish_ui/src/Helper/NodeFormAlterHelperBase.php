@@ -4,6 +4,7 @@ namespace Drupal\tieto_unpublish_ui\Helper;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\node\NodeInterface;
 
 /**
  * Base class for FormAlter helpers.
@@ -64,6 +65,13 @@ abstract class NodeFormAlterHelperBase {
   protected $node;
 
   /**
+   * Time service.
+   *
+   * @var \Drupal\Component\Datetime\TimeInterface
+   */
+  protected $time;
+
+  /**
    * NodeFormAlterHelper constructor.
    *
    * @param array $form
@@ -79,6 +87,7 @@ abstract class NodeFormAlterHelperBase {
     $this->dateFormatter = \Drupal::service('date.formatter');
     $this->moderationInfo = \Drupal::service('workbench_moderation.moderation_information');
     $this->entityTypeManager = \Drupal::service('entity_type.manager');
+    $this->time = \Drupal::time();
 
     $this->form = $form;
     $this->formState = $formState;
@@ -95,7 +104,7 @@ abstract class NodeFormAlterHelperBase {
    * @return \Drupal\node\NodeInterface
    *   The node.
    */
-  public function node() {
+  public function node(): NodeInterface {
     return $this->node;
   }
 
@@ -108,8 +117,9 @@ abstract class NodeFormAlterHelperBase {
    *   "machine_name", "label", "entity" keys.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getNodeModerationStates() {
+  protected function getNodeModerationStates(): array {
     $nid = $this->node()->id();
     if (NULL === $nid) {
       return [
@@ -162,8 +172,9 @@ abstract class NodeFormAlterHelperBase {
    *   Associative array of state labels keyed by state machine names.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  protected function getModerationStateLabels() {
+  protected function getModerationStateLabels(): array {
     $moderationStates = $this->entityTypeManager->getStorage('moderation_state')->loadMultiple();
 
     return \array_map(function ($item) {
