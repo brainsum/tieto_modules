@@ -14,11 +14,10 @@ use Drupal\node\NodeInterface;
  */
 function tieto_general_features_inactive_user_with_content_alter(&$other, $uid) {
   $query = \Drupal::entityQuery('node')
-    ->condition('field_information_owner', $uid);
+    ->condition('field_information_owner', $uid)
+    ->count();
 
-  $nids = $query->execute();
-
-  $other = \count($nids);
+  $other = $query->execute();
 }
 
 /**
