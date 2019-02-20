@@ -71,10 +71,9 @@ function tieto_tibr_preprocess_node(&$variables) {
   $modulePath = drupal_get_path('module', 'tieto_tibr');
   $variables['tibr_og_image_absolute_url'] = file_create_url($modulePath . '/images/tibr_placeholder.png');
   if ($node->hasField($tibrOgImageField) && $fileFieldValue = $node->get($tibrOgImageField)->getValue()) {
-    /** @var \Drupal\file\Entity\File $file */
+    /** @var \Drupal\file\FileInterface $file */
     $file = File::load($fileFieldValue[0]['target_id']);
-    // @todo: url() is deprecated.
-    $variables['tibr_og_image_absolute_url'] = $file->url();
+    $variables['tibr_og_image_absolute_url'] = $file->toUrl()->toString(TRUE)->getGeneratedUrl();
   }
 
   $variables['tibr_og_title'] = $node->getTitle();
