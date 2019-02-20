@@ -174,21 +174,19 @@ function tieto_ldap_preprocess_status_messages(&$variables) {
 
   // When there are messages of the requested type..
   if (isset($variables['message_list'][$type])) {
-    /** @var array $messages */
-    $messages = $variables['message_list'][$type];
-
-    // @todo?: maybe use array_filter or smth.
-    foreach ($messages as $key => $message) {
-      $tmpMsg = (\is_string($message) ? $message : $message->__toString());
-      if ($tmpMsg === $text->__toString()) {
-        unset($variables['message_list'][$type][$key]);
-        // If this was the only message, remove the now empty $type sub-array,
-        // to avoid rendering an empty status box.
-        if (empty($variables['message_list'][$type])) {
-          unset($variables['message_list'][$type]);
-        }
-        break;
+    $variables['message_list'][$type] = \array_filter(
+      $variables['message_list'][$type],
+      function ($message) use ($text) {
+        /** @var string|\Drupal\Component\Render\MarkupInterface $message */
+        $msgAsStr = (\is_string($message) ? $message : $message->__toString());
+        return !($msgAsStr === $text->__toString());
       }
+    );
+
+    // If this was the only message, remove the now empty $type sub-array,
+    // to avoid rendering an empty status box.
+    if (empty($variables['message_list'][$type])) {
+      unset($variables['message_list'][$type]);
     }
   }
 }
