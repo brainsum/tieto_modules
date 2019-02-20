@@ -19,7 +19,8 @@
             },
             "drupal/ldap": {
                 "Enable changing LDAP server on user provisioning": "./patches/ldap_user-provisioning-multiple-server.patch",
-                "LDAP server search filter": "./patches/ldap_server_search_filter-v2.patch"
+                "LDAP server search filter": "./patches/ldap_server_search_filter-v2.patch",
+                "PHP7.2 fix for count()": "https://www.drupal.org/files/issues/2018-11-08/Issue-3012381-php-72-count-error_0.patch"
             }
         }
     }
