@@ -14,9 +14,9 @@ class UserImporter extends ImporterBase {
    *
    * @param bool $import
    *   Import or only display LDAP query result.
-   * @param array $ldap_servers
+   * @param array $ldapServers
    *   LDAP server ID, optional - settings will be overridden if entered.
-   * @param string $ldap_filter
+   * @param string $ldapFilter
    *   LDAP query filter, optional - settings will be overridden if entered.
    *
    * @return array
@@ -24,7 +24,7 @@ class UserImporter extends ImporterBase {
    *
    * @throws \Exception
    */
-  public function import($import = FALSE, array $ldap_servers = [], $ldap_filter = '') {
+  public function import($import = FALSE, array $ldapServers = [], $ldapFilter = ''): array {
     $mode = ($import ? 'import' : 'test');
     $this->state->set('tieto_ldap.user_' . $mode . '_last', $this->time->getRequestTime());
     $this->state->set('tieto_ldap.user_ ' . $mode . '_last_uid', $this->currentUser->id());
@@ -32,29 +32,29 @@ class UserImporter extends ImporterBase {
 
     $output = '';
 
-    if (empty($ldap_servers)) {
-      $ldap_servers = $config->get('ldap_server') ?? [];
+    if (empty($ldapServers)) {
+      $ldapServers = $config->get('ldap_server') ?? [];
     }
-    if (empty($ldap_filter)) {
-      $ldap_filter = $config->get('ldap_filter') ?? '';
+    if (empty($ldapFilter)) {
+      $ldapFilter = $config->get('ldap_filter') ?? '';
     }
 
-    foreach ($ldap_servers as $sid) {
+    foreach ($ldapServers as $sid) {
       if ($sid) {
-        $ldap_server = $this->serverFactory->getServerById($sid);
-        $ldap_server->connect();
-        $ldap_server->bind();
+        $ldapServer = $this->serverFactory->getServerById($sid);
+        $ldapServer->connect();
+        $ldapServer->bind();
 
-        $ldap_server_config = $this->configFactory->get('ldap_servers.server.' . $sid);
+        $ldapServerConfig = $this->configFactory->get('ldap_servers.server.' . $sid);
 
-        $ldap_server->baseDn = $ldap_server_config->get('base_dn');
-        $ldap_server->filter = $ldap_filter;
+        $ldapServer->baseDn = $ldapServerConfig->get('base_dn');
+        $ldapServer->filter = $ldapFilter;
 
         // Override ldap_user.settings - set user provisioning server to actual.
         $processor = new DrupalUserImportProcessor($sid);
 
         foreach (['user_attr', 'mail_attr'] as $attribute_name) {
-          if ($attribute = $ldap_server_config->get($attribute_name)) {
+          if ($attribute = $ldapServerConfig->get($attribute_name)) {
             $attributes[$attribute] = [];
           }
         }
@@ -64,27 +64,27 @@ class UserImporter extends ImporterBase {
           'ldap_context' => 'ldap_user_prov_to_drupal',
         ];
         $userAttributes = $processor->alterUserAttributes($attributes, $params);
-        $ldap_server->attributes = \array_keys($userAttributes);
+        $ldapServer->attributes = \array_keys($userAttributes);
 
         $attrsonly = 0;
         $sizelimit = 0;
-        $result = $ldap_server->search($ldap_server->baseDn, $ldap_server->filter, $ldap_server->attributes, $attrsonly, $sizelimit);
+        $result = $ldapServer->search($ldapServer->baseDn, $ldapServer->filter, $ldapServer->attributes, $attrsonly, $sizelimit);
 
-        $prefix = '<strong>baseDn:</strong> ' . $ldap_server->baseDn . '</br>';
-        $prefix .= '<strong>filter:</strong> ' . $ldap_server->filter . '</br>';
+        $prefix = '<strong>baseDn:</strong> ' . $ldapServer->baseDn . '</br>';
+        $prefix .= '<strong>filter:</strong> ' . $ldapServer->filter . '</br>';
         $caption = t('LDAP Query Results at %address:%port: count=%count', [
-          '%address' => $ldap_server->get('address'),
-          '%port' => $ldap_server->get('port'),
+          '%address' => $ldapServer->get('address'),
+          '%port' => $ldapServer->get('port'),
           '%count' => (int) $result['count'],
         ]);
 
-        $search_result_rows = [];
+        $searchResultRows = [];
         unset($result['count']);
         if (!empty($result)) {
           foreach ($result as $row) {
             unset($row['objectclass']['count']);
-            $row_data = [];
-            foreach ($ldap_server->attributes as $attribute) {
+            $rowData = [];
+            foreach ($ldapServer->attributes as $attribute) {
               $attribute = \mb_strtolower($attribute);
               $data = '-';
               if (isset($row[$attribute])) {
@@ -95,55 +95,57 @@ class UserImporter extends ImporterBase {
                   $data = $row[$attribute][0];
                 }
               }
-              $row_data[$attribute] = $data;
+              $rowData[$attribute] = $data;
             }
-            $search_result_rows[] = $row_data;
+            $searchResultRows[] = $rowData;
 
             if ($import) {
-              $ldapUsername = $row[\mb_strtolower($ldap_server_config->get('user_attr'))][0];
-              $ldap_mail = $row[\mb_strtolower($ldap_server_config->get('mail_attr'))][0];
-              $user_values = [
+              $ldapUsername = $row[\mb_strtolower($ldapServerConfig->get('user_attr'))][0];
+              $ldapMail = $row[\mb_strtolower($ldapServerConfig->get('mail_attr'))][0];
+              $userValues = [
                 'name' => $ldapUsername,
                 'status' => 1,
               ];
               if ($this->isValidLdapUsername($sid, $ldapUsername) && $this->emailValidator
-                ->isValid($ldap_mail) && (\user_validate_name($ldapUsername) === NULL || $this->emailValidator
+                ->isValid($ldapMail) && (\user_validate_name($ldapUsername) === NULL || $this->emailValidator
                   ->isValid($ldapUsername))) {
-                $drupal_account = \user_load_by_name($user_values['name']);
+
+                /** @var \Drupal\user\UserInterface $drupalAccount */
+                $drupalAccount = \user_load_by_name($userValues['name']);
                 // Create user in Drupal.
-                if (!$drupal_account) {
-                  $result = $processor->provisionDrupalAccount($user_values);
+                if (!$drupalAccount) {
+                  $result = $processor->provisionDrupalAccount($userValues);
                   if (!$result) {
                     $this->logger
-                      ->warning('%username: user create error from LDAP', ['%username' => $user_values['name']]);
+                      ->warning('%username: user create error from LDAP', ['%username' => $userValues['name']]);
                   }
                   else {
                     $this->logger
-                      ->info('%username: user created from LDAP', ['%username' => $user_values['name']]);
+                      ->info('%username: user created from LDAP', ['%username' => $userValues['name']]);
                   }
                 }
                 // Existing user, update ldap_user fields if are empty.
                 else {
-                  if (!$drupal_account->get('ldap_user_puid_sid')->value) {
-                    $drupal_account->set('ldap_user_puid', $ldapUsername);
-                    $drupal_account->set('ldap_user_puid_property', $ldap_server->get('unique_persistent_attr'));
-                    $drupal_account->set('ldap_user_puid_sid', $ldap_server->id());
-                    $drupal_account->set('ldap_user_current_dn', $row['dn']);
-                    $drupal_account->set('ldap_user_last_checked', $this->time->getCurrentTime());
-                    $drupal_account->set('ldap_user_ldap_exclude', 0);
-                    $drupal_account->save();
+                  if (!$drupalAccount->get('ldap_user_puid_sid')->value) {
+                    $drupalAccount->set('ldap_user_puid', $ldapUsername);
+                    $drupalAccount->set('ldap_user_puid_property', $ldapServer->get('unique_persistent_attr'));
+                    $drupalAccount->set('ldap_user_puid_sid', $ldapServer->id());
+                    $drupalAccount->set('ldap_user_current_dn', $row['dn']);
+                    $drupalAccount->set('ldap_user_last_checked', $this->time->getCurrentTime());
+                    $drupalAccount->set('ldap_user_ldap_exclude', 0);
+                    $drupalAccount->save();
                     $this->logger
-                      ->info('%username: ldap_user fields updated from LDAP.', ['%username' => $user_values['name']]);
+                      ->info('%username: ldap_user fields updated from LDAP.', ['%username' => $userValues['name']]);
                   }
                   // Sync blocked user - possibility to re-activate.
                   // Sync if full name is empty.
                   // Sync if location is empty.
                   if (
-                    !$drupal_account->isActive()
-                    || !$drupal_account->get('field_user_fullname')->value
-                    || !$drupal_account->get('field_location')->target_id
+                    !$drupalAccount->isActive()
+                    || ($drupalAccount->hasField('field_user_fullname') && !$drupalAccount->get('field_user_fullname')->value)
+                    || ($drupalAccount->hasField('field_location') && !$drupalAccount->get('field_location')->target_id)
                   ) {
-                    $processor->drupalUserLogsIn($drupal_account);
+                    $processor->drupalUserLogsIn($drupalAccount);
                   }
                 }
               }
@@ -151,7 +153,7 @@ class UserImporter extends ImporterBase {
                 $this->logger
                   ->warning('No valid mail address or valid username (name: %username, mail: %mail) - user not created from LDAP', [
                     '%username' => $ldapUsername,
-                    '%mail' => $ldap_mail,
+                    '%mail' => $ldapMail,
                   ]);
               }
             }
@@ -162,8 +164,8 @@ class UserImporter extends ImporterBase {
           '#theme' => 'table',
           '#prefix' => $prefix,
           '#caption' => $caption,
-          '#header' => $ldap_server->attributes,
-          '#rows' => $search_result_rows,
+          '#header' => $ldapServer->attributes,
+          '#rows' => $searchResultRows,
         ];
       }
     }
@@ -175,6 +177,8 @@ class UserImporter extends ImporterBase {
         '#markup' => $output,
       ];
     }
+
+    return [];
   }
 
   /**

@@ -45,10 +45,13 @@ function tieto_ldap_help($route_name, RouteMatchInterface $route_match) {
  */
 function tieto_ldap_entity_base_field_info_alter(&$fields, EntityTypeInterface $entityType) {
   if ($entityType->id() === 'user') {
-    $constraints = $fields['name']->getConstraints();
+    /** @var \Drupal\Core\Field\FieldConfigInterface $nameField */
+    $nameField = $fields['name'];
+    $constraints = $nameField->getConstraints();
     unset($constraints['UserName']);
-    $fields['name']->setConstraints($constraints);
-    $fields['name']->addConstraint('TietoLdapUserName', []);
+    $nameField->setConstraints($constraints);
+    $nameField->addConstraint('TietoLdapUserName', []);
+    $fields['name'] = $nameField;
   }
 }
 
@@ -120,34 +123,37 @@ function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, a
   $tokenProcessor = \Drupal::service('ldap.token_processor');
 
   $fieldName = 'field_user_fullname';
-  $value = $account->get($fieldName)->value;
-  $ldapTokens = \explode(' ', $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr']);
-  foreach ($ldapTokens as $ldapToken) {
-    $value = \str_replace($ldapToken, '', $value);
+  if ($account->hasField($fieldName)) {
+    $value = $account->get($fieldName)->value;
+    $ldapTokens = \explode(' ', $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr']);
+    foreach ($ldapTokens as $ldapToken) {
+      $value = \str_replace($ldapToken, '', $value);
+    }
+    $value = \trim($value);
+    $account->set($fieldName, $value);
   }
-  $value = \trim($value);
-  $account->set($fieldName, $value);
 
-  // @todo: Don't depend on field_location anywhere.
   $fieldName = 'field_location';
-  $ldapToken = $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr'];
-  $location = $tokenProcessor->tokenReplace($ldapUser['attr'], $ldapToken, 'ldap_entry');
+  if ($account->hasField($fieldName)) {
+    $ldapToken = $config->get('ldapUserSyncMappings')['drupal']["field-$fieldName"]['ldap_attr'];
+    $location = $tokenProcessor->tokenReplace($ldapUser['attr'], $ldapToken, 'ldap_entry');
 
-  if ($location !== $ldapToken) {
-    /** @var \Drupal\Core\Database\Connection $database */
-    $database = \Drupal::database();
+    if ($location !== $ldapToken) {
+      /** @var \Drupal\Core\Database\Connection $database */
+      $database = \Drupal::database();
 
-    $query = $database->select('taxonomy_term_field_data', 't');
-    $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
-    $query->fields('t', ['tid', 'tieto_ldap_usercount']);
-    $query->condition('t.name', $location);
-    $query->condition('t.vid', 'location');
-    $query->condition('p.parent_target_id', 0);
-    $result = $query->execute()->fetchAll();
-    $data = \reset($result);
+      $query = $database->select('taxonomy_term_field_data', 't');
+      $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
+      $query->fields('t', ['tid', 'tieto_ldap_usercount']);
+      $query->condition('t.name', $location);
+      $query->condition('t.vid', 'location');
+      $query->condition('p.parent_target_id', 0);
+      $result = $query->execute()->fetchAll();
+      $data = \reset($result);
 
-    if ($data && $data->tid) {
-      $account->set($fieldName, $data->tid);
+      if ($data && $data->tid) {
+        $account->set($fieldName, $data->tid);
+      }
     }
   }
 }
