@@ -1,3 +1,5 @@
 services:
-  tieto_wysiwyg.image_helper:
-    class: Drupal\tieto_wysiwyg\Service\ImageHelper
+  tieto_wysiwyg.image_popup_renderer:
+    class: Drupal\tieto_wysiwyg\Service\ImagePopupRenderer
+    arguments:
+      - '@entity_type.manager'

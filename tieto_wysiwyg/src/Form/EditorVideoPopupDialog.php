@@ -14,7 +14,7 @@ class EditorVideoPopupDialog extends VideoEmbedDialog {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, FilterFormat $filter_format = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, FilterFormat $filter_format = NULL): array {
     $form = parent::buildForm($form, $form_state, $filter_format);
 
     // Disable what we don't need.

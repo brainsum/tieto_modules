@@ -4,7 +4,6 @@ namespace Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin;
 
 use Drupal\ckeditor\CKEditorPluginBase;
 use Drupal\editor\Entity\Editor;
-use Drupal\ckeditor\CKEditorPluginInterface;
 use Drupal\ckeditor\CKEditorPluginContextualInterface;
 use Drupal\ckeditor\CKEditorPluginCssInterface;
 
@@ -17,26 +16,12 @@ use Drupal\ckeditor\CKEditorPluginCssInterface;
  *   module = "tieto_wysiwyg"
  * )
  */
-class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginInterface, CKEditorPluginContextualInterface, CKEditorPluginCssInterface {
+class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginContextualInterface, CKEditorPluginCssInterface {
 
   /**
    * {@inheritdoc}
    */
-  public function isInternal() {
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getDependencies(Editor $editor) {
-    return [];
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibraries(Editor $editor) {
+  public function getLibraries(Editor $editor): array {
     return [
       'core/drupal.ajax',
     ];
@@ -46,13 +31,13 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginInter
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/plugin.js';
+    return \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/plugin.js';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function getConfig(Editor $editor) {
+  public function getConfig(Editor $editor): array {
     return [];
   }
 
@@ -61,7 +46,7 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginInter
    */
   public function getCssFiles(Editor $editor) {
     return [
-      drupal_get_path('module', 'ckeditor') . '/css/plugins/drupalimagecaption/ckeditor.drupalimagecaption.css',
+      \drupal_get_path('module', 'ckeditor') . '/css/plugins/drupalimagecaption/ckeditor.drupalimagecaption.css',
     ];
   }
 
@@ -76,8 +61,12 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginInter
     // Automatically enable this plugin if the text format associated with this
     // text editor uses the filter_align or filter_caption filter and the
     // DrupalImage button is enabled.
+    /** @var \Drupal\filter\FilterFormatInterface $format */
     $format = $editor->getFilterFormat();
-    if ($format->filters('filter_align')->status || $format->filters('filter_caption')->status) {
+    if (
+      $format !== NULL
+      && ($format->filters('filter_align')->status || $format->filters('filter_caption')->status)
+    ) {
       $settings = $editor->getSettings();
       foreach ($settings['toolbar']['rows'] as $row) {
         foreach ($row as $group) {
@@ -99,8 +88,8 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginInter
   public function getButtons() {
     return [
       'DoubleImage' => [
-        'label' => t('Double Image Popup'),
-        'image' => drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/icons/DoubleImage.png',
+        'label' => \t('Double Image Popup'),
+        'image' => \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/icons/DoubleImage.png',
       ],
     ];
   }

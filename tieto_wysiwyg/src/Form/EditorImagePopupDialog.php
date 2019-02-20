@@ -14,7 +14,7 @@ class EditorImagePopupDialog extends EditorImageDialog {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, Editor $editor = NULL) {
+  public function buildForm(array $form, FormStateInterface $form_state, Editor $editor = NULL): array {
     $form = parent::buildForm($form, $form_state, $editor);
 
     // Retrieve the image element's attributes from form state.
@@ -22,7 +22,12 @@ class EditorImagePopupDialog extends EditorImageDialog {
 
     // When Drupal core's filter_align is being used, the text editor may
     // offer the ability to change the alignment.
-    if (isset($image_element['data-align']) && $editor->getFilterFormat()->filters('filter_align')->status) {
+    /** @var \Drupal\editor\EditorInterface $editor */
+    if (
+      $editor !== NULL
+      && isset($image_element['data-align'])
+      && $editor->getFilterFormat()->filters('filter_align')->status
+    ) {
       $form['align'] = [
         '#title' => $this->t('Align'),
         '#type' => 'radios',
@@ -31,7 +36,7 @@ class EditorImagePopupDialog extends EditorImageDialog {
           'center' => $this->t('Full width'),
           'right' => $this->t('Right'),
         ],
-        '#default_value' => $image_element['data-align'] === '' || $image_element['data-align'] === 'none' ? 'center' : $image_element['data-align'],
+        '#default_value' => ($image_element['data-align'] === '' || $image_element['data-align'] === 'none') ? 'center' : $image_element['data-align'],
         '#wrapper_attributes' => ['class' => ['container-inline']],
         '#attributes' => ['class' => ['container-inline']],
         '#parents' => ['attributes', 'data-align'],

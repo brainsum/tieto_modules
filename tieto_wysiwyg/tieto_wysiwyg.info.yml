@@ -6,5 +6,8 @@ package: Tieto
 
 dependencies:
   - drupal:editor
+  - drupal:filter
+  - drupal:file
+  - drupal:image
   - video_embed_field:video_embed_field
   - video_embed_field:video_embed_wysiwyg

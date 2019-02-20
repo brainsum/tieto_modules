@@ -2,7 +2,6 @@
 
 namespace Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin;
 
-use Drupal\ckeditor\CKEditorPluginConfigurableInterface;
 use Drupal\editor\Entity\Editor;
 use Drupal\video_embed_wysiwyg\Plugin\CKEditorPlugin\VideoEmbedWysiwyg;
 
@@ -15,19 +14,12 @@ use Drupal\video_embed_wysiwyg\Plugin\CKEditorPlugin\VideoEmbedWysiwyg;
  *   module = "tieto_wysiwyg"
  * )
  */
-class VideoPopupPlugin extends VideoEmbedWysiwyg implements CKEditorPluginConfigurableInterface {
+class VideoPopupPlugin extends VideoEmbedWysiwyg {
 
   /**
    * {@inheritdoc}
    */
-  public function isInternal() {
-    return FALSE;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function getLibraries(Editor $editor) {
+  public function getLibraries(Editor $editor): array {
     return [
       'core/drupal.ajax',
     ];
@@ -37,13 +29,13 @@ class VideoPopupPlugin extends VideoEmbedWysiwyg implements CKEditorPluginConfig
    * {@inheritdoc}
    */
   public function getFile() {
-    return drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_video/plugin.js';
+    return \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_video/plugin.js';
   }
 
   /**
    * {@inheritdoc}
    */
-  public function isEnabled(Editor $editor) {
+  public function isEnabled(Editor $editor): bool {
     $settings = $editor->getSettings();
     foreach ($settings['toolbar']['rows'] as $row) {
       foreach ($row as $group) {
