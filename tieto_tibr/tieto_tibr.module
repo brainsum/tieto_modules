@@ -73,7 +73,7 @@ function tieto_tibr_preprocess_node(&$variables) {
   if ($node->hasField($tibrOgImageField) && $fileFieldValue = $node->get($tibrOgImageField)->getValue()) {
     /** @var \Drupal\file\FileInterface $file */
     $file = File::load($fileFieldValue[0]['target_id']);
-    $variables['tibr_og_image_absolute_url'] = $file->toUrl()->toString(TRUE)->getGeneratedUrl();
+    $variables['tibr_og_image_absolute_url'] = \file_create_url($file->getFileUri());
   }
 
   $variables['tibr_og_title'] = $node->getTitle();
