@@ -513,15 +513,18 @@ class NodeInformation extends NodeFormAlterHelperBase {
    * @param string $type
    *   The scheduled date type.
    *
-   * @return string
-   *   The date timestamp.
+   * @return string|null
+   *   The date timestamp or NULL, if not available.
    */
-  protected function getScheduledDate(string $type = 'publish'): string {
+  protected function getScheduledDate(string $type = 'publish'):? string {
     $fieldName = "scheduled_{$type}_date";
 
     $scheduledDateField = $this->node()->{$fieldName};
 
-    if (!$scheduledDateField->isEmpty() && ($updateTimestamp = $scheduledDateField->entity->update_timestamp)) {
+    if (
+      !$scheduledDateField->isEmpty()
+      && ($updateTimestamp = $scheduledDateField->entity->update_timestamp)
+    ) {
       $scheduledDate = $updateTimestamp
         ->first()
         ->getValue();
@@ -639,10 +642,7 @@ class NodeInformation extends NodeFormAlterHelperBase {
   protected function displayNotificationAction($field): bool {
     $scheduleState = $this->form[$field]['widget']['entities'];
 
-    if (isset($scheduleState['0']['#label'])) {
-      return TRUE;
-    }
-    return FALSE;
+    return isset($scheduleState['0']['#label']);
   }
 
   /**
