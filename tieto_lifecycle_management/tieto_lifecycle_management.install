@@ -1,0 +1,13 @@
+<?php
+
+/**
+ * @file
+ * Install and update routines.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function tieto_lifecycle_management_install() {
+  \module_set_weight('tieto_lifecycle_management', 15);
+}

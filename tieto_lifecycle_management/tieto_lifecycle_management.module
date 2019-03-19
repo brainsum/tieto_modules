@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * @file
+ * Module hooks.
+ */
+
+use Drupal\Core\Entity\EntityInterface;
+
+/**
+ * Implements hook_entity_presave().
+ */
+function tieto_lifecycle_management_entity_presave(EntityInterface $entity) {
+  /** @var \Drupal\tieto_lifecycle_management\Service\SchedulingManager $schedulingManager */
+  $schedulingManager = \Drupal::service('tieto_lifecycle_management.scheduling_manager');
+  $schedulingManager->setDefaultsForEntity($entity);
+}

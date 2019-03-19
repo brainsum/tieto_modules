@@ -1,0 +1,6 @@
+services:
+  tieto_lifecycle_management.scheduling_manager:
+    class: Drupal\tieto_lifecycle_management\Service\SchedulingManager
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'

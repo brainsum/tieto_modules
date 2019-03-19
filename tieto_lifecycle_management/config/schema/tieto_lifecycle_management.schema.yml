@@ -1,0 +1,19 @@
+tieto_lifecycle_management.settings:
+  type: mapping
+  mapping:
+    fields:
+      type: sequence
+      label: 'Fields'
+      sequence:
+        - type: sequence
+          label: 'Entity type'
+          sequence:
+            - type: sequence
+              label: 'Bundle'
+              sequence:
+                - type: mapping
+                  label: 'Field'
+                  mapping:
+                    date:
+                      type: string
+                      label: 'Date default'
