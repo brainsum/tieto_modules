@@ -152,6 +152,10 @@ class NotificationsModalForm {
         'label' => t('Archive'),
         'field' => 'scheduled_trash_date',
       ],
+      'delete' => [
+        'label' => t('Delete'),
+        'field' => 'scheduled_delete_date',
+      ],
     ];
   }
 

@@ -9,7 +9,7 @@ tieto_node_forms:
     - core/jquery
 
 notification_modal:
-  version: 1.0
+  version: 1.1
   js:
     js/notification_modal.js: {}
   css:

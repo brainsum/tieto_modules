@@ -508,6 +508,24 @@ class NodeInformation extends NodeFormAlterHelperBase {
   }
 
   /**
+   * Returns delete button description.
+   *
+   * @return string
+   *   The button description.
+   */
+  protected function getDeleteDescription(): string {
+    $date = $this->getScheduledDate('delete');
+
+    if ($date) {
+      return $this->t('Scheduled delete date: <span>@date</span>', [
+        '@date' => $this->dateFormatter->format($date, 'tieto_date'),
+      ]);
+    }
+
+    return '';
+  }
+
+  /**
    * Returns scheduled date by type.
    *
    * @param string $type
@@ -565,7 +583,14 @@ class NodeInformation extends NodeFormAlterHelperBase {
         'description' => $this->getArchiveDescription(),
         'field' => 'scheduled_trash_date',
       ],
-      'delete' => [],
+      'delete' => [
+        'enable_notifications' => TRUE,
+        'title' => $this->t('Delete'),
+        'hyphenated_key' => 'moderation-state-deleted',
+        'scheduled' => NULL !== $this->getScheduledDate('delete'),
+        'description' => $this->getDeleteDescription(),
+        'field' => 'scheduled_delete_date',
+      ],
       'moderation_state_published' => [
         'enable_notifications' => TRUE,
         'title' => $this->t('Publish'),
