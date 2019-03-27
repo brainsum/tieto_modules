@@ -115,6 +115,13 @@ final class ConfigurationForm extends ConfigFormBase {
           '#placeholder' => '+6 months',
           '#default_value' => $values[$targetEntityId][$targetBundleId][$fieldId]['date'] ?? '',
         ],
+        // @todo: Load from field as markup only?
+        'target_state' => [
+          '#type' => 'textfield',
+          '#title' => $this->t('Target state'),
+          '#placeholder' => 'E.g published',
+          '#default_value' => $values[$targetEntityId][$targetBundleId][$fieldId]['target_state'] ?? '',
+        ],
       ];
 
     }
