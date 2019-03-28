@@ -58,7 +58,26 @@ class ModerationHelper {
   }
 
   /**
-   * Show a notification about moderation states.
+   * Show notification about new entities.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   */
+  protected function newEntityNotificationMessage(FieldableEntityInterface $entity): void {
+    if ($entity->isNew() === FALSE) {
+      return;
+    }
+
+    if ($entity->bundle() === 'service_alert') {
+      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.'));
+      return;
+    }
+
+    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.'));
+  }
+
+  /**
+   * Show notification about draft deletion.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
@@ -66,11 +85,122 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function showNotification(FieldableEntityInterface $entity): void {
-    if ($entity->isNew()) {
-      $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.'));
+  protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): void {
+    $deleteTime = $this->unpublishedEntityDeleteTime($entity);
+
+    if ($deleteTime === NULL) {
       return;
     }
+
+    if ($entity->bundle() === 'service_alert') {
+      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
+        '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
+      ]));
+      return;
+    }
+
+    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
+      '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
+    ]));
+  }
+
+  /**
+   * Show notification about unpublishing.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function unpublishNotificationMessage(FieldableEntityInterface $entity): void {
+    $unpublishTime = $this->entityUnpublishTime($entity);
+
+    if ($unpublishTime === NULL) {
+      return;
+    }
+
+    if ($entity->bundle() === 'service_alert') {
+      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be unpublished on @unpublishDate', [
+        '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
+      ]));
+      return;
+    }
+
+    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be unpublished on @unpublishDate', [
+      '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
+    ]));
+  }
+
+  /**
+   * Show notification about archiving.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function archiveNotificationMessage(FieldableEntityInterface $entity): void {
+    $archiveTime = $this->entityArchiveTime($entity);
+
+    if ($archiveTime === NULL) {
+      return;
+    }
+
+    if ($entity->bundle() === 'service_alert') {
+      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be archived on @archiveDate', [
+        '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
+      ]));
+      return;
+    }
+
+    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be archived on @archiveDate', [
+      '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
+    ]));
+  }
+
+  /**
+   * Show notification about deleting old entities.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): void {
+    $deleteTime = $this->entityDeleteTime($entity);
+
+    if ($deleteTime === NULL) {
+      return;
+    }
+
+    if ($entity->bundle() === 'service_alert') {
+      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be deleted on @deleteDate', [
+        '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
+      ]));
+      return;
+    }
+
+    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be deleted on @deleteDate', [
+      '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
+    ]));
+  }
+
+  /**
+   * Show a notification about moderation states.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @todo: Generalize.
+   */
+  public function showNotification(FieldableEntityInterface $entity): void {
+    $this->newEntityNotificationMessage($entity);
 
     if ($this->isEntityScheduled($entity)) {
       return;
@@ -78,53 +208,24 @@ class ModerationHelper {
 
     $currentState = $entity->get('moderation_state')->target_id ?? NULL;
 
-    if ($currentState === NULL) {
-      return;
-    }
-
     switch ($currentState) {
       case 'unpublished':
-        $deleteTime = $this->unpublishedEntityDeleteTime($entity);
-
-        if ($deleteTime !== NULL) {
-          $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
-            '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-          ]));
-        }
-
+        $this->draftDeleteNotificationMessage($entity);
         return;
 
       case 'published':
-        $unpublishTime = $this->entityUnpublishTime($entity);
-
-        if ($unpublishTime !== NULL) {
-          $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be unpublished on @unpublishDate', [
-            '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
-          ]));
-        }
-
+        $this->unpublishNotificationMessage($entity);
         return;
 
       case 'unpublished_content':
-        $archiveTime = $this->entityArchiveTime($entity);
-
-        if ($archiveTime !== NULL) {
-          $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be archived on @archiveDate', [
-            '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
-          ]));
-        }
-
+        $this->archiveNotificationMessage($entity);
         return;
 
       case 'trash':
-        $deleteTime = $this->entityDeleteTime($entity);
+        $this->oldDeleteNotificationMessage($entity);
+        return;
 
-        if ($deleteTime !== NULL) {
-          $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be deleted on @deleteDate', [
-            '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-          ]));
-        }
-
+      default:
         return;
     }
   }
