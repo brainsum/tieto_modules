@@ -71,6 +71,29 @@ function tieto_general_ui_preprocess_html(&$variables) {
     $variables['#attached']['library'][] = 'tieto_general_ui/edit_mode';
     $variables['page']['page_bottom'] = ['#theme' => 'edit_toggle'];
   }
+
+  if ($routeName === 'entity.node.canonical') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $routeMatch->getParameter('node');
+    if ($node->hasField('path')) {
+      $pathValue = $node->get('path')->getValue()[0];
+      $alias = $pathValue['alias'] ?? NULL;
+      $currentPath = \Drupal::request()->getPathInfo();
+
+      if ($alias !== $currentPath) {
+        $variables['page']['#attached']['html_head'][] = [
+          [
+            '#tag' => 'meta',
+            '#attributes' => [
+              'name' => 'robots',
+              'content' => 'noindex',
+            ],
+          ],
+          'robots',
+        ];
+      }
+    }
+  }
 }
 
 /**
