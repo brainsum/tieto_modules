@@ -38,6 +38,9 @@ final class ImageDimensions {
     if ($width < 1 || $height < 1) {
       throw new \RuntimeException('Illegal width or height!');
     }
+
+    $this->width = $width;
+    $this->height = $height;
   }
 
   /**
