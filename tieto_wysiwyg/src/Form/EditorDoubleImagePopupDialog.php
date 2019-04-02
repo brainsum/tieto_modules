@@ -328,13 +328,13 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
         $form_state->setValue(['attributes_right', 'alt'], '');
       }
 
-      $fileLeft = $this->imageFactory->get($fileLeft->getFileUri());
+      $imageLeft = $this->imageFactory->get($fileLeft->getFileUri());
       $imageRight = $this->imageFactory->get($fileRight->getFileUri());
 
       $displayImageRight = $this->renderer->render($fidRight);
 
       $imageDimensions = new ImageDimensionsCalculator(
-        new PopupImage($fileLeft->getWidth(), $fileLeft->getHeight()),
+        new PopupImage($imageLeft->getWidth(), $imageLeft->getHeight()),
         new PopupImage($imageRight->getWidth(), $imageRight->getHeight())
       );
       $imageDimensions->calculateEqualDimensions(620);
