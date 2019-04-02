@@ -196,7 +196,7 @@ function tieto_general_ui_entity_operation(EntityInterface $entity) {
  */
 function tieto_general_ui_form_node_form_alter(
   array &$form,
-  FormStateInterface $formState,
+  FormStateInterface $form_state,
   $formId
 ) {
   /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */

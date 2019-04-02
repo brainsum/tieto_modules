@@ -41,13 +41,13 @@ class RepublishButton {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
-  public static function validate(array &$form, FormStateInterface $formState) {
-    $trigger = $formState->getTriggeringElement();
+  public static function validate(array &$form, FormStateInterface $form_state) {
+    $trigger = $form_state->getTriggeringElement();
     if (static::BUTTON_NAME !== $trigger['#name']) {
       return;
     }
@@ -55,19 +55,19 @@ class RepublishButton {
     /** @var \Drupal\tieto_unpublish_ui\Service\NodeRevisionManager $nodeRevisionManager */
     $nodeRevisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
     /** @var \Drupal\node\NodeForm $nodeForm */
-    $nodeForm = $formState->getFormObject();
+    $nodeForm = $form_state->getFormObject();
     /** @var \Drupal\node\NodeInterface $node */
     $node = $nodeForm->getEntity();
 
     $revision = $nodeRevisionManager->loadLatestPublishedRevision($node);
     if (NULL === $revision) {
-      $formState->setError($trigger, t('The content could not be reverted, no published version was found.'));
+      $form_state->setError($trigger, t('The content could not be reverted, no published version was found.'));
       return;
     }
     $revisionId = $revision->getRevisionId();
 
-    $formState->clearErrors();
-    $formState->setError($trigger, t('The content should be reverted, not saved.'));
+    $form_state->clearErrors();
+    $form_state->setError($trigger, t('The content should be reverted, not saved.'));
     // Since form redirect doesn't execute on validate fail,
     // we force it with the RedirectResponse.
     $redirectUrl = Url::fromRoute('tieto_unpublish_ui.revert_node_revision', [

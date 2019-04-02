@@ -499,26 +499,26 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
    *
    * @param array $element
    *   Element.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   Form state.
    *
    * @throws \Exception
    */
-  public static function validateElementDate(array $element, FormStateInterface $formState): void {
+  public static function validateElementDate(array $element, FormStateInterface $form_state): void {
     $iefId = $element['#ief_id'];
     /** @var \Drupal\field\FieldConfigInterface $field */
-    $field = $formState->get(['inline_entity_form', $iefId, 'instance']);
+    $field = $form_state->get(['inline_entity_form', $iefId, 'instance']);
     if (!static::isScheduleField($field)) {
       return;
     }
-    $updateTimestamp = static::getScheduledUpdateTimestamp($iefId, $formState);
+    $updateTimestamp = static::getScheduledUpdateTimestamp($iefId, $form_state);
     if (NULL === $updateTimestamp) {
       return;
     }
 
     $currentTime = \Drupal::time()->getCurrentTime();
     if ($updateTimestamp < $currentTime) {
-      $formState->setError($element, t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
+      $form_state->setError($element, t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
         '@name' => $field->getLabel(),
       ]));
     }
@@ -529,23 +529,23 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @throws \Exception
    */
-  public static function validateFormDate(array &$form, FormStateInterface $formState): void {
-    $trigger = $formState->getTriggeringElement();
+  public static function validateFormDate(array &$form, FormStateInterface $form_state): void {
+    $trigger = $form_state->getTriggeringElement();
     if (!isset($trigger['#ief_submit_trigger']) || FALSE === $trigger['#ief_submit_trigger']) {
       return;
     }
     $iefId = \str_replace('inline-entity-form-', '', $trigger['#ajax']['wrapper']);
     /** @var \Drupal\field\FieldConfigInterface $field */
-    $field = $formState->get(['inline_entity_form', $iefId, 'instance']);
+    $field = $form_state->get(['inline_entity_form', $iefId, 'instance']);
     if (!static::isScheduleField($field)) {
       return;
     }
-    $updateTimestamp = static::getScheduledUpdateTimestamp($iefId, $formState);
+    $updateTimestamp = static::getScheduledUpdateTimestamp($iefId, $form_state);
     if (NULL === $updateTimestamp) {
       return;
     }
@@ -553,12 +553,12 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     $currentTime = \Drupal::time()->getCurrentTime();
     if ($updateTimestamp < $currentTime) {
       if (isset($form[$field->getName()]['widget']['form'])) {
-        $formState->setError($form[$field->getName()]['widget']['form']['inline_entity_form']['update_timestamp']['widget']['0']['value'], t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
+        $form_state->setError($form[$field->getName()]['widget']['form']['inline_entity_form']['update_timestamp']['widget']['0']['value'], t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
           '@name' => $field->getLabel(),
         ]));
       }
       else {
-        $formState->setError($form[$field->getName()]['widget']['entities'][0]['form']['inline_entity_form']['update_timestamp']['widget'][0]['value'], t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
+        $form_state->setError($form[$field->getName()]['widget']['entities'][0]['form']['inline_entity_form']['update_timestamp']['widget'][0]['value'], t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
           '@name' => $field->getLabel(),
         ]));
       }
@@ -570,7 +570,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
    *
    * @param string $iefId
    *   The ief ID.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @return int|null
@@ -578,13 +578,13 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
    *
    * @throws \Exception
    */
-  public static function getScheduledUpdateTimestamp($iefId, FormStateInterface $formState) {
+  public static function getScheduledUpdateTimestamp($iefId, FormStateInterface $form_state) {
     /** @var \Drupal\field\FieldConfigInterface $field */
-    $field = $formState->get(['inline_entity_form', $iefId, 'instance']);
+    $field = $form_state->get(['inline_entity_form', $iefId, 'instance']);
 
     /** @var array $entities */
-    $entities = $formState->get(['inline_entity_form', $iefId, 'entities']);
-    if ($rawUpdateTimestamp = $formState->getValue([
+    $entities = $form_state->get(['inline_entity_form', $iefId, 'entities']);
+    if ($rawUpdateTimestamp = $form_state->getValue([
       $field->getName(),
       'form',
       'inline_entity_form',
@@ -598,7 +598,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
       $tmpDateObject = new \DateTime($updateDateObject->format($updateDateObject::FORMAT));
       $updateTimestamp = $tmpDateObject->getTimestamp();
     }
-    elseif ($rawUpdateTimestamp = $formState->getValue([
+    elseif ($rawUpdateTimestamp = $form_state->getValue([
       $field->getName(),
       'form',
       'inline_entity_form',

@@ -20,15 +20,15 @@ class NotificationsHelper {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @return \Drupal\Core\Ajax\AjaxResponse
    *   The response.
    */
-  public static function notificationCallback(array &$form, FormStateInterface $formState) {
+  public static function notificationCallback(array &$form, FormStateInterface $form_state) {
     $response = new AjaxResponse();
-    $trigger = $formState->getTriggeringElement();
+    $trigger = $form_state->getTriggeringElement();
     if (empty($trigger) || !isset($trigger['#attributes']['data-moderation-state'])) {
       $response->addCommand(new AlertCommand(t('Error! Triggering element cannot be found.')));
       return $response;
@@ -41,7 +41,7 @@ class NotificationsHelper {
 
     $triggerState = $trigger['#attributes']['data-moderation-state'];
     $moderationState = \str_replace('moderation_state_', '', $triggerState);
-    $modalForm = NotificationsModalForm::buildFromParent($form, $formState, $moderationState);
+    $modalForm = NotificationsModalForm::buildFromParent($form, $form_state, $moderationState);
 
     $dialogOptions = [
       'width' => 800,

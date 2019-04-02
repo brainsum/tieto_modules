@@ -135,17 +135,17 @@ class UserImportSettingsForm extends ConfigFormBase {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @throws \Exception
    */
-  public function submitTest(array &$form, FormStateInterface $formState): void {
+  public function submitTest(array &$form, FormStateInterface $form_state): void {
     $this->messenger()->addStatus('Test triggered.');
     $importer = new UserImporter();
-    $result = $importer->import(FALSE, $formState->getValue('ldap_server'), \trim($formState->getValue('ldap_filter')));
-    $formState->set('result', $result);
-    $formState->setRebuild();
+    $result = $importer->import(FALSE, $form_state->getValue('ldap_server'), \trim($form_state->getValue('ldap_filter')));
+    $form_state->set('result', $result);
+    $form_state->setRebuild();
   }
 
   /**

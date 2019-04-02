@@ -103,7 +103,7 @@ function tieto_unpublish_ui_preprocess_node(array &$variables) {
 /**
  * Implements hook_form_BASE_FORM_ID_alter().
  */
-function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $formState, $form_id) {
+function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   $form['revision_information']['#type'] = 'container';
   $form['revision_information']['#group'] = 'meta';
 
@@ -113,9 +113,9 @@ function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $for
   $form['tieto_form_footer'] = [
     '#type' => 'container',
   ];
-  $form['tieto_form_footer']['group'] = (new NodeFormAlterGroupsHelper($form, $formState))->createNodeGroups();
+  $form['tieto_form_footer']['group'] = (new NodeFormAlterGroupsHelper($form, $form_state))->createNodeGroups();
 
-  $form['#tieto_meta_data'] = (new NodeInformation($form, $formState))->getMetaData();
+  $form['#tieto_meta_data'] = (new NodeInformation($form, $form_state))->getMetaData();
   $form['tieto_form_footer']['tieto_notification_actions'] = $form['#tieto_meta_data']['notification_actions'];
 
   $form['#attached']['library'][] = 'tieto_unpublish_ui/tieto_node_forms';
@@ -149,7 +149,7 @@ function tieto_unpublish_ui_form_node_form_alter(&$form, FormStateInterface $for
 /**
  * Implements hook_field_widget_WIDGET_TYPE_form_alter().
  */
-function tieto_unpublish_ui_field_widget_moderation_state_default_form_alter(&$element, FormStateInterface $formState, $context) {
+function tieto_unpublish_ui_field_widget_moderation_state_default_form_alter(&$element, FormStateInterface $form_state, $context) {
   // This is the only way to reliably alter button titles.
   $element['#process'][] = [ModerationStateProcessor::class, 'processActions'];
 }
@@ -157,7 +157,7 @@ function tieto_unpublish_ui_field_widget_moderation_state_default_form_alter(&$e
 /**
  * Custom process function to alter #ajax callback.
  */
-function tieto_unpublish_ui_ief_process($element, FormStateInterface $formState, &$complete_form) {
+function tieto_unpublish_ui_ief_process($element, FormStateInterface $form_state, &$complete_form) {
   if (isset($element['actions']['ief_add_save'])) {
     $element['actions']['ief_add_save']['#ajax']['callback'] = 'tieto_unpublish_ui_scheduled_date_ajax_callback';
   }
@@ -176,12 +176,12 @@ function tieto_unpublish_ui_ief_process($element, FormStateInterface $formState,
 /**
  * Based on inline_entity_form_get_element().
  */
-function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterface $formState) {
-  $element = \inline_entity_form_get_element($form, $formState);
-  $triggeringElement = $formState->getTriggeringElement();
+function tieto_unpublish_ui_scheduled_date_ajax_callback($form, FormStateInterface $form_state) {
+  $element = \inline_entity_form_get_element($form, $form_state);
+  $triggeringElement = $form_state->getTriggeringElement();
   $wrapper = '#' . $triggeringElement['#ajax']['wrapper'];
 
-  $ief = $formState->get('inline_entity_form');
+  $ief = $form_state->get('inline_entity_form');
   $scheduledDates = [];
 
   /** @var \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter */

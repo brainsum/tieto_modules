@@ -76,12 +76,12 @@ abstract class NodeFormAlterHelperBase {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    */
   public function __construct(
     array $form,
-    FormStateInterface $formState
+    FormStateInterface $form_state
   ) {
     $this->nodeRevisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
     $this->dateFormatter = \Drupal::service('date.formatter');
@@ -90,7 +90,7 @@ abstract class NodeFormAlterHelperBase {
     $this->time = \Drupal::time();
 
     $this->form = $form;
-    $this->formState = $formState;
+    $this->formState = $form_state;
 
     /** @var \Drupal\node\NodeForm $formObject */
     $formObject = $this->formState->getFormObject();

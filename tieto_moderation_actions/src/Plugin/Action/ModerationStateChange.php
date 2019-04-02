@@ -73,7 +73,7 @@ final class ModerationStateChange extends ConfigurableActionBase implements Cont
   /**
    * {@inheritdoc}
    */
-  public function buildConfigurationForm(array $form, FormStateInterface $formState) {
+  public function buildConfigurationForm(array $form, FormStateInterface $form_state) {
     $wmStates = [];
 
     try {
@@ -98,8 +98,8 @@ final class ModerationStateChange extends ConfigurableActionBase implements Cont
   /**
    * {@inheritdoc}
    */
-  public function submitConfigurationForm(array &$form, FormStateInterface $formState) {
-    $this->configuration['wm_state'] = $formState->getValue('wm_state');
+  public function submitConfigurationForm(array &$form, FormStateInterface $form_state) {
+    $this->configuration['wm_state'] = $form_state->getValue('wm_state');
   }
 
   /**

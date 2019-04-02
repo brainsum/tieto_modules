@@ -80,7 +80,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
    */
   public function buildForm(
     array $form,
-    FormStateInterface $formState,
+    FormStateInterface $form_state,
     Editor $editor = NULL
   ): array {
     // This form is special, in that the default values do not come from the
@@ -88,17 +88,17 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
     // this data in form state, because when the form is rebuilt, we will be
     // receiving values from the form, instead of the values from the text
     // editor. If we don't cache it, this data will be lost.
-    if (isset($formState->getUserInput()['editor_object'])) {
+    if (isset($form_state->getUserInput()['editor_object'])) {
       // By convention, the data that the text editor sends to any dialog is in
       // the 'editor_object' key. And the image dialog for text editors expects
       // that data to be the attributes for an <img> element.
-      $imageElement = $formState->getUserInput()['editor_object'];
-      $formState->set('image_element', $imageElement);
-      $formState->setCached();
+      $imageElement = $form_state->getUserInput()['editor_object'];
+      $form_state->set('image_element', $imageElement);
+      $form_state->setCached();
     }
     else {
       // Retrieve the image element's attributes from form state.
-      $imageElement = $formState->get('image_element') ?: [];
+      $imageElement = $form_state->get('image_element') ?: [];
     }
 
     $form['#tree'] = TRUE;
@@ -276,13 +276,13 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, FormStateInterface $formState): AjaxResponse {
+  public function submitForm(array &$form, FormStateInterface $form_state): AjaxResponse {
     $response = new AjaxResponse();
 
     // Convert any uploaded files from the FID values to data-entity-uuid
     // attributes and set data-entity-type to 'file'.
-    $fidLeft = $formState->getValue(['fid_left', 0]);
-    $fidRight = $formState->getValue(['fid_right', 0]);
+    $fidLeft = $form_state->getValue(['fid_left', 0]);
+    $fidRight = $form_state->getValue(['fid_right', 0]);
     if (!empty($fidLeft) && !empty($fidRight)) {
       // LEFT IMAGE.
       /** @var \Drupal\file\FileInterface $fileLeft */
@@ -291,18 +291,18 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // Transform absolute image URLs to relative image URLs: prevent problems
       // on multisite set-ups and prevent mixed content errors.
       $fileUrlLeft = \file_url_transform_relative($fileUrlLeft);
-      $formState->setValue(['attributes_left', 'src'], $fileUrlLeft);
-      $formState->setValue([
+      $form_state->setValue(['attributes_left', 'src'], $fileUrlLeft);
+      $form_state->setValue([
         'attributes_left',
         'data-entity-uuid',
       ], $fileLeft->uuid());
-      $formState->setValue(['attributes_left', 'data-entity-type'], 'file');
+      $form_state->setValue(['attributes_left', 'data-entity-type'], 'file');
 
       // When the alt attribute is set to two double quotes, transform it to the
       // empty string: two double quotes signify "empty alt attribute". See
       // above.
-      if (\trim($formState->getValue(['attributes_left', 'alt'])) === '""') {
-        $formState->setValue(['attributes_left', 'alt'], '');
+      if (\trim($form_state->getValue(['attributes_left', 'alt'])) === '""') {
+        $form_state->setValue(['attributes_left', 'alt'], '');
       }
 
       $displayImageLeft = $this->renderer->render($fidLeft);
@@ -314,18 +314,18 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // Transform absolute image URLs to relative image URLs: prevent problems
       // on multisite set-ups and prevent mixed content errors.
       $fileUrlRight = \file_url_transform_relative($fileUrlRight);
-      $formState->setValue(['attributes_right', 'src'], $fileUrlRight);
-      $formState->setValue([
+      $form_state->setValue(['attributes_right', 'src'], $fileUrlRight);
+      $form_state->setValue([
         'attributes_right',
         'data-entity-uuid',
       ], $fileRight->uuid());
-      $formState->setValue(['attributes_right', 'data-entity-type'], 'file');
+      $form_state->setValue(['attributes_right', 'data-entity-type'], 'file');
 
       // When the alt attribute is set to two double quotes, transform it to the
       // empty string: two double quotes signify "empty alt attribute". See
       // above.
-      if (\trim($formState->getValue(['attributes_right', 'alt'])) === '""') {
-        $formState->setValue(['attributes_right', 'alt'], '');
+      if (\trim($form_state->getValue(['attributes_right', 'alt'])) === '""') {
+        $form_state->setValue(['attributes_right', 'alt'], '');
       }
 
       $fileLeft = $this->imageFactory->get($fileLeft->getFileUri());
@@ -341,7 +341,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
 
       $leftImageTag = static::generateImageTag(
         'left',
-        $formState->getValue(['attributes_left', 'alt']),
+        $form_state->getValue(['attributes_left', 'alt']),
         $fileLeft->uuid(),
         $displayImageLeft['#url_popup'],
         $imageDimensions->equalizedFirstDimensions()->width(),
@@ -349,7 +349,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       );
       $rightImageTag = static::generateImageTag(
         'right',
-        $formState->getValue(['attributes_right', 'alt']),
+        $form_state->getValue(['attributes_right', 'alt']),
         $fileRight->uuid(),
         $displayImageRight['#url_popup'],
         $imageDimensions->equalizedSecondDimensions()->width(),
@@ -357,10 +357,10 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       );
       // We need an outer container, or CKeditor will remove our div, and only
       // images will be inserted.
-      $formState->setValue('image_render', "<div><div class='sbs-full-image'>{$leftImageTag}{$rightImageTag}</div></div>");
+      $form_state->setValue('image_render', "<div><div class='sbs-full-image'>{$leftImageTag}{$rightImageTag}</div></div>");
     }
 
-    if ($formState->getErrors()) {
+    if ($form_state->getErrors()) {
       unset($form['#prefix'], $form['#suffix']);
       $form['status_messages'] = [
         '#type' => 'status_messages',
@@ -369,7 +369,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       $response->addCommand(new HtmlCommand('#editor-image-dialog-form', $form));
     }
     else {
-      $response->addCommand(new EditorDialogSave($formState->getValues()));
+      $response->addCommand(new EditorDialogSave($form_state->getValues()));
       $response->addCommand(new CloseModalDialogCommand());
     }
     return $response;

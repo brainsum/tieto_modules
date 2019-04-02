@@ -124,17 +124,17 @@ class TaxonomyImportSettingsForm extends ConfigFormBase {
    *
    * @param array $form
    *   The form.
-   * @param \Drupal\Core\Form\FormStateInterface $formState
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
    *   The form state.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    */
-  public function submitTest(array &$form, FormStateInterface $formState): void {
+  public function submitTest(array &$form, FormStateInterface $form_state): void {
     $this->messenger()->addStatus('Test triggered.');
     $importer = new TaxonomyImporter();
     $result = $importer->import();
-    $formState->set('result', $result);
-    $formState->setRebuild();
+    $form_state->set('result', $result);
+    $form_state->setRebuild();
   }
 
   /**
