@@ -12,6 +12,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
+use Drupal\Core\StringTranslation\TranslatableMarkup;
 
 /**
  * Class ModerationHelper.
@@ -58,134 +59,185 @@ class ModerationHelper {
   }
 
   /**
-   * Show notification about new entities.
+   * Return notification about new entities.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
    */
-  protected function newEntityNotificationMessage(FieldableEntityInterface $entity): void {
+  protected function newEntityNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     if ($entity->isNew() === FALSE) {
-      return;
+      return NULL;
     }
 
     if ($entity->bundle() === 'service_alert') {
-      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.'));
-      return;
+      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.');
     }
 
-    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.'));
+    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.');
   }
 
   /**
-   * Show notification about draft deletion.
+   * Return notification about draft deletion.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
    */
-  protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): void {
+  protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $deleteTime = $this->unpublishedEntityDeleteTime($entity);
 
     if ($deleteTime === NULL) {
-      return;
+      return NULL;
     }
 
     if ($entity->bundle() === 'service_alert') {
-      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
+      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
         '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-      ]));
-      return;
+      ]);
     }
 
-    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
+    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
       '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-    ]));
+    ]);
   }
 
   /**
-   * Show notification about unpublishing.
+   * Return notification about unpublishing.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
    */
-  protected function unpublishNotificationMessage(FieldableEntityInterface $entity): void {
+  protected function unpublishNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $unpublishTime = $this->entityUnpublishTime($entity);
 
     if ($unpublishTime === NULL) {
-      return;
+      return NULL;
     }
 
     if ($entity->bundle() === 'service_alert') {
-      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be unpublished on @unpublishDate', [
+      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be unpublished on @unpublishDate', [
         '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
-      ]));
-      return;
+      ]);
     }
 
-    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be unpublished on @unpublishDate', [
+    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be unpublished on @unpublishDate', [
       '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
-    ]));
+    ]);
   }
 
   /**
-   * Show notification about archiving.
+   * Return notification about archiving.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
    */
-  protected function archiveNotificationMessage(FieldableEntityInterface $entity): void {
+  protected function archiveNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $archiveTime = $this->entityArchiveTime($entity);
 
     if ($archiveTime === NULL) {
-      return;
+      return NULL;
     }
 
     if ($entity->bundle() === 'service_alert') {
-      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be archived on @archiveDate', [
+      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be archived on @archiveDate', [
         '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
-      ]));
-      return;
+      ]);
     }
 
-    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be archived on @archiveDate', [
+    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be archived on @archiveDate', [
       '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
-    ]));
+    ]);
   }
 
   /**
-   * Show notification about deleting old entities.
+   * Return notification about deleting old entities.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
    */
-  protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): void {
+  protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $deleteTime = $this->entityDeleteTime($entity);
 
     if ($deleteTime === NULL) {
-      return;
+      return NULL;
     }
 
     if ($entity->bundle() === 'service_alert') {
-      $this->messenger()->addWarning($this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be deleted on @deleteDate', [
+      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be deleted on @deleteDate', [
         '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-      ]));
-      return;
+      ]);
     }
 
-    $this->messenger()->addWarning($this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be deleted on @deleteDate', [
+    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be deleted on @deleteDate', [
       '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-    ]));
+    ]);
+  }
+
+  /**
+   * Return the notification message.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
+   *   The translatable message, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  public function notificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
+    if ($entity->isNew()) {
+      return $this->newEntityNotificationMessage($entity);
+    }
+
+    if ($this->isEntityScheduled($entity)) {
+      return NULL;
+    }
+
+    $currentState = $entity->get('moderation_state')->target_id ?? NULL;
+
+    switch ($currentState) {
+      case 'unpublished':
+        return $this->draftDeleteNotificationMessage($entity);
+
+      case 'published':
+        return $this->unpublishNotificationMessage($entity);
+
+      case 'unpublished_content':
+        return $this->archiveNotificationMessage($entity);
+
+      case 'trash':
+        return $this->oldDeleteNotificationMessage($entity);
+
+      default:
+        return NULL;
+    }
   }
 
   /**
@@ -200,33 +252,8 @@ class ModerationHelper {
    * @todo: Generalize.
    */
   public function showNotification(FieldableEntityInterface $entity): void {
-    $this->newEntityNotificationMessage($entity);
-
-    if ($this->isEntityScheduled($entity)) {
-      return;
-    }
-
-    $currentState = $entity->get('moderation_state')->target_id ?? NULL;
-
-    switch ($currentState) {
-      case 'unpublished':
-        $this->draftDeleteNotificationMessage($entity);
-        return;
-
-      case 'published':
-        $this->unpublishNotificationMessage($entity);
-        return;
-
-      case 'unpublished_content':
-        $this->archiveNotificationMessage($entity);
-        return;
-
-      case 'trash':
-        $this->oldDeleteNotificationMessage($entity);
-        return;
-
-      default:
-        return;
+    if (($message = $this->notificationMessage($entity)) && $message !== NULL) {
+      $this->messenger()->addWarning($message);
     }
   }
 
@@ -326,7 +353,7 @@ class ModerationHelper {
         $entityId = $entity->id();
 
         if (
-        ($isUnpublished = $this->shouldDeleteUnpublishedEntity($entity))
+          ($isUnpublished = $this->shouldDeleteUnpublishedEntity($entity))
           || ($isOld = $this->shouldDeleteOldEntity($entity))
         ) {
           $reason = 'unknown';
