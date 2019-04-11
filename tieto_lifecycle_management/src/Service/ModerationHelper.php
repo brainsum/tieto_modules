@@ -210,6 +210,8 @@ class ModerationHelper {
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @todo: Generalize.
    */
   public function notificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     if ($entity->isNew()) {
@@ -249,7 +251,7 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    *
-   * @todo: Generalize.
+   * @deprecated
    */
   public function showNotification(FieldableEntityInterface $entity): void {
     if (($message = $this->notificationMessage($entity)) && $message !== NULL) {
