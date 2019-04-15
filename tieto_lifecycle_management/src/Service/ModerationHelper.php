@@ -200,6 +200,23 @@ class ModerationHelper {
   }
 
   /**
+   * Return the moderation state for the entity if possible.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @return string|null
+   *   The state or NULL.
+   */
+  protected function entityModerationState(FieldableEntityInterface $entity): ?string {
+    if (!$entity->hasField('moderation_state')) {
+      return NULL;
+    }
+
+    return $entity->get('moderation_state')->target_id ?? NULL;
+  }
+
+  /**
    * Return the notification message.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
@@ -222,9 +239,7 @@ class ModerationHelper {
       return NULL;
     }
 
-    $currentState = $entity->get('moderation_state')->target_id ?? NULL;
-
-    switch ($currentState) {
+    switch ($this->entityModerationState($entity)) {
       case 'unpublished':
         return $this->draftDeleteNotificationMessage($entity);
 
@@ -579,7 +594,7 @@ class ModerationHelper {
   /**
    * Returns whether the entity moderation state should be updated.
    *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    * @param array $fieldSettings
    *   Field settings.
@@ -591,9 +606,13 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function shouldUpdateModerationState(
-    EntityInterface $entity,
+    FieldableEntityInterface $entity,
     array $fieldSettings
   ): bool {
+    if (!$entity->hasField('moderation_state')) {
+      return FALSE;
+    }
+
     // Invalid settings.
     if (empty($fieldSettings['date']) || empty($fieldSettings['target_state'])) {
       return FALSE;
@@ -612,7 +631,7 @@ class ModerationHelper {
 
     // @todo: Maybe check if moderation transition is allowed.
     // Already the target state.
-    if ($entity->get('moderation_state')->target_id === $fieldSettings['target_state']) {
+    if ($this->entityModerationState($entity) === $fieldSettings['target_state']) {
       return FALSE;
     }
 

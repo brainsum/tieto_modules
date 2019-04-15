@@ -16,6 +16,7 @@
         }
     },
     "require": {
+        "ext-json": "*",
         "drupal/scheduled_updates": "^1.0",
         "drupal/workbench_moderation": "^1.0"
     }
