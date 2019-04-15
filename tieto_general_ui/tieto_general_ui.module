@@ -202,11 +202,12 @@ function tieto_general_ui_form_node_form_alter(
 ) {
   /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */
   $routeMatch = \Drupal::routeMatch();
-  /** @var \Drupal\node\NodeInterface $node */
-  $node = $routeMatch->getParameter('node');
 
   // Alter clone form - page title, node title.
   if ($routeMatch->getRouteName() === 'node_clone.prepopulate_node') {
+    /** @var \Drupal\node\NodeInterface $node */
+    $node = $routeMatch->getParameter('node');
+
     $form['title']['widget']['0']['value']['#default_value'] = \t('Copy of %title', [
       '%title' => $node->getTitle(),
     ]);
@@ -250,7 +251,12 @@ function tieto_general_ui_form_node_form_alter(
     $form['field_thumbnail']
   );
 
-  _tieto_general_ui_unavailable_information_owner_notification($node);
+  /** @var \Drupal\node\NodeForm $formObject */
+  $formObject = $form_state->getFormObject();
+  /** @var \Drupal\node\NodeInterface $entity */
+  if ($entity = $formObject->getEntity()) {
+    _tieto_general_ui_unavailable_information_owner_notification($entity);
+  }
 }
 
 /**
