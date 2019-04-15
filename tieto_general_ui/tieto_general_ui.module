@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
@@ -201,11 +202,11 @@ function tieto_general_ui_form_node_form_alter(
 ) {
   /** @var \Drupal\Core\Routing\RouteMatchInterface $routeMatch */
   $routeMatch = \Drupal::routeMatch();
+  /** @var \Drupal\node\NodeInterface $node */
+  $node = $routeMatch->getParameter('node');
 
   // Alter clone form - page title, node title.
   if ($routeMatch->getRouteName() === 'node_clone.prepopulate_node') {
-    // Load the current node.
-    $node = $routeMatch->getParameter('node');
     $form['title']['widget']['0']['value']['#default_value'] = \t('Copy of %title', [
       '%title' => $node->getTitle(),
     ]);
@@ -248,6 +249,8 @@ function tieto_general_ui_form_node_form_alter(
     $form['field_image'],
     $form['field_thumbnail']
   );
+
+  _tieto_general_ui_unavailable_information_owner_notification($node);
 }
 
 /**
@@ -355,6 +358,10 @@ function tieto_general_ui_preprocess_node(array &$variables) {
   $variables['date_ago'] = $dateFormatter->formatDiff($changed, $time->getRequestTime(), [
     'granularity' => 1,
   ]);
+
+  if ($variables['view_mode'] === 'full') {
+    _tieto_general_ui_unavailable_information_owner_notification($node);
+  }
 }
 
 /**
@@ -430,6 +437,32 @@ function tieto_general_ui_form_views_exposed_form_alter(
     // plain 'authorized' users won't.
     if ($form['#id'] === 'views-exposed-form-news-page' && !\Drupal::currentUser()->hasPermission('toggle edit mode')) {
       unset($form['exposed_form']['moderation_state']);
+    }
+  }
+}
+
+/**
+ * Show warning message if an assigned information owner is deleted or blocked.
+ *
+ * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+ *   The entity.
+ *
+ * @see: EL-840.
+ * @todo: Move to service.
+ */
+function _tieto_general_ui_unavailable_information_owner_notification(FieldableEntityInterface $entity): void {
+  if (!$entity->hasField('field_information_owner')) {
+    return;
+  }
+
+  $ownerField = $entity->get('field_information_owner');
+  /** @var \Drupal\Core\Field\FieldItemInterface $item */
+  foreach ($ownerField as $item) {
+    /** @var \Drupal\user\UserInterface $user */
+    $user = $item->entity;
+
+    if ($user === NULL || $user->isBlocked()) {
+      \Drupal::messenger()->addWarning(\t('The original information owner is not a Tieto employee anymore, please add a new one.'));
     }
   }
 }
