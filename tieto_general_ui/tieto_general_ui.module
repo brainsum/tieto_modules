@@ -364,10 +364,6 @@ function tieto_general_ui_preprocess_node(array &$variables) {
   $variables['date_ago'] = $dateFormatter->formatDiff($changed, $time->getRequestTime(), [
     'granularity' => 1,
   ]);
-
-  if ($variables['view_mode'] === 'full') {
-    _tieto_general_ui_unavailable_information_owner_notification($node);
-  }
 }
 
 /**
