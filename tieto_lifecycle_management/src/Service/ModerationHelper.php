@@ -59,6 +59,35 @@ class ModerationHelper {
   }
 
   /**
+   * Determines whether a transition is correct or not.
+   *
+   * @param string $currentState
+   *   The current state.
+   * @param string $targetState
+   *   The desired state.
+   *
+   * @return bool
+   *   TRUE for correct transitions, FALSE otherwise.
+   *
+   * @todo: temporary
+   * @todo: FIXME, move to config.
+   */
+  protected function isCorrectTransition(string $currentState, string $targetState): bool {
+    switch ($currentState) {
+      case 'unpublished':
+        return TRUE;
+
+      case 'published':
+        return in_array($targetState, ['unpublished_content', 'trash'], TRUE);
+
+      case 'unpublished_content':
+        return $targetState === 'trash';
+    }
+
+    return FALSE;
+  }
+
+  /**
    * Return notification about new entities.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
@@ -609,7 +638,8 @@ class ModerationHelper {
     FieldableEntityInterface $entity,
     array $fieldSettings
   ): bool {
-    if (!$entity->hasField('moderation_state')) {
+    $currentState = $this->entityModerationState($entity);
+    if ($currentState === NULL) {
       return FALSE;
     }
 
@@ -629,9 +659,11 @@ class ModerationHelper {
       return FALSE;
     }
 
-    // @todo: Maybe check if moderation transition is allowed.
-    // Already the target state.
-    if ($this->entityModerationState($entity) === $fieldSettings['target_state']) {
+    // Already the target state, or would be an invalid one.
+    if (
+      $currentState === $fieldSettings['target_state']
+      || !$this->isCorrectTransition($currentState, $fieldSettings['target_state'])
+    ) {
       return FALSE;
     }
 
