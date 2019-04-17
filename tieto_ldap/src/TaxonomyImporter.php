@@ -267,7 +267,7 @@ class TaxonomyImporter extends ImporterBase {
       ];
 
       /** @var \Drupal\taxonomy\TermInterface $term */
-      $term = $this->termStorage->create($termData);
+      $term = $this->termStorage()->create($termData);
       $term->save();
       $tid = $term->id();
 
@@ -288,7 +288,7 @@ class TaxonomyImporter extends ImporterBase {
     // Check stored usercount.
     if ($tietoLdapUserCount != $userCount) {
       /** @var \Drupal\taxonomy\TermInterface $term */
-      $term = $this->termStorage->load($tid);
+      $term = $this->termStorage()->load($tid);
       $term->set('tieto_ldap_usercount', $userCount);
       $term->save();
 
@@ -318,13 +318,13 @@ class TaxonomyImporter extends ImporterBase {
    */
   private function inactivateTerms(): void {
     // Get all not imported terms.
-    $query = $this->termStorage->getQuery('taxonomy_term');
+    $query = \Drupal::entityQuery('taxonomy_term');
     $query->condition('vid', \array_keys($this->getAttributeStructure()), 'IN');
     $query->condition('tid', $this->tidsImported, 'NOT IN');
     $notImportedTids = $query->execute();
 
     /** @var \Drupal\taxonomy\TermInterface[] $terms */
-    $terms = $this->termStorage->loadMultiple($notImportedTids);
+    $terms = $this->termStorage()->loadMultiple($notImportedTids);
     foreach ($terms as $term) {
       $term->tieto_ldap_usercount = 0;
       $term->save();
