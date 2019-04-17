@@ -68,8 +68,10 @@ class TaxonomyImporter extends ImporterBase {
    *   Import result message or (for CLI only) NULL.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function import(bool $import = FALSE): ?array {
+  public function import(bool $import = FALSE): ? array {
     $mode = ($import ? 'import' : 'test');
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last", $this->time->getRequestTime());
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last_uid", $this->currentUser->id());
@@ -158,7 +160,7 @@ class TaxonomyImporter extends ImporterBase {
             $this->importTerms();
 
             // When we checked all source data, we can run inactivateTerms.
-            if ($resultCount == $this->rowsImportChecked) {
+            if ($resultCount === $this->rowsImportChecked) {
               $this->inactivateTerms();
             }
             else {
@@ -205,7 +207,7 @@ class TaxonomyImporter extends ImporterBase {
    * @return array
    *   Attribute structure.
    */
-  private function getAttributeStructure(): array {
+  private function getAttributeStructure() : array {
     return [
       'unit' => ['o', 'ou', 'admindescription'],
       'location' => ['co', 'l', 'physicaldeliveryofficename'],
@@ -217,6 +219,8 @@ class TaxonomyImporter extends ImporterBase {
    * Custom helper function to import taxonomy terms.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function importTerms(): void {
     $termHierarchy = $this->termHierarchy;
@@ -242,6 +246,8 @@ class TaxonomyImporter extends ImporterBase {
    *   Parent term ID.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function saveTerms(string $vid, string $name, array $item, int $parent = 0): void {
     $query = $this->database
@@ -286,7 +292,7 @@ class TaxonomyImporter extends ImporterBase {
     }
 
     // Check stored usercount.
-    if ($tietoLdapUserCount != $userCount) {
+    if ($tietoLdapUserCount !== $userCount) {
       /** @var \Drupal\taxonomy\TermInterface $term */
       $term = $this->termStorage()->load($tid);
       $term->set('tieto_ldap_usercount', $userCount);
@@ -315,6 +321,8 @@ class TaxonomyImporter extends ImporterBase {
    * Inactivate empty (not referenced/not imported) terms.
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function inactivateTerms(): void {
     // Get all not imported terms.
