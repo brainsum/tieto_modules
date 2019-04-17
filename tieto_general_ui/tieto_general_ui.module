@@ -453,6 +453,14 @@ function tieto_general_ui_form_views_exposed_form_alter(
  * @todo: Move to service.
  */
 function _tieto_general_ui_unavailable_information_owner_notification(FieldableEntityInterface $entity): void {
+  // Don't show this message on AJAX requests.
+  if (
+    ($request = \Drupal::request())
+    && $request->isXmlHttpRequest()
+  ) {
+    return;
+  }
+
   if (!$entity->hasField('field_information_owner')) {
     return;
   }
