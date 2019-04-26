@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_ldap;
 
+use Drupal\taxonomy\TermInterface;
 use Drupal\taxonomy\TermStorageInterface;
 use function array_key_exists;
 use function array_keys;
@@ -296,9 +297,12 @@ class TaxonomyImporter extends ImporterBase {
     }
 
     // Check stored usercount.
-    if ($tietoLdapUserCount !== $userCount) {
+    if (
+      $tietoLdapUserCount !== $userCount
       /** @var \Drupal\taxonomy\TermInterface $term */
-      $term = $this->termStorage()->load($tid);
+      && ($term = $this->termStorage()->load($tid))
+      && $this->ignoreTermUpdate($term) === FALSE
+    ) {
       $term->set('tieto_ldap_usercount', $userCount);
       $term->save();
 
@@ -338,6 +342,10 @@ class TaxonomyImporter extends ImporterBase {
     /** @var \Drupal\taxonomy\TermInterface[] $terms */
     $terms = $this->termStorage()->loadMultiple($notImportedTids);
     foreach ($terms as $term) {
+      if ($this->ignoreTermUpdate($term) === TRUE) {
+        continue;
+      }
+
       $term->tieto_ldap_usercount = 0;
       $term->save();
       $message = $this->t('%vocab: term inactivated: %term (tid:@tid)', [
@@ -348,6 +356,23 @@ class TaxonomyImporter extends ImporterBase {
       $this->messenger()->addStatus($message);
       $this->logger->info($message);
     }
+  }
+
+  /**
+   * Determines whether the term should be updated or not.
+   *
+   * @param \Drupal\taxonomy\TermInterface $term
+   *   The term.
+   *
+   * @return bool
+   *   Whether the term should be ignored from LDAP update.
+   */
+  private function ignoreTermUpdate(TermInterface $term): bool {
+    if ($term->hasField('field_ignore_ldap_update') === FALSE) {
+      return FALSE;
+    }
+
+    return (bool) $term->get('field_ignore_ldap_update')->value === TRUE;
   }
 
 }
