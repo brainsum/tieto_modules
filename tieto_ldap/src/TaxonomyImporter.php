@@ -2,7 +2,11 @@
 
 namespace Drupal\tieto_ldap;
 
+use function array_key_exists;
+use function array_keys;
+use function array_merge;
 use Drupal\taxonomy\TermStorageInterface;
+use function reset;
 
 /**
  * Controller routines for taxonomy importer route.
@@ -98,7 +102,7 @@ class TaxonomyImporter extends ImporterBase {
           $intermittentAttrs[] = $attributeNames;
         }
 
-        $attributes = \array_merge(...$intermittentAttrs);
+        $attributes = array_merge(...$intermittentAttrs);
 
         $ldapServer->attributes = $attributes;
         // Should be 1 ?
@@ -142,7 +146,7 @@ class TaxonomyImporter extends ImporterBase {
                 $leaf = &$this->termHierarchy[$vocab];
                 $parent = empty($leaf) ? ['children' => []] : $this->termHierarchy[$vocab];
                 foreach ($termHierarchy as $attributeName => $label) {
-                  if (\array_key_exists($label, $parent)) {
+                  if (array_key_exists($label, $parent)) {
                     $leaf[$label]['usercount']++;
                   }
                   else {
@@ -164,7 +168,7 @@ class TaxonomyImporter extends ImporterBase {
               $this->inactivateTerms();
             }
             else {
-              $message = t('inactivateTerms not invoked: result_count (@result_count) not match rowsImportChecked (@rowsImportChecked)', [
+              $message = $this->t('inactivateTerms not invoked: result_count (@result_count) not match rowsImportChecked (@rowsImportChecked)', [
                 '@result_count' => $resultCount,
                 '@rowsImportChecked' => $this->rowsImportChecked,
               ]);
@@ -258,7 +262,7 @@ class TaxonomyImporter extends ImporterBase {
     $query->condition('t.vid', $vid);
     $query->condition('p.parent_target_id', $parent);
     $result = $query->execute()->fetchAll();
-    $data = \reset($result);
+    $data = reset($result);
     $tid = $data->tid;
 
     $userCount = $item['usercount'];
@@ -326,8 +330,8 @@ class TaxonomyImporter extends ImporterBase {
    */
   private function inactivateTerms(): void {
     // Get all not imported terms.
-    $query = \Drupal::entityQuery('taxonomy_term');
-    $query->condition('vid', \array_keys($this->getAttributeStructure()), 'IN');
+    $query = $this->termStorage()->getQuery();
+    $query->condition('vid', array_keys($this->getAttributeStructure()), 'IN');
     $query->condition('tid', $this->tidsImported, 'NOT IN');
     $notImportedTids = $query->execute();
 
