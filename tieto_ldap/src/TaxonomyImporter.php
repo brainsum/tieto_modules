@@ -2,10 +2,10 @@
 
 namespace Drupal\tieto_ldap;
 
+use Drupal\taxonomy\TermStorageInterface;
 use function array_key_exists;
 use function array_keys;
 use function array_merge;
-use Drupal\taxonomy\TermStorageInterface;
 use function reset;
 
 /**
@@ -41,7 +41,7 @@ class TaxonomyImporter extends ImporterBase {
   /**
    * Term storage.
    *
-   * @var \Drupal\taxonomy\TermStorageInterface
+   * @var \Drupal\taxonomy\TermStorageInterface|null
    */
   protected $termStorage;
 
@@ -75,7 +75,7 @@ class TaxonomyImporter extends ImporterBase {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function import(bool $import = FALSE): ? array {
+  public function import(bool $import = FALSE): ?array {
     $mode = ($import ? 'import' : 'test');
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last", $this->time->getRequestTime());
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last_uid", $this->currentUser->id());
@@ -211,7 +211,7 @@ class TaxonomyImporter extends ImporterBase {
    * @return array
    *   Attribute structure.
    */
-  private function getAttributeStructure() : array {
+  private function getAttributeStructure(): array {
     return [
       'unit' => ['o', 'ou', 'admindescription'],
       'location' => ['co', 'l', 'physicaldeliveryofficename'],
