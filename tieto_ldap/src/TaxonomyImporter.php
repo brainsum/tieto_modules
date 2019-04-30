@@ -268,12 +268,13 @@ class TaxonomyImporter extends ImporterBase {
     $query->condition('t.vid', $vid);
     $query->condition('p.parent_target_id', $parent);
     $result = $query->execute()->fetchAll();
-    $data = reset($result);
     // @todo: Handle reset() returning false.
+    $data = reset($result);
+
     $tid = $data->tid;
     $tietoLdapUserCount = $data->tieto_ldap_usercount_reference;
     $term = NULL;
-    $actionType = '';
+
     // No Term found, create it.
     if (!$tid) {
       $termData = [
@@ -286,34 +287,26 @@ class TaxonomyImporter extends ImporterBase {
 
       /** @var \Drupal\taxonomy\TermInterface $term */
       $term = $this->termStorage()->create($termData);
-      $term->save();
-      $tid = $term->id();
-
-      // Update usercount.
-      $tietoLdapUserCount = $userCount;
-
-      $actionType = 'term created';
     }
-
-    // Check stored usercount.
-    if (
-      $tietoLdapUserCount !== $userCount
-    ) {
+    elseif ($tietoLdapUserCount !== $userCount) {
       /** @var \Drupal\taxonomy\TermInterface $term */
       $term = $this->termStorage()->load($tid);
+    }
+
+    if ($term !== NULL) {
+      $actionType = $term->isNew() ? 'term created' : 'term usercount updated';
+
       $visibleUserCount = $this->ignoreTermUpdate($term) ? 0 : $userCount;
       $term->set('tieto_ldap_usercount', $visibleUserCount);
       $term->set('tieto_ldap_usercount_reference', $userCount);
       $term->save();
 
-      $actionType = 'term usercount updated';
-    }
+      $tid = $term->id();
 
-    if ($term !== NULL) {
       $message = $this->t('%vocab: %actionType: %term (tid: @tid, parent: @parent, usercount: @usercount)', [
         '%vocab' => $vid,
-        '%term' => $term->getName(),
-        '@tid' => $term->id(),
+        '%term' => $name,
+        '@tid' => $tid,
         '@parent' => $parent,
         '@usercount' => $userCount,
         '%actionType' => $actionType,
