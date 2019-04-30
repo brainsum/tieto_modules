@@ -255,19 +255,25 @@ class TaxonomyImporter extends ImporterBase {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function saveTerms(string $vid, string $name, array $item, int $parent = 0): void {
+    $userCount = $item['usercount'];
+
     $query = $this->database
       ->select('taxonomy_term_field_data', 't');
     $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
-    $query->fields('t', ['tid', 'tieto_ldap_usercount']);
+    $query->fields('t', [
+      'tid',
+      'tieto_ldap_usercount_reference',
+    ]);
     $query->condition('t.name', $name);
     $query->condition('t.vid', $vid);
     $query->condition('p.parent_target_id', $parent);
     $result = $query->execute()->fetchAll();
     $data = reset($result);
+    // @todo: Handle reset() returning false.
     $tid = $data->tid;
-
-    $userCount = $item['usercount'];
-    $tietoLdapUserCount = $data->tieto_ldap_usercount;
+    $tietoLdapUserCount = $data->tieto_ldap_usercount_reference;
+    $term = NULL;
+    $actionType = '';
     // No Term found, create it.
     if (!$tid) {
       $termData = [
@@ -286,15 +292,7 @@ class TaxonomyImporter extends ImporterBase {
       // Update usercount.
       $tietoLdapUserCount = $userCount;
 
-      $message = $this->t('%vocab: term created: %term (tid:@tid, parent:@parent, usercount:@usercount)', [
-        '%vocab' => $vid,
-        '%term' => $term->getName(),
-        '@tid' => $tid,
-        '@parent' => $parent,
-        '@usercount' => $userCount,
-      ]);
-      $this->messenger()->addStatus($message);
-      $this->logger->info($message);
+      $actionType = 'term created';
     }
 
     // Check stored usercount.
@@ -308,16 +306,23 @@ class TaxonomyImporter extends ImporterBase {
       $term->set('tieto_ldap_usercount_reference', $userCount);
       $term->save();
 
-      $message = $this->t('%vocab: term usercount updated: %term (tid:@tid, parent:@parent, usercount:@usercount)', [
+      $actionType = 'term usercount updated';
+    }
+
+    if ($term !== NULL) {
+      $message = $this->t('%vocab: %actionType: %term (tid: @tid, parent: @parent, usercount: @usercount)', [
         '%vocab' => $vid,
         '%term' => $term->getName(),
-        '@tid' => $tid,
+        '@tid' => $term->id(),
         '@parent' => $parent,
         '@usercount' => $userCount,
+        '%actionType' => $actionType,
       ]);
+
       $this->messenger()->addStatus($message);
       $this->logger->info($message);
     }
+
     $this->tidsImported[] = $tid;
 
     if (!empty($item['children'])) {
