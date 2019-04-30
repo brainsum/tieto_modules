@@ -9,6 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\taxonomy\TermInterface;
 use Drupal\user\UserInterface;
 
 /**
@@ -206,5 +207,22 @@ function tieto_ldap_preprocess_status_messages(&$variables) {
     if (empty($variables['message_list'][$type])) {
       unset($variables['message_list'][$type]);
     }
+  }
+}
+
+/**
+ * Implements hook_ENTITY_TYPE_presave().
+ */
+function tieto_ldap_taxonomy_term_presave(TermInterface $term) {
+  if (
+    $term->hasField('field_ignore_ldap_update')
+    && $term->hasField('tieto_ldap_usercount')
+    && $term->hasField('tieto_ldap_usercount_reference')
+  ) {
+    $forceNullUserCount = (bool) $term->get('field_ignore_ldap_update')->value === TRUE;
+
+    $userCount = $forceNullUserCount ? 0 : (int) $term->get('tieto_ldap_usercount_reference')->value;
+
+    $term->set('tieto_ldap_usercount', $userCount);
   }
 }
