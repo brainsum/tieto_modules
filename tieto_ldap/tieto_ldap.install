@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Database\Database;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\Entity\User;
 
 /**
@@ -52,4 +53,25 @@ function tieto_ldap_update_8002() {
       }
     }
   }
+}
+
+/**
+ * Install new "usercount reference" field for terms.
+ */
+function tieto_ldap_update_8601() {
+  $definition = BaseFieldDefinition::create('integer')
+    ->setName('tieto_ldap_usercount_reference')
+    ->setLabel(\t('AD user count (reference)'))
+    ->setDescription(\t('The count of users assigned to this term in AD. Used as a reference.'))
+    ->setTargetEntityTypeId('taxonomy_term')
+    ->setDisplayConfigurable('form', TRUE)
+    ->setDisplayConfigurable('view', TRUE);
+
+  \Drupal::entityDefinitionUpdateManager()
+    ->installFieldStorageDefinition(
+      'tieto_ldap_usercount_reference',
+      'taxonomy_term',
+      'taxonomy_term',
+      $definition
+    );
 }

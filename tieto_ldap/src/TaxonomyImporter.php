@@ -275,6 +275,7 @@ class TaxonomyImporter extends ImporterBase {
         'vid' => $vid,
         'parent' => $parent,
         'tieto_ldap_usercount' => $userCount,
+        'tieto_ldap_usercount_reference' => $userCount,
       ];
 
       /** @var \Drupal\taxonomy\TermInterface $term */
@@ -299,11 +300,12 @@ class TaxonomyImporter extends ImporterBase {
     // Check stored usercount.
     if (
       $tietoLdapUserCount !== $userCount
-      /** @var \Drupal\taxonomy\TermInterface $term */
-      && ($term = $this->termStorage()->load($tid))
-      && $this->ignoreTermUpdate($term) === FALSE
     ) {
-      $term->set('tieto_ldap_usercount', $userCount);
+      /** @var \Drupal\taxonomy\TermInterface $term */
+      $term = $this->termStorage()->load($tid);
+      $visibleUserCount = $this->ignoreTermUpdate($term) ? 0 : $userCount;
+      $term->set('tieto_ldap_usercount', $visibleUserCount);
+      $term->set('tieto_ldap_usercount_reference', $userCount);
       $term->save();
 
       $message = $this->t('%vocab: term usercount updated: %term (tid:@tid, parent:@parent, usercount:@usercount)', [
@@ -342,11 +344,13 @@ class TaxonomyImporter extends ImporterBase {
     /** @var \Drupal\taxonomy\TermInterface[] $terms */
     $terms = $this->termStorage()->loadMultiple($notImportedTids);
     foreach ($terms as $term) {
+      // @todo: Maybe no longer needed here?
       if ($this->ignoreTermUpdate($term) === TRUE) {
         continue;
       }
 
-      $term->tieto_ldap_usercount = 0;
+      $term->set('tieto_ldap_usercount', 0);
+      $term->set('tieto_ldap_usercount_reference', 0);
       $term->save();
       $message = $this->t('%vocab: term inactivated: %term (tid:@tid)', [
         '%vocab' => $term->bundle(),

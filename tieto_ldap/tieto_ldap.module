@@ -9,7 +9,7 @@ use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\user\Entity\User;
+use Drupal\user\UserInterface;
 
 /**
  * Implements hook_help().
@@ -61,16 +61,30 @@ function tieto_ldap_entity_base_field_info_alter(&$fields, EntityTypeInterface $
  * Define custom field.
  */
 function tieto_ldap_entity_field_storage_info(EntityTypeInterface $entityType) {
+  $definitions = [];
   if ($entityType->id() === 'taxonomy_term') {
+    // @todo: Add some form of API for getting whether it should be hidden, etc.
+    // @todo: Use this api instead of "usercount == 0" conditions in code.
+    // @todo: Add boolean fields instead, e.g "inactive" or "hidden".
+    // @todo: Update API for these flags.
+    // @todo: Remove tieto_ldap_usercount_reference.
     $definitions['tieto_ldap_usercount'] = BaseFieldDefinition::create('integer')
       ->setName('tieto_ldap_usercount')
       ->setLabel(\t('AD user count'))
-      ->setDescription(\t('The count of users assigned to this term in AD.'))
+      ->setDescription(\t('The count of users assigned to this term in AD. Integrated into site functionalities. Managed automatically.'))
       ->setTargetEntityTypeId($entityType->id())
       ->setDisplayConfigurable('form', TRUE)
       ->setDisplayConfigurable('view', TRUE);
-    return $definitions;
+
+    $definitions['tieto_ldap_usercount_reference'] = BaseFieldDefinition::create('integer')
+      ->setName('tieto_ldap_usercount_reference')
+      ->setLabel(\t('AD user count (reference)'))
+      ->setDescription(\t('The count of users assigned to this term in AD. Used as a reference.'))
+      ->setTargetEntityTypeId($entityType->id())
+      ->setDisplayConfigurable('form', TRUE)
+      ->setDisplayConfigurable('view', TRUE);
   }
+  return $definitions;
 }
 
 /**
@@ -79,6 +93,7 @@ function tieto_ldap_entity_field_storage_info(EntityTypeInterface $entityType) {
  * Add field definition only for specified bundles.
  */
 function tieto_ldap_entity_bundle_field_info(EntityTypeInterface $entityType, $bundle) {
+  $definitions = [];
   if (
     $entityType->id() === 'taxonomy_term'
     && \in_array($bundle, [
@@ -87,10 +102,13 @@ function tieto_ldap_entity_bundle_field_info(EntityTypeInterface $entityType, $b
       'role',
     ])
   ) {
-    $definitions['tieto_ldap_usercount'] = \Drupal::service('entity_field.manager')
-      ->getFieldStorageDefinitions($entityType->id())['tieto_ldap_usercount'];
-    return $definitions;
+    $typeFields = \Drupal::service('entity_field.manager')
+      ->getFieldStorageDefinitions($entityType->id());
+
+    $definitions['tieto_ldap_usercount'] = $typeFields['tieto_ldap_usercount'];
+    $definitions['tieto_ldap_usercount_reference'] = $typeFields['tieto_ldap_usercount_reference'];
   }
+  return $definitions;
 }
 
 /**
@@ -118,7 +136,7 @@ function tieto_ldap_form_user_form_alter(&$form, FormStateInterface $form_state,
  * Remove empty LDAP tokens on user save for fullname.
  * Set the field_location term ID depends on token value.
  */
-function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, array $context) {
+function tieto_ldap_ldap_user_edit_user_alter(UserInterface $account, array &$ldapUser, array $context) {
   $config = \Drupal::config('ldap_user.settings');
   $tokenProcessor = \Drupal::service('ldap.token_processor');
 
@@ -144,7 +162,7 @@ function tieto_ldap_ldap_user_edit_user_alter(User $account, array &$ldapUser, a
 
       $query = $database->select('taxonomy_term_field_data', 't');
       $query->join('taxonomy_term__parent', 'p', 'p.entity_id = t.tid');
-      $query->fields('t', ['tid', 'tieto_ldap_usercount']);
+      $query->addField('t', 'tid');
       $query->condition('t.name', $location);
       $query->condition('t.vid', 'location');
       $query->condition('p.parent_target_id', 0);
@@ -176,7 +194,7 @@ function tieto_ldap_preprocess_status_messages(&$variables) {
   if (isset($variables['message_list'][$type])) {
     $variables['message_list'][$type] = \array_filter(
       $variables['message_list'][$type],
-      function ($message) use ($text) {
+      static function ($message) use ($text) {
         /** @var string|\Drupal\Component\Render\MarkupInterface $message */
         $msgAsStr = (\is_string($message) ? $message : $message->__toString());
         return !($msgAsStr === $text->__toString());
