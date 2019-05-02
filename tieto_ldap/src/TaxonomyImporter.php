@@ -193,6 +193,8 @@ class TaxonomyImporter extends ImporterBase {
         '#markup' => $output,
       ];
     }
+
+    return NULL;
   }
 
   /**
