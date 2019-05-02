@@ -17,6 +17,13 @@ function tieto_ldap_install() {
 }
 
 /**
+ * Implements hook_uninstall().
+ */
+function tieto_ldap_uninstall() {
+  // @todo: Remove custom fields, e.g tieto_ldap_usercount_reference.
+}
+
+/**
  * Set ldap_exclude for search engine (IpAuth) user.
  */
 function tieto_ldap_update_8001() {
