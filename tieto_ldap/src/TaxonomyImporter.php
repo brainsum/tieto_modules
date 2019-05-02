@@ -69,14 +69,14 @@ class TaxonomyImporter extends ImporterBase {
    * @param bool $import
    *   TRUE for import, FALSE for test.
    *
-   * @return array|null
-   *   Import result message or (for CLI only) NULL.
+   * @return array
+   *   Import result message (for CLI only).
    *
    * @throws \Drupal\Core\Entity\EntityStorageException
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
-  public function import(bool $import = FALSE): ?array {
+  public function import(bool $import = FALSE): array {
     $mode = ($import ? 'import' : 'test');
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last", $this->time->getRequestTime());
     $this->state->set("tieto_ldap.taxonomy_{$mode}_last_uid", $this->currentUser->id());
@@ -194,7 +194,7 @@ class TaxonomyImporter extends ImporterBase {
       ];
     }
 
-    return NULL;
+    return [];
   }
 
   /**
