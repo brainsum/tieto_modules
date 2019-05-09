@@ -219,10 +219,23 @@ function tieto_ldap_taxonomy_term_presave(TermInterface $term) {
     && $term->hasField('tieto_ldap_usercount')
     && $term->hasField('tieto_ldap_usercount_reference')
   ) {
-    $forceNullUserCount = (bool) $term->get('field_ignore_ldap_update')->value === TRUE;
-
+    $forceNullUserCount = (bool) $term->get('field_ignore_ldap_update')->value;
     $userCount = $forceNullUserCount ? 0 : (int) $term->get('tieto_ldap_usercount_reference')->value;
-
     $term->set('tieto_ldap_usercount', $userCount);
+
+    // We might not have an ID, if it's a create.
+    // We want to cascade "hide", but not unhide.
+    if ($forceNullUserCount && ($termId = $term->id())) {
+      /** @var \Drupal\taxonomy\TermStorageInterface $termStorage */
+      $termStorage = \Drupal::entityTypeManager()->getStorage('taxonomy_term');
+      $termChildren = $termStorage->loadChildren($termId, $term->bundle());
+
+      /** @var \Drupal\taxonomy\TermInterface $childTerm */
+      foreach ($termChildren as $childTerm) {
+        $childTerm->set('field_ignore_ldap_update', TRUE);
+        // Note, hidden recursion, this will also call hook_presave().
+        $childTerm->save();
+      }
+    }
   }
 }
