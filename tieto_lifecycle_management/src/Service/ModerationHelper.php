@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_lifecycle_management\Service;
 
+use DateInterval;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -13,6 +14,9 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use function array_keys;
+use function json_encode;
+use function key;
 
 /**
  * Class ModerationHelper.
@@ -410,7 +414,7 @@ class ModerationHelper {
             $reason = 'was too old';
           }
 
-          $info = \json_encode([
+          $info = json_encode([
             'id' => $entityId,
             'title' => $entity->label(),
             'url' => $entity->toUrl()->toString(),
@@ -455,7 +459,7 @@ class ModerationHelper {
   public function isEntityScheduled(EntityInterface $entity): bool {
     $entityConfig = $this->lifeCycleConfig->get('fields')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
 
-    foreach (\array_keys($entityConfig) as $scheduleFieldName) {
+    foreach (array_keys($entityConfig) as $scheduleFieldName) {
       /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
       if ($entity->hasField($scheduleFieldName)
         && ($field = $entity->get($scheduleFieldName))
@@ -481,7 +485,7 @@ class ModerationHelper {
    */
   public function offsetTimestamp(int $timestamp, string $offset): int {
     return DrupalDateTime::createFromTimestamp($timestamp)
-      ->add(\DateInterval::createFromDateString($offset))
+      ->add(DateInterval::createFromDateString($offset))
       ->getTimestamp();
   }
 
@@ -520,7 +524,7 @@ class ModerationHelper {
     }
 
     /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface $revision */
-    $revision = $storage->loadRevision(\key($data));
+    $revision = $storage->loadRevision(key($data));
 
     if ($revision === NULL) {
       return NULL;
