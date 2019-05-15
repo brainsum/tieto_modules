@@ -14,6 +14,7 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use function array_chunk;
 use function array_keys;
 use function json_encode;
 use function key;
@@ -393,56 +394,66 @@ class ModerationHelper {
       /** @var \Drupal\Core\Entity\EntityStorageInterface $entityStorage */
       $entityStorage = $this->entityTypeManager->getStorage($entityType);
 
-      // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
-      /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
-      foreach ($entityStorage->loadMultiple() as $entity) {
-        if ($this->isEntityScheduled($entity)) {
-          continue;
-        }
+      $entityQuery = $entityStorage->getQuery();
+      $results = $entityQuery->execute();
 
-        $entityId = $entity->id();
+      $entityIdsBatched = array_chunk($results, 500, TRUE);
 
-        if (
-          ($isUnpublished = $this->shouldDeleteUnpublishedEntity($entity))
-          || ($isOld = $this->shouldDeleteOldEntity($entity))
-        ) {
-          $reason = 'unknown';
-          if (isset($isUnpublished) && $isUnpublished === TRUE) {
-            $reason = 'has never been published';
-          }
-          if (isset($isOld) && $isOld === TRUE) {
-            $reason = 'was too old';
+      foreach ($entityIdsBatched as $entityIds) {
+        // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
+        /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
+        foreach ($entityStorage->loadMultiple($entityIdsBatched) as $entity) {
+          if ($this->isEntityScheduled($entity)) {
+            continue;
           }
 
-          $info = json_encode([
-            'id' => $entityId,
-            'title' => $entity->label(),
-            'url' => $entity->toUrl()->toString(),
-          ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+          $entityId = $entity->id();
 
-          $entity->delete();
-          $this->logger->info("Entity ({$entityId}) has been deleted [reason: {$reason}]. Additional info: {$info}");
-          continue;
-        }
+          if (
+            ($isUnpublished = $this->shouldDeleteUnpublishedEntity($entity))
+            || ($isOld = $this->shouldDeleteOldEntity($entity))
+          ) {
+            $reason = 'unknown';
+            if (isset($isUnpublished) && $isUnpublished === TRUE) {
+              $reason = 'has never been published';
+            }
+            if (isset($isOld) && $isOld === TRUE) {
+              $reason = 'was too old';
+            }
 
-        $entityConfig = $bundles[$entity->bundle()] ?? [];
+            $info = json_encode([
+              'id' => $entityId,
+              'title' => $entity->label(),
+              'url' => $entity->toUrl()->toString(),
+            ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
-        // Update moderation state according to the config, if users didn't
-        // add a scheduled update date.
-        // No need to re-update, if it already is the target state.
-        // @todo: Maybe order this based on offset (DESC), so we don't update
-        // multiple times.
-        foreach ($entityConfig as $fieldName => $fieldSettings) {
-          $fieldSettings['field_name'] = $fieldName;
+            $entity->delete();
+            $this->logger->info("Entity ({$entityId}) has been deleted [reason: {$reason}]. Additional info: {$info}");
+            continue;
+          }
 
-          // No real reason to update multiple times.
-          if ($this->shouldUpdateModerationState($entity, $fieldSettings)) {
-            $entity->get('moderation_state')->setValue($fieldSettings['target_state']);
-            $entity->save();
-            $this->logger->info("Entity ({$entityId}) state has been updated to {$fieldSettings['target_state']}.");
-            break;
+          $entityConfig = $bundles[$entity->bundle()] ?? [];
+
+          // Update moderation state according to the config, if users didn't
+          // add a scheduled update date.
+          // No need to re-update, if it already is the target state.
+          // @todo: Maybe order this based on offset (DESC), so we don't update
+          // multiple times.
+          foreach ($entityConfig as $fieldName => $fieldSettings) {
+            $fieldSettings['field_name'] = $fieldName;
+
+            // No real reason to update multiple times.
+            if ($this->shouldUpdateModerationState($entity, $fieldSettings)) {
+              $entity->get('moderation_state')
+                ->setValue($fieldSettings['target_state']);
+              $entity->save();
+              $this->logger->info("Entity ({$entityId}) state has been updated to {$fieldSettings['target_state']}.");
+              break;
+            }
           }
         }
+
+        $entityStorage->resetCache($entityIds);
       }
     }
   }
