@@ -388,6 +388,13 @@ class ModerationHelper {
         // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
         /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
         foreach ($entityStorage->loadMultiple($entityIds) as $entity) {
+          if (
+            $entity->hasField('ignore_lifecycle_management')
+            && (bool) $entity->get('ignore_lifecycle_management')->value === TRUE
+          ) {
+            continue;
+          }
+
           if ($this->isEntityScheduled($entity)) {
             continue;
           }
