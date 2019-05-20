@@ -30,9 +30,13 @@ class ModerationHelper {
   use StringTranslationTrait;
 
   private $entityTypeManager;
+
   private $time;
+
   private $lifeCycleConfig;
+
   private $logger;
+
   private $dateFormatter;
 
   /**
@@ -119,11 +123,11 @@ class ModerationHelper {
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $deleteTime = $this->unpublishedEntityDeleteTime($entity);
@@ -149,11 +153,11 @@ class ModerationHelper {
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function unpublishNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $unpublishTime = $this->entityUnpublishTime($entity);
@@ -179,11 +183,11 @@ class ModerationHelper {
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function archiveNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $archiveTime = $this->entityArchiveTime($entity);
@@ -209,11 +213,11 @@ class ModerationHelper {
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
    *   The entity.
    *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     $deleteTime = $this->entityDeleteTime($entity);
