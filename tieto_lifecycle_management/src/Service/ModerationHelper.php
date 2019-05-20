@@ -308,14 +308,13 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function entityUnpublishTime(EntityInterface $entity): ?int {
-    $lastPublishDate = $this->entityLastPublishDate($entity);
+    $offset = $this->getStateOffset($entity, 'unpublished_content');
 
-    if ($lastPublishDate === NULL) {
+    if ($offset === NULL) {
       return NULL;
     }
 
-    $offset = $this->getStateOffset($entity, 'unpublished_content');
-    return $this->offsetTimestamp($lastPublishDate, $offset);
+    return $this->offsetLastPublishTime($entity, $offset);
   }
 
   /**
@@ -331,14 +330,13 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function entityArchiveTime(EntityInterface $entity): ?int {
-    $lastPublishDate = $this->entityLastPublishDate($entity);
+    $offset = $this->getStateOffset($entity, 'trash');
 
-    if ($lastPublishDate === NULL) {
+    if ($offset === NULL) {
       return NULL;
     }
 
-    $offset = $this->getStateOffset($entity, 'trash');
-    return $this->offsetTimestamp($lastPublishDate, $offset);
+    return $this->offsetLastPublishTime($entity, $offset);
   }
 
   /**
@@ -612,14 +610,8 @@ class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function entityDeleteTime(EntityInterface $entity): ?int {
-    $lastPublishDate = $this->entityLastPublishDate($entity);
-
-    if ($lastPublishDate === NULL) {
-      return NULL;
-    }
-
     // @todo: Make offset configurable.
-    return $this->offsetTimestamp($lastPublishDate, '+3 years');
+    return $this->offsetLastPublishTime($entity, '+3 years');
   }
 
   /**
@@ -669,16 +661,39 @@ class ModerationHelper {
       return FALSE;
     }
 
+    $moderationUpdateTime = $this->offsetLastPublishTime($entity, $fieldSettings['date']);
+
+    // Was not yet published.
+    if ($moderationUpdateTime === NULL) {
+      return FALSE;
+    }
+
+    return $this->time->getRequestTime() >= $moderationUpdateTime;
+  }
+
+  /**
+   * Return the last published timestamp with an offset.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   * @param string $offset
+   *   The offset.
+   *
+   * @return int|null
+   *   The last publish date timestamp with the offset applied, or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  private function offsetLastPublishTime(EntityInterface $entity, string $offset): ?int {
     $lastPublishDate = $this->entityLastPublishDate($entity);
 
     // Was not yet published.
     if ($lastPublishDate === NULL) {
-      return FALSE;
+      return NULL;
     }
 
-    $moderationUpdateTime = $this->offsetTimestamp($lastPublishDate, $fieldSettings['date']);
-
-    return $this->time->getRequestTime() >= $moderationUpdateTime;
+    return $this->offsetTimestamp($lastPublishDate, $offset);
   }
 
 }
