@@ -296,23 +296,6 @@ class ModerationHelper {
   }
 
   /**
-   * Show a notification about moderation states.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   *
-   * @deprecated
-   */
-  public function showNotification(FieldableEntityInterface $entity): void {
-    if (($message = $this->notificationMessage($entity)) && $message !== NULL) {
-      $this->messenger()->addWarning($message);
-    }
-  }
-
-  /**
    * Returns the entity unpublish time if possible.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
