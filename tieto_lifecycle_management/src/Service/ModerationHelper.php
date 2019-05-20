@@ -402,7 +402,7 @@ class ModerationHelper {
       foreach ($entityIdsBatched as $entityIds) {
         // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
         /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
-        foreach ($entityStorage->loadMultiple($entityIdsBatched) as $entity) {
+        foreach ($entityStorage->loadMultiple($entityIds) as $entity) {
           if ($this->isEntityScheduled($entity)) {
             continue;
           }
