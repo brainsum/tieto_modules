@@ -3,6 +3,7 @@
 namespace Drupal\tieto_lifecycle_management\Service;
 
 use DateInterval;
+use Drupal;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -14,6 +15,10 @@ use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
+use Drupal\tieto_lifecycle_management\Constant\RemovalReason;
+use Drupal\tieto_lifecycle_management\Event\LifeCycleIgnoreEvent;
+use Drupal\tieto_lifecycle_management\Event\LifeCycleRemoveEvent;
+use Drupal\tieto_lifecycle_management\Event\LifeCycleUpdateEvent;
 use function array_chunk;
 use function array_keys;
 use function json_encode;
@@ -38,6 +43,8 @@ class ModerationHelper {
   private $logger;
 
   private $dateFormatter;
+
+  private $eventDispatcher;
 
   /**
    * ModerationHelper constructor.
@@ -65,6 +72,8 @@ class ModerationHelper {
     $this->lifeCycleConfig = $configFactory->get('tieto_lifecycle_management.settings');
     $this->logger = $loggerChannelFactory->get('tieto_lifecycle_management');
     $this->dateFormatter = $dateFormatter;
+
+    $this->eventDispatcher = Drupal::service('event_dispatcher');
   }
 
   /**
@@ -398,25 +407,37 @@ class ModerationHelper {
           if ($this->isEntityScheduled($entity)) {
             continue;
           }
-
           $entityId = $entity->id();
 
           if (
             ($isUnpublished = $this->shouldDeleteUnpublishedEntity($entity))
             || ($isOld = $this->shouldDeleteOldEntity($entity))
           ) {
-            $reason = 'unknown';
+            $reason = RemovalReason::UNKNOWN;
             if (isset($isUnpublished) && $isUnpublished === TRUE) {
-              $reason = 'has never been published';
+              $reason = RemovalReason::NEVER_PUBLISHED;
             }
             if (isset($isOld) && $isOld === TRUE) {
-              $reason = 'was too old';
+              $reason = RemovalReason::TOO_OLD;
             }
+
+            // @todo: More data, e.g timestamps?
+            $event = new LifeCycleRemoveEvent(
+              $entity,
+              $reason
+            );
+
+            $this->eventDispatcher->dispatch(
+              $event::NAME,
+              $event
+            );
 
             $info = json_encode([
               'id' => $entityId,
               'title' => $entity->label(),
-              'url' => $entity->toUrl()->toString(),
+              'url' => $entity->toUrl('canonical', ['absolute' => TRUE])
+                ->toString(TRUE)
+                ->getGeneratedUrl(),
             ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
             $entity->delete();
@@ -426,6 +447,7 @@ class ModerationHelper {
 
           $entityConfig = $bundles[$entity->bundle()] ?? [];
 
+          $wasUpdated = FALSE;
           // Update moderation state according to the config, if users didn't
           // add a scheduled update date.
           // No need to re-update, if it already is the target state.
@@ -436,6 +458,19 @@ class ModerationHelper {
 
             // No real reason to update multiple times.
             if ($this->shouldUpdateModerationState($entity, $fieldSettings)) {
+              $wasUpdated = TRUE;
+
+              // @todo: More data, e.g timestamps?
+              $event = new LifeCycleUpdateEvent(
+                $entity,
+                $fieldSettings['target_state']
+              );
+
+              $this->eventDispatcher->dispatch(
+                $event::NAME,
+                $event
+              );
+
               $entity->get('moderation_state')
                 ->setValue($fieldSettings['target_state']);
               $entity->save();
@@ -443,11 +478,27 @@ class ModerationHelper {
               break;
             }
           }
+
+          // @todo?: Maybe check isset($event). If it's not, set the Ignore one.
+          // @todo: If ^ is added, dispatch outside the conditional.
+          if ($wasUpdated === FALSE) {
+            // @todo: More data, e.g timestamps?
+            $event = new LifeCycleIgnoreEvent(
+              $entity
+            );
+
+            $this->eventDispatcher->dispatch(
+              $event::NAME,
+              $event
+            );
+          }
         }
 
         $entityStorage->resetCache($entityIds);
       }
     }
+
+    // @todo: Dispatch LifeCycleEndedEvent (Required, when wanting to send aggregate mails).
   }
 
   /**
