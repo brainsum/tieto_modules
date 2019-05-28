@@ -3,7 +3,6 @@
 namespace Drupal\tieto_lifecycle_management\Service;
 
 use DateInterval;
-use Drupal;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
@@ -19,6 +18,7 @@ use Drupal\tieto_lifecycle_management\Constant\RemovalReason;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleIgnoreEvent;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleRemoveEvent;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleUpdateEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use function array_chunk;
 use function array_keys;
 use function json_encode;
@@ -59,13 +59,16 @@ class ModerationHelper {
    *   Logger channel factory.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
    *   Date formatter.
+   * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
+   *   Event dispatcher.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     TimeInterface $time,
     ConfigFactoryInterface $configFactory,
     LoggerChannelFactoryInterface $loggerChannelFactory,
-    DateFormatterInterface $dateFormatter
+    DateFormatterInterface $dateFormatter,
+    EventDispatcherInterface $dispatcher
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->time = $time;
@@ -73,7 +76,7 @@ class ModerationHelper {
     $this->logger = $loggerChannelFactory->get('tieto_lifecycle_management');
     $this->dateFormatter = $dateFormatter;
 
-    $this->eventDispatcher = Drupal::service('event_dispatcher');
+    $this->eventDispatcher = $dispatcher;
   }
 
   /**
@@ -90,7 +93,7 @@ class ModerationHelper {
    * @todo: temporary
    * @todo: FIXME, move to config.
    */
-  protected function isCorrectTransition(string $currentState, string $targetState): bool {
+  public function isCorrectTransition(string $currentState, string $targetState): bool {
     switch ($currentState) {
       case 'unpublished':
         return TRUE;
@@ -394,6 +397,7 @@ class ModerationHelper {
       $entityIdsBatched = array_chunk($results, 500, TRUE);
 
       foreach ($entityIdsBatched as $entityIds) {
+        // Note: Entities loaded are the default revision, not latest.
         // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
         /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
         foreach ($entityStorage->loadMultiple($entityIds) as $entity) {
@@ -407,6 +411,7 @@ class ModerationHelper {
           if ($this->isEntityScheduled($entity)) {
             continue;
           }
+
           $entityId = $entity->id();
 
           if (

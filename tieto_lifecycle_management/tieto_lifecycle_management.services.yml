@@ -7,3 +7,4 @@ services:
       - '@config.factory'
       - '@logger.factory'
       - '@date.formatter'
+      - '@event_dispatcher'
