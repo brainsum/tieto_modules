@@ -1,0 +1,6 @@
+tieto_lifecycle_management_notifications.settings:
+  type: mapping
+  mapping:
+    contact_mail:
+      type: string
+      label: 'Contact mail'
