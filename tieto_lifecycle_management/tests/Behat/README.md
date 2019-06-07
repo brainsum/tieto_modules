@@ -16,7 +16,7 @@ take a look at `Zalas\Behat\NoExtension` or `FriendsOfBehat\ContextServiceExtens
 - Add `'%paths.base%/../../web/modules/contrib/tieto_modules/tieto_lifecycle_management/tests/src/Behat/features'` to `paths`
     - Note: This assumes a standard drupal-composer install.
 - Create a new context
-    - Extend `Drupal\Tests\tieto_lifecycle_management\Behat\Context\BaseContext`
+    - Extend `Brainsum\TietoModules\tieto_lifecycle_management\Tests\Behat\Context\BaseContext`
     - Implement the abstract functions that are needed
     - Suggestion: You should set up autoloading
         - E.g: `{project-root}/tests/behat/src` folder as `MyProject\Tests\Behat`
