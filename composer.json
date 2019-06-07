@@ -26,6 +26,9 @@
         "cweagans/composer-patches": "~1.5",
         "wikimedia/composer-merge-plugin": "^1.4"
     },
+    "require-dev": {
+        "brainsum/drupal-behat-testing": "^0.11"
+    },
     "replace": {
         "brainsum/elevation_wysiwyg": "*",
         "brainsum/tieto_tibr": "*",
@@ -46,6 +49,11 @@
             "merge-extra": true,
             "merge-extra-deep": false,
             "merge-scripts": false
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Brainsum\\TietoModules\\tieto_lifecycle_management\\Tests\\Behat\\": "tieto_lifecycle_management/tests/Behat/"
         }
     }
 }
