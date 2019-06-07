@@ -261,7 +261,7 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     $users = array_filter($users, static function (UserInterface $user) use ($notifiedUsers) {
       $alreadyNotified = in_array($user->id(), $notifiedUsers, FALSE);
       $noMail = ($user->getEmail() === NULL);
-      return !($alreadyNotified || $noMail);
+      return !($alreadyNotified || $noMail || $user->isBlocked());
     });
 
     return $users;
