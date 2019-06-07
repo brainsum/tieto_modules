@@ -5,15 +5,15 @@
 {#    - page: \Drupal\tieto_lifecycle_management_notifications\Data\EntityLifeCycleData object #}
 {#- contact_mail: email address#}
 <div>
-    Hello {{ user_name }},
+    <p>Hello <span>{{ user_name }}</span>,</p>
 
-    We have now unpublished the Intra page you have published or where you are marked as an information owner.
-    The content was not updated within the previous 12 months.
-    If the page is still needed, you can find it in an unpublished mode in the Intra publishing platform
-    until {{ entity_delete_date }}.
-    The page can be published again during that timeframe.
+    <p>We have now unpublished the Intra page you have published or where you are marked as an information owner.
+        The content was not updated within the previous 12 months.
+        If the page is still needed, you can find it in an unpublished mode in the Intra publishing platform
+        until <span>{{ entity_delete_date }}</span>.
+        The page can be published again during that timeframe.</p>
 
-    Follow the link(s) to review the pages:
+    <p>Follow the link(s) to review the pages:</p>
     {# @todo: Pages have been turned from array to class, test this. #}
     <ul>
         {% for page in pages %}
@@ -21,9 +21,8 @@
         {% endfor %}
     </ul>
 
-    Kind regards,
-    Your Intra administrator
+    <p>Kind regards,</p>
+    <p>Your Intra administrator</p>
 
-    In case you have questions related to this email you’re welcome to contact <a
-            href="mailto:{{ contact_mail }}">{{ contact_mail }}</a>
+    <p>In case you have questions related to this email you’re welcome to contact <a href="mailto:{{ contact_mail }}">{{ contact_mail }}</a></p>
 </div>
