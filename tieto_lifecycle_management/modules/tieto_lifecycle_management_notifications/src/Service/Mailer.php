@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_lifecycle_management_notifications\Service;
 
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Mail\MailManagerInterface;
@@ -152,7 +153,7 @@ final class Mailer {
     }
 
     try {
-      $rendered = $this->renderer->renderRoot($template);
+      $rendered = Html::escape($this->renderer->renderRoot($template));
     }
     catch (Exception $exception) {
       $this->logger->error('Sending life-cycle reminder failed. ' . $exception->getMessage());
@@ -255,7 +256,7 @@ final class Mailer {
     }
 
     try {
-      $rendered = $this->renderer->renderRoot($template);
+      $rendered = Html::escape($this->renderer->renderRoot($template));
     }
     catch (Exception $exception) {
       $this->logger->error('Sending life-cycle notification failed. ' . $exception->getMessage());

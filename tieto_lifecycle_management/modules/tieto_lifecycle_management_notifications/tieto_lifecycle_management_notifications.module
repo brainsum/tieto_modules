@@ -57,4 +57,7 @@ function tieto_lifecycle_management_notifications_mail($key, &$message, $params)
   $message['from'] = Drupal::config('system.site')->get('mail');
   $message['subject'] = $params['subject'];
   $message['body'][] = $params['message'];
+  $message['headers']['Content-Type'] = 'text/html; charset=UTF-8';
+  $message['params']['format'] = 'text/html';
+  $message['params']['plain'] = NULL;
 }
