@@ -264,6 +264,20 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
       return !($alreadyNotified || $noMail || $user->isBlocked());
     });
 
+    if (empty($users)) {
+      // @todo: DI & cleanup.
+      /** @var \Drupal\user\UserStorageInterface $userStorage */
+      $userStorage = \Drupal::entityTypeManager()->getStorage('user');
+      $configFactory = \Drupal::configFactory();
+      $notificationSettings = $configFactory->get('tieto_lifecycle_management_notifications.settings');
+      // @todo: Add info about this fallback to readme.
+      // @todo: TBD send to multiple users.
+      $fallbackUsers = \array_keys($userStorage->loadByProperties(['mail' => $notificationSettings->get('contact_mail')]));
+      if (!empty($fallbackUsers) && ($fallbackUser = $userStorage->load(\reset($fallbackUsers)))) {
+        $users[] = $fallbackUser;
+      }
+    }
+
     return $users;
   }
 
