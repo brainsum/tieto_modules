@@ -220,8 +220,8 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     // @todo: Load from config.
     // @todo: Add weight field.
     $notifications = [
-      ['offset' => '14 days', 'id' => 'reminder.unpublished_content.half_month_before'],
-      ['offset' => '1 month', 'id' => 'reminder.unpublished_content.one_month_before'],
+      ['offset' => '-14 days', 'id' => 'reminder.unpublished_content.half_month_before'],
+      ['offset' => '-1 month', 'id' => 'reminder.unpublished_content.one_month_before'],
     ];
 
     foreach ($notifications as $notification) {
