@@ -2,12 +2,24 @@
 
 namespace Drupal\tieto_unpublish_ui\Plugin\Field\FieldWidget;
 
+use function array_merge;
+use function asort;
+use function ceil;
+use function count;
+use DateTime;
+use Drupal;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\field\FieldConfigInterface;
 use Drupal\inline_entity_form\Plugin\Field\FieldWidget\InlineEntityFormComplex;
 use Drupal\inline_entity_form\Element\InlineEntityForm;
+use function implode;
+use function in_array;
+use function max;
+use function reset;
+use function sha1;
+use function str_replace;
 
 /**
  * Complex inline widget.
@@ -33,7 +45,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     $labels = $this->getEntityTypeLabels();
 
     // Build a parents array for this element's values in the form.
-    $parents = \array_merge($element['#field_parents'], [
+    $parents = array_merge($element['#field_parents'], [
       $items->getName(),
       'form',
     ]);
@@ -41,7 +53,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     // Assign a unique identifier to each IEF widget.
     // Since $parents can get quite long, \sha1() ensures that every id has
     // a consistent and relatively short length while maintaining uniqueness.
-    $this->setIefId(\sha1(\implode('-', $parents)));
+    $this->setIefId(sha1(implode('-', $parents)));
 
     // Get the langcode of the parent entity.
     $parentLangcode = $items->getEntity()->language()->getId();
@@ -101,7 +113,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     $this->moduleHandler->alter('inline_entity_form_table_fields', $fields, $context);
     $element['entities']['#table_fields'] = $fields;
 
-    $weightDelta = \max(\ceil(\count($entities) * 1.2), 50);
+    $weightDelta = max(ceil(count($entities) * 1.2), 50);
     foreach ($entities as $key => $value) {
       // Data used by theme_inline_entity_form_entity_table().
       /** @var \Drupal\Core\Entity\EntityInterface $entity */
@@ -131,7 +143,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
               $entity->bundle(),
               $parentLangcode,
               $key,
-              \array_merge($parents, [
+              array_merge($parents, [
                 'inline_entity_form',
                 'entities',
                 $key,
@@ -154,7 +166,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
             '#attributes' => ['class' => ['ief-form', 'ief-form-row']],
             // Used by Field API and controller methods to find the relevant
             // values in $form_state.
-            '#parents' => \array_merge($parents, ['entities', $key, 'form']),
+            '#parents' => array_merge($parents, ['entities', $key, 'form']),
             // Store the entity on the form, later modified in the controller.
             '#entity' => $entity,
             // Identifies the IEF widget to which the form belongs.
@@ -230,7 +242,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
       return $element;
     }
 
-    $entitiesCount = \count($entities);
+    $entitiesCount = count($entities);
     $cardinality = $this->fieldDefinition->getFieldStorageDefinition()->getCardinality();
     if ($cardinality > 1) {
       // Add a visual cue of cardinality count.
@@ -249,7 +261,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     }
 
     $createBundles = $this->getCreateBundles();
-    $createBundlesCount = \count($createBundles);
+    $createBundlesCount = count($createBundles);
     $allowNew = $settings['allow_new'] && !empty($createBundles);
     $hideCancel = FALSE;
     // If the field is required and empty try to open one of the forms.
@@ -259,7 +271,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
         $hideCancel = TRUE;
       }
       elseif ($createBundlesCount === 1 && $allowNew && !$settings['allow_existing']) {
-        $bundle = \reset($targetBundles);
+        $bundle = reset($targetBundles);
 
         // The parent entity type and bundle must not be the same as the inline
         // entity type and bundle, to prevent recursion.
@@ -299,11 +311,11 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
         if ($createBundlesCount > 1) {
           $bundles = [];
           foreach ($this->entityTypeBundleInfo->getBundleInfo($targetType) as $bundleName => $bundleInfo) {
-            if (\in_array($bundleName, $createBundles, TRUE)) {
+            if (in_array($bundleName, $createBundles, TRUE)) {
               $bundles[$bundleName] = $bundleInfo['label'];
             }
           }
-          \asort($bundles);
+          asort($bundles);
 
           $element['actions']['bundle'] = [
             '#type' => 'select',
@@ -313,7 +325,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
         else {
           $element['actions']['bundle'] = [
             '#type' => 'value',
-            '#value' => \reset($createBundles),
+            '#value' => reset($createBundles),
           ];
         }
 
@@ -321,7 +333,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
           '#type' => 'submit',
           '#value' => $this->t('Add new @type_singular', ['@type_singular' => $labels['singular']]),
           '#name' => 'ief-' . $this->getIefId() . '-add',
-          '#limit_validation_errors' => [\array_merge($parents, ['actions'])],
+          '#limit_validation_errors' => [array_merge($parents, ['actions'])],
           '#ajax' => [
             'callback' => 'inline_entity_form_get_element',
             'wrapper' => $wrapper,
@@ -336,7 +348,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
           '#type' => 'submit',
           '#value' => $this->t('Add existing @type_singular', ['@type_singular' => $labels['singular']]),
           '#name' => 'ief-' . $this->getIefId() . '-add-existing',
-          '#limit_validation_errors' => [\array_merge($parents, ['actions'])],
+          '#limit_validation_errors' => [array_merge($parents, ['actions'])],
           '#ajax' => [
             'callback' => 'inline_entity_form_get_element',
             'wrapper' => $wrapper,
@@ -357,7 +369,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
             $this->determineBundle($form_state),
             $parentLangcode,
             NULL,
-            \array_merge($parents, ['inline_entity_form'])
+            array_merge($parents, ['inline_entity_form'])
           ),
         ];
         $element['form']['inline_entity_form']['#process'] = [
@@ -375,7 +387,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
           '#ief_id' => $this->getIefId(),
           // Used by Field API and controller methods to find the relevant
           // values in $form_state.
-          '#parents' => \array_merge($parents),
+          '#parents' => array_merge($parents),
           // Pass the current entity type.
           '#entity_type' => $targetType,
           // Pass the widget specific labels.
@@ -491,7 +503,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     }
 
     $targetBundles = $this->getTargetBundles();
-    return \reset($targetBundles);
+    return reset($targetBundles);
   }
 
   /**
@@ -516,7 +528,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
       return;
     }
 
-    $currentTime = \Drupal::time()->getCurrentTime();
+    $currentTime = Drupal::time()->getCurrentTime();
     if ($updateTimestamp < $currentTime) {
       $form_state->setError($element, t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
         '@name' => $field->getLabel(),
@@ -539,7 +551,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
     if (!isset($trigger['#ief_submit_trigger']) || FALSE === $trigger['#ief_submit_trigger']) {
       return;
     }
-    $iefId = \str_replace('inline-entity-form-', '', $trigger['#ajax']['wrapper']);
+    $iefId = str_replace('inline-entity-form-', '', $trigger['#ajax']['wrapper']);
     /** @var \Drupal\field\FieldConfigInterface $field */
     $field = $form_state->get(['inline_entity_form', $iefId, 'instance']);
     if (!static::isScheduleField($field)) {
@@ -550,7 +562,7 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
       return;
     }
 
-    $currentTime = \Drupal::time()->getCurrentTime();
+    $currentTime = Drupal::time()->getCurrentTime();
     if ($updateTimestamp < $currentTime) {
       if (isset($form[$field->getName()]['widget']['form'])) {
         $form_state->setError($form[$field->getName()]['widget']['form']['inline_entity_form']['update_timestamp']['widget']['0']['value'], t('Scheduling in the past is not possible. Please, choose a date in the future for the @name', [
@@ -594,8 +606,8 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
         return NULL;
       }
       /** @var \Drupal\Core\Datetime\DrupalDateTime $updateDateObject */
-      $updateDateObject = \reset($rawUpdateTimestamp)['value'];
-      $tmpDateObject = new \DateTime($updateDateObject->format($updateDateObject::FORMAT));
+      $updateDateObject = reset($rawUpdateTimestamp)['value'];
+      $tmpDateObject = new DateTime($updateDateObject->format($updateDateObject::FORMAT));
       $updateTimestamp = $tmpDateObject->getTimestamp();
     }
     elseif ($rawUpdateTimestamp = $form_state->getValue([
@@ -611,13 +623,13 @@ class TietoInlineEntityFormComplex extends InlineEntityFormComplex {
         return NULL;
       }
       /** @var \Drupal\Core\Datetime\DrupalDateTime $updateDateObject */
-      $updateDateObject = \reset($rawUpdateTimestamp)['value'];
-      $tmpDateObject = new \DateTime($updateDateObject->format($updateDateObject::FORMAT));
+      $updateDateObject = reset($rawUpdateTimestamp)['value'];
+      $tmpDateObject = new DateTime($updateDateObject->format($updateDateObject::FORMAT));
       $updateTimestamp = $tmpDateObject->getTimestamp();
     }
     else {
       /** @var \Drupal\scheduled_updates\ScheduledUpdateInterface $scheduleEntity */
-      $scheduleEntity = \reset($entities)['entity'];
+      $scheduleEntity = reset($entities)['entity'];
       if (NULL === $scheduleEntity) {
         return NULL;
       }

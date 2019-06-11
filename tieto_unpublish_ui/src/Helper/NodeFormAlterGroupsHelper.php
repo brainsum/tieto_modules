@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_unpublish_ui\Helper;
 
+use function array_walk_recursive;
+
 /**
  * Class NodeFormAlterGroupsHelper.
  *
@@ -37,7 +39,7 @@ class NodeFormAlterGroupsHelper extends NodeFormAlterHelperBase {
       }
       $build[$field] = $this->form[$field];
 
-      \array_walk_recursive($build[$field], [$this, 'removeGroup']);
+      array_walk_recursive($build[$field], [$this, 'removeGroup']);
     }
     return $build;
   }

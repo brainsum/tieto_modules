@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_moderation_actions\Plugin\Action;
 
+use function array_map;
+use Drupal;
 use Drupal\core\Access\AccessResult;
 use Drupal\Core\Action\ConfigurableActionBase;
 use Drupal\Core\Entity\EntityInterface;
@@ -9,6 +11,7 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\workbench_moderation\ModerationInformationInterface;
+use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -79,7 +82,7 @@ final class ModerationStateChange extends ConfigurableActionBase implements Cont
     try {
       $wmStates = $this->moderationStateNames();
     }
-    catch (\Exception $exception) {
+    catch (Exception $exception) {
       $this->messenger()->addError($this->t('Error while loading moderation states: %exception', [
         '%exception' => $exception->getMessage(),
       ]));
@@ -134,11 +137,11 @@ final class ModerationStateChange extends ConfigurableActionBase implements Cont
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   private function moderationStateNames(): array {
-    $moderationStates = \Drupal::entityTypeManager()
+    $moderationStates = Drupal::entityTypeManager()
       ->getStorage('moderation_state')
       ->loadMultiple();
 
-    return \array_map(function ($item) {
+    return array_map(function ($item) {
       /** @var \Drupal\workbench_moderation\ModerationStateInterface $item */
       return $item->label();
     }, $moderationStates);

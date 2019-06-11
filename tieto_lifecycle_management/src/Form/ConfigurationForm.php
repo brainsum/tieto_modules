@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_lifecycle_management\Form;
 
+use function array_filter;
+use function date_parse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
@@ -78,7 +80,7 @@ final class ConfigurationForm extends ConfigFormBase {
         'field_type' => 'entity_reference',
       ]);
 
-    $scheduledFields = \array_filter($scheduledFields, function ($field) {
+    $scheduledFields = array_filter($scheduledFields, function ($field) {
       /** @var \Drupal\field\FieldConfigInterface $field */
       return $field->getSetting('handler') === 'default:scheduled_update';
     });
@@ -139,7 +141,7 @@ final class ConfigurationForm extends ConfigFormBase {
    *   TRUE, if date is valid.
    */
   protected function isRelativeDate(string $date): bool {
-    $parsedDate = \date_parse($date);
+    $parsedDate = date_parse($date);
 
     // @todo: Disallow negative numbers.
     return !(

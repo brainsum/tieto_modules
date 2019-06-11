@@ -5,6 +5,10 @@ namespace Drupal\tieto_ldap\Plugin\Validation\Constraint;
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\user\UserInterface;
 use Egulias\EmailValidator\EmailValidatorInterface;
+use function mb_strlen;
+use function preg_match;
+use function strpos;
+use function substr;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
@@ -54,18 +58,18 @@ class TietoLdapUserNameConstraintValidator extends ConstraintValidator implement
       return;
     }
     $name = $items->first()->value;
-    if (\strpos($name, ' ') === 0) {
+    if (strpos($name, ' ') === 0) {
       $this->context->addViolation($constraint->spaceBeginMessage);
     }
-    if (\substr($name, -1) === ' ') {
+    if (substr($name, -1) === ' ') {
       $this->context->addViolation($constraint->spaceEndMessage);
     }
-    if (\strpos($name, '  ') !== FALSE) {
+    if (strpos($name, '  ') !== FALSE) {
       $this->context->addViolation($constraint->multipleSpacesMessage);
     }
     if (
-      \preg_match('/[^\x{80}-\x{F7} a-z0-9@+_.\'-]/i', $name)
-      || \preg_match(
+      preg_match('/[^\x{80}-\x{F7} a-z0-9@+_.\'-]/i', $name)
+      || preg_match(
         // Non-printable ISO-8859-1 + NBSP.
         '/[\x{80}-\x{A0}' .
         // Soft-hyphen.
@@ -91,7 +95,7 @@ class TietoLdapUserNameConstraintValidator extends ConstraintValidator implement
         $this->context->addViolation($constraint->illegalMessage);
       }
     }
-    if (\mb_strlen($name) > UserInterface::USERNAME_MAX_LENGTH) {
+    if (mb_strlen($name) > UserInterface::USERNAME_MAX_LENGTH) {
       $this->context->addViolation($constraint->tooLongMessage, [
         '%name' => $name,
         '%max' => UserInterface::USERNAME_MAX_LENGTH,

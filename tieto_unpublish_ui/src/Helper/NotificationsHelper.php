@@ -7,6 +7,7 @@ use Drupal\Core\Ajax\AlertCommand;
 use Drupal\Core\Ajax\OpenModalDialogCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tieto_unpublish_ui\Form\NotificationsModalForm;
+use function str_replace;
 
 /**
  * Class NotificationsHelper.
@@ -40,7 +41,7 @@ class NotificationsHelper {
     }
 
     $triggerState = $trigger['#attributes']['data-moderation-state'];
-    $moderationState = \str_replace('moderation_state_', '', $triggerState);
+    $moderationState = str_replace('moderation_state_', '', $triggerState);
     $modalForm = NotificationsModalForm::buildFromParent($form, $form_state, $moderationState);
 
     $dialogOptions = [

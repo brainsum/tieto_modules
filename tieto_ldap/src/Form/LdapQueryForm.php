@@ -2,12 +2,17 @@
 
 namespace Drupal\tieto_ldap\Form;
 
+use function array_map;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\ldap_servers\ServerFactory;
+use function explode;
+use function implode;
+use function mb_strtolower;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Form\FormStateInterface;
+use function trim;
 
 /**
  * Defines a form that run ldap query with specified filter.
@@ -96,7 +101,7 @@ class LdapQueryForm extends FormBase {
     $form['ldap_query_attributes'] = [
       '#type' => 'textarea',
       '#title' => $this->t('Attributes'),
-      '#default_value' => \implode("\n", ['uid', 'mail']),
+      '#default_value' => implode("\n", ['uid', 'mail']),
       '#required' => TRUE,
       '#description' => $this->t('One per line.'),
     ];
@@ -125,9 +130,9 @@ class LdapQueryForm extends FormBase {
     $ldapServerConfig = $this->configFactory()->get("ldap_servers.server.$sid");
 
     $ldapServer->baseDn = $ldapServerConfig->get('basedn');
-    $ldapServer->filter = \trim($form_state->getValue('ldap_query_filter'));
-    $attributes = \explode("\n", \trim($form_state->getValue('ldap_query_attributes')));
-    $attributes = \array_map('trim', $attributes);
+    $ldapServer->filter = trim($form_state->getValue('ldap_query_filter'));
+    $attributes = explode("\n", trim($form_state->getValue('ldap_query_attributes')));
+    $attributes = array_map('trim', $attributes);
     $ldapServer->attributes = $attributes;
     $attrsonly = 0;
     $sizelimit = 0;
@@ -153,11 +158,11 @@ class LdapQueryForm extends FormBase {
         unset($row['objectclass']['count']);
         $rowData = [];
         foreach ($attributes as $attribute) {
-          $attribute = \mb_strtolower($attribute);
+          $attribute = mb_strtolower($attribute);
           $data = '-';
           if (isset($row[$attribute])) {
             if ($row[$attribute]['count'] > 1) {
-              $data = \implode(',', $row[$attribute]);
+              $data = implode(',', $row[$attribute]);
             }
             else {
               $data = $row[$attribute][0];

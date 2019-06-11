@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_unpublish_ui\Helper;
 
+use function array_map;
+use Drupal;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\node\NodeInterface;
@@ -83,11 +85,11 @@ abstract class NodeFormAlterHelperBase {
     array $form,
     FormStateInterface $form_state
   ) {
-    $this->nodeRevisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
-    $this->dateFormatter = \Drupal::service('date.formatter');
-    $this->moderationInfo = \Drupal::service('workbench_moderation.moderation_information');
-    $this->entityTypeManager = \Drupal::service('entity_type.manager');
-    $this->time = \Drupal::time();
+    $this->nodeRevisionManager = Drupal::service('tieto_unpublish_ui.node_revision_manager');
+    $this->dateFormatter = Drupal::service('date.formatter');
+    $this->moderationInfo = Drupal::service('workbench_moderation.moderation_information');
+    $this->entityTypeManager = Drupal::service('entity_type.manager');
+    $this->time = Drupal::time();
 
     $this->form = $form;
     $this->formState = $form_state;
@@ -177,7 +179,7 @@ abstract class NodeFormAlterHelperBase {
   protected function getModerationStateLabels(): array {
     $moderationStates = $this->entityTypeManager->getStorage('moderation_state')->loadMultiple();
 
-    return \array_map(function ($item) {
+    return array_map(function ($item) {
       /** @var \Drupal\workbench_moderation\Entity\ModerationState $item */
       return $item->label();
     }, $moderationStates);

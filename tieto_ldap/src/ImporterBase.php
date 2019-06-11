@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_ldap;
 
+use Drupal;
 use Drupal\Core\Messenger\MessengerTrait;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 
@@ -89,16 +90,16 @@ abstract class ImporterBase {
    * ImporterBase constructor.
    */
   public function __construct() {
-    $this->state = \Drupal::state();
-    $this->time = \Drupal::time();
-    $this->configFactory = \Drupal::configFactory();
-    $this->serverFactory = \Drupal::service('ldap.servers');
-    $this->currentUser = \Drupal::currentUser();
-    $this->emailValidator = \Drupal::service('email.validator');
-    $this->logger = \Drupal::logger('tieto_ldap');
-    $this->renderer = \Drupal::service('renderer');
-    $this->database = \Drupal::database();
-    $this->entityTypeManager = \Drupal::entityTypeManager();
+    $this->state = Drupal::state();
+    $this->time = Drupal::time();
+    $this->configFactory = Drupal::configFactory();
+    $this->serverFactory = Drupal::service('ldap.servers');
+    $this->currentUser = Drupal::currentUser();
+    $this->emailValidator = Drupal::service('email.validator');
+    $this->logger = Drupal::logger('tieto_ldap');
+    $this->renderer = Drupal::service('renderer');
+    $this->database = Drupal::database();
+    $this->entityTypeManager = Drupal::entityTypeManager();
   }
 
 }

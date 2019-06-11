@@ -4,6 +4,7 @@ namespace Drupal\tieto_wysiwyg\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Url;
+use function file_create_url;
 
 /**
  * Class ImagePopupRenderer.
@@ -65,7 +66,7 @@ final class ImagePopupRenderer {
       $absolutePath = $imageStyle->buildUrl($imageUri);
     }
     else {
-      $absolutePath = Url::fromUri(\file_create_url($imageUri))->getUri();
+      $absolutePath = Url::fromUri(file_create_url($imageUri))->getUri();
     }
 
     return [

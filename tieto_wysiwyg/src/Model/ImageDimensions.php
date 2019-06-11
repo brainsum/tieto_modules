@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_wysiwyg\Model;
 
+use RuntimeException;
+
 /**
  * Class ImageDimensions.
  *
@@ -36,7 +38,7 @@ final class ImageDimensions {
     int $height
   ) {
     if ($width < 1 || $height < 1) {
-      throw new \RuntimeException('Illegal width or height!');
+      throw new RuntimeException('Illegal width or height!');
     }
 
     $this->width = $width;

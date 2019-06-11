@@ -15,7 +15,14 @@ use Drupal\Core\Ajax\CloseModalDialogCommand;
 use Drupal\tieto_wysiwyg\Model\PopupImage;
 use Drupal\tieto_wysiwyg\Component\ImageDimensionsCalculator;
 use Drupal\tieto_wysiwyg\Service\ImagePopupRenderer;
+use function file_create_url;
+use function file_upload_max_size;
+use function file_url_transform_relative;
+use function min;
+use function parse_url;
+use function reset;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function trim;
 
 /**
  * Provides an image dialog for text editors.
@@ -114,7 +121,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
     else {
       $maxDimensions = 0;
     }
-    $maxFileSize = \min(Bytes::toInt($imageUpload['max_size']), \file_upload_max_size());
+    $maxFileSize = min(Bytes::toInt($imageUpload['max_size']), file_upload_max_size());
 
     $existingFile = NULL;
     if (
@@ -122,7 +129,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       && ($existingFiles = $this->fileStorage->loadByProperties(['uuid' => $imageElement['data-entity-uuid']]))
       && !empty($existingFiles)
     ) {
-      $existingFile = \reset($existingFiles);
+      $existingFile = reset($existingFiles);
     }
 
     $fid = $existingFile ? $existingFile->id() : NULL;
@@ -287,10 +294,10 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // LEFT IMAGE.
       /** @var \Drupal\file\FileInterface $fileLeft */
       $fileLeft = $this->fileStorage->load($fidLeft);
-      $fileUrlLeft = \file_create_url($fileLeft->getFileUri());
+      $fileUrlLeft = file_create_url($fileLeft->getFileUri());
       // Transform absolute image URLs to relative image URLs: prevent problems
       // on multisite set-ups and prevent mixed content errors.
-      $fileUrlLeft = \file_url_transform_relative($fileUrlLeft);
+      $fileUrlLeft = file_url_transform_relative($fileUrlLeft);
       $form_state->setValue(['attributes_left', 'src'], $fileUrlLeft);
       $form_state->setValue([
         'attributes_left',
@@ -301,7 +308,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // When the alt attribute is set to two double quotes, transform it to the
       // empty string: two double quotes signify "empty alt attribute". See
       // above.
-      if (\trim($form_state->getValue(['attributes_left', 'alt'])) === '""') {
+      if (trim($form_state->getValue(['attributes_left', 'alt'])) === '""') {
         $form_state->setValue(['attributes_left', 'alt'], '');
       }
 
@@ -310,10 +317,10 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // RIGHT IMAGE.
       /** @var \Drupal\file\FileInterface $fileRight */
       $fileRight = $this->fileStorage->load($fidRight);
-      $fileUrlRight = \file_create_url($fileRight->getFileUri());
+      $fileUrlRight = file_create_url($fileRight->getFileUri());
       // Transform absolute image URLs to relative image URLs: prevent problems
       // on multisite set-ups and prevent mixed content errors.
-      $fileUrlRight = \file_url_transform_relative($fileUrlRight);
+      $fileUrlRight = file_url_transform_relative($fileUrlRight);
       $form_state->setValue(['attributes_right', 'src'], $fileUrlRight);
       $form_state->setValue([
         'attributes_right',
@@ -324,7 +331,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
       // When the alt attribute is set to two double quotes, transform it to the
       // empty string: two double quotes signify "empty alt attribute". See
       // above.
-      if (\trim($form_state->getValue(['attributes_right', 'alt'])) === '""') {
+      if (trim($form_state->getValue(['attributes_right', 'alt'])) === '""') {
         $form_state->setValue(['attributes_right', 'alt'], '');
       }
 
@@ -402,7 +409,7 @@ class EditorDoubleImagePopupDialog extends EditorImageDialog {
     int $width,
     int $height
   ): string {
-    $fileSrc = \parse_url($fileAbsolutePath, PHP_URL_PATH);
+    $fileSrc = parse_url($fileAbsolutePath, PHP_URL_PATH);
 
     return "<img data-align='$alignment' 
                  alt='$altTag' 

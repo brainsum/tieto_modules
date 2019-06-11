@@ -3,6 +3,7 @@
 namespace Drupal\tieto_unpublish_ui\Form;
 
 use Drupal\Core\Form\FormStateInterface;
+use function str_replace;
 
 /**
  * Class NotificationsModalForm.
@@ -89,7 +90,7 @@ class NotificationsModalForm {
       }
     }
 
-    $hyphenatedState = \str_replace('_', '-', $moderationState);
+    $hyphenatedState = str_replace('_', '-', $moderationState);
     $modalForm['moderation_state'] = [
       '#type' => 'hidden',
       '#value' => $hyphenatedState,

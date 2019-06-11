@@ -7,6 +7,7 @@ use Drupal\views\Plugin\views\field\FieldPluginBase;
 use Drupal\views\Plugin\views\display\DisplayPluginBase;
 use Drupal\views\ResultRow;
 use Drupal\views\ViewExecutable;
+use function key;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -94,7 +95,7 @@ class NodeLatestRevisionStatus extends FieldPluginBase {
       ->sort('vid', 'DESC')
       ->range(0, 1)
       ->execute();
-    $currentRevisionId = \key($currentRevisionId);
+    $currentRevisionId = key($currentRevisionId);
 
     /** @var \Drupal\node\NodeInterface $currentRevision */
     $currentRevision = $entityStorage

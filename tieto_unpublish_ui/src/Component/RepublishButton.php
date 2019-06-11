@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_unpublish_ui\Component;
 
+use Drupal;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\Url;
@@ -53,7 +54,7 @@ class RepublishButton {
     }
 
     /** @var \Drupal\tieto_unpublish_ui\Service\NodeRevisionManager $nodeRevisionManager */
-    $nodeRevisionManager = \Drupal::service('tieto_unpublish_ui.node_revision_manager');
+    $nodeRevisionManager = Drupal::service('tieto_unpublish_ui.node_revision_manager');
     /** @var \Drupal\node\NodeForm $nodeForm */
     $nodeForm = $form_state->getFormObject();
     /** @var \Drupal\node\NodeInterface $node */

@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\tieto_ldap\UserImporter;
+use function trim;
 
 /**
  * Defines a form that configures user import settings.
@@ -124,7 +125,7 @@ class UserImportSettingsForm extends ConfigFormBase {
     $values = $form_state->getValues();
     $this->config('tieto_ldap.user.settings')
       ->set('ldap_server', $values['ldap_server'])
-      ->set('ldap_filter', \trim($values['ldap_filter']))
+      ->set('ldap_filter', trim($values['ldap_filter']))
       ->save();
 
     parent::submitForm($form, $form_state);
@@ -143,7 +144,7 @@ class UserImportSettingsForm extends ConfigFormBase {
   public function submitTest(array &$form, FormStateInterface $form_state): void {
     $this->messenger()->addStatus('Test triggered.');
     $importer = new UserImporter();
-    $result = $importer->import(FALSE, $form_state->getValue('ldap_server'), \trim($form_state->getValue('ldap_filter')));
+    $result = $importer->import(FALSE, $form_state->getValue('ldap_server'), trim($form_state->getValue('ldap_filter')));
     $form_state->set('result', $result);
     $form_state->setRebuild();
   }

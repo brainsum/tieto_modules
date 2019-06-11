@@ -14,7 +14,7 @@
         event.preventDefault();
         // @todo: Get proper state.
 
-        let stateDataItem = $('#tieto-action-notification-modal-form > #modal-moderation-state-information')
+        let stateDataItem = $('#tieto-action-notification-modal-form > #modal-moderation-state-information');
 
         let state = stateDataItem.val();
         let selector = "div.form-action-moderation-state-" + state + "-button-wrapper > div.action-button--action-wrapper.action-button--hidden-action-wrapper > input";

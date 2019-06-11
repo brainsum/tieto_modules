@@ -3,6 +3,7 @@
 namespace Drupal\tieto_general_ui\Plugin\Block;
 
 use Drupal\Core\Block\BlockBase;
+use function drupal_get_path;
 
 /**
  * Provides a 'TietoFooterLogo' Block.
@@ -18,7 +19,7 @@ class TietoFooterLogo extends BlockBase {
    * {@inheritdoc}
    */
   public function build(): array {
-    $imagePath = '/' . \drupal_get_path('module', 'tieto_general_ui') . '/images/logofooter.png';
+    $imagePath = '/' . drupal_get_path('module', 'tieto_general_ui') . '/images/logofooter.png';
     return [
       '#markup' => "<img src='$imagePath' alt='Tieto logo' />",
     ];

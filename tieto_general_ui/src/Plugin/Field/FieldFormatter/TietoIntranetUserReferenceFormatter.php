@@ -6,6 +6,7 @@ use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
 use Drupal\Core\Url;
+use function strlen;
 
 /**
  * Plugin implementation of the 'entity reference' formatter.
@@ -37,7 +38,7 @@ class TietoIntranetUserReferenceFormatter extends EntityReferenceFormatterBase {
       $name = $entity->getDisplayName();
       $mail = $entity->getEmail();
       $full = $entity->get('field_user_fullname')->value;
-      if (\strlen($name) === 8) {
+      if (strlen($name) === 8) {
         $fullName = $entity->get('field_user_fullname')->value;
         $uri = Url::fromUri('http://intra.tieto.com/profile/' . $mail);
         $elements[$delta] = [

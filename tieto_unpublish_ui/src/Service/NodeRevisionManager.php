@@ -4,6 +4,7 @@ namespace Drupal\tieto_unpublish_ui\Service;
 
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\node\NodeInterface;
+use function key;
 
 /**
  * Class NodeRevisionManager.
@@ -62,7 +63,7 @@ class NodeRevisionManager {
     if (empty($data)) {
       return NULL;
     }
-    return $nodeStorage->loadRevision(\key($data));
+    return $nodeStorage->loadRevision(key($data));
   }
 
   /**
@@ -97,7 +98,7 @@ class NodeRevisionManager {
     if (empty($data)) {
       return NULL;
     }
-    return $nodeStorage->loadRevision(\key($data));
+    return $nodeStorage->loadRevision(key($data));
   }
 
   /**

@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_tibr\Plugin\Validation\Constraint;
 
+use function strlen;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 
@@ -14,7 +15,7 @@ class MaxLengthValidator extends ConstraintValidator {
    * {@inheritdoc}
    */
   public function validate($value, Constraint $constraint) {
-    if (\strlen($value) > $constraint->maxLength) {
+    if (strlen($value) > $constraint->maxLength) {
       $this->context->addViolation($constraint->notLessThan, ['%value' => $value, '%maxLength' => $constraint->maxLength]);
     }
   }

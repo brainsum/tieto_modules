@@ -5,6 +5,8 @@ namespace Drupal\tieto_unpublish_ui\Helper;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
+use function reset;
+use function strtotime;
 
 /**
  * Class NodeInformation.
@@ -277,10 +279,10 @@ class NodeInformation extends NodeFormAlterHelperBase {
     // TODO: review why can $firstPublishValueItem just 0 value.
     // (hint: I created a new node, saved, than I edited and saved again, and
     // still 0.)
-    $firstPublishValue = \reset($firstPublishValue);
+    $firstPublishValue = reset($firstPublishValue);
     $firstPublishDate = $this->t('Not available');
     if (isset($firstPublishValue['value'])) {
-      $firstPublishValue = \strtotime($firstPublishValue['value']);
+      $firstPublishValue = strtotime($firstPublishValue['value']);
       $firstPublishDate = $this->dateFormatter->format($firstPublishValue, 'tieto_date');
     }
 

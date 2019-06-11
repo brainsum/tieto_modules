@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_ldap\Processor;
 
+use Drupal;
 use Drupal\ldap_user\Processor\DrupalUserProcessor;
 
 /**
@@ -17,7 +18,7 @@ class DrupalUserImportProcessor extends DrupalUserProcessor {
    */
   public function __construct($sid) {
     parent::__construct();
-    $config = \Drupal::service('config.factory')->getEditable('ldap_user.settings');
+    $config = Drupal::service('config.factory')->getEditable('ldap_user.settings');
     $config->set('drupalAcctProvisionServer', $sid);
     $this->config = $config;
   }

@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_unpublish_ui\Helper;
 
+use function array_merge;
 use Drupal\Core\Form\FormStateInterface;
 
 /**
@@ -47,7 +48,7 @@ class ModerationStateProcessor {
       return $element;
     }
 
-    $options = \array_merge($element['#options'], static::getStateLabels());
+    $options = array_merge($element['#options'], static::getStateLabels());
 
     foreach ($options as $id => $label) {
       $form['actions']['moderation_state_' . $id]['#value'] = $label;

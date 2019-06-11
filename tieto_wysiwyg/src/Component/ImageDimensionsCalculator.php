@@ -4,6 +4,7 @@ namespace Drupal\tieto_wysiwyg\Component;
 
 use Drupal\tieto_wysiwyg\Model\ImageDimensions;
 use Drupal\tieto_wysiwyg\Model\PopupImage;
+use RuntimeException;
 
 /**
  * Class ImageDimensionsCalculator.
@@ -97,7 +98,7 @@ final class ImageDimensionsCalculator {
    */
   public function calculateEqualDimensions(int $maxWidth): void {
     if ($maxWidth < 1) {
-      throw new \RuntimeException('Max width has to be greater than 0!');
+      throw new RuntimeException('Max width has to be greater than 0!');
     }
 
     // Determinate which image is the smaller and which is the bigger.
