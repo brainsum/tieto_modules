@@ -126,8 +126,14 @@ final class Mailer {
       '#contact_mail' => $contactMail,
     ];
 
+    // @todo: Cleanup.
+    $subjectPrefix = '';
+    if ($reminderType === 'reminder.unpublished_content.half_month_before') {
+      $subjectPrefix = $this->t('REMINDER') . ' - ';
+    }
+
     if ($entityCount === 1) {
-      $subject = $this->t(
+      $subject = $subjectPrefix . $this->t(
         'TO BE UNPUBLISHED: Your Intra page - @pageTitle',
         [
           '@pageTitle' => $firstEntity->title,
@@ -141,7 +147,7 @@ final class Mailer {
       $template['#theme'] = 'single_content_unpublish__reminder';
     }
     else {
-      $subject = $this->t(
+      $subject = $subjectPrefix . $this->t(
         'TO BE UNPUBLISHED: Multiple Intra pages',
         [],
         [
