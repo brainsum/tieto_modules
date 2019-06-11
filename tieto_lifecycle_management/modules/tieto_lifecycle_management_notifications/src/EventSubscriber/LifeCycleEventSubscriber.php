@@ -19,6 +19,7 @@ use Drupal\tieto_lifecycle_management_notifications\Service\Mailer;
 use Drupal\tieto_lifecycle_management_notifications\Service\NotificationStorage;
 use Drupal\user\UserInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use function array_keys;
 use function in_array;
 
 /**
@@ -287,16 +288,34 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     });
 
     if (empty($users)) {
-      $notificationSettings = $this->notificationConfig->get('tieto_lifecycle_management_notifications.settings');
-      // @todo: Add info about this fallback to readme.
-      // @todo: TBD send to multiple users.
-      $fallbackUsers = \array_keys($this->userStorage->loadByProperties(['mail' => $notificationSettings->get('contact_mail')]));
-      if (!empty($fallbackUsers) && ($fallbackUser = $this->userStorage->load(\reset($fallbackUsers)))) {
-        $users[] = $fallbackUser;
-      }
+      $users = $this->loadFallbackUsers();
     }
 
     return $users;
+  }
+
+  /**
+   * Load fallback users.
+   *
+   * @return \Drupal\user\UserInterface[]
+   *   The users.
+   *
+   * @todo: Move this out into a service.
+   */
+  private function loadFallbackUsers(): array {
+    $notificationSettings = $this->notificationConfig->get('tieto_lifecycle_management_notifications.settings');
+    /** @var string[] $fallbackRecipients */
+    $fallbackRecipients = $notificationSettings->get('fallback_recipients') ?? [];
+
+    if (empty($fallbackRecipients)) {
+      return [];
+    }
+
+    // @todo: Add info about this fallback to readme.
+    $fallbackUserIds = array_keys($this->userStorage->loadByProperties(['mail' => $fallbackRecipients]));
+    /** @var \Drupal\user\UserInterface[] $fallbackUsers */
+    $fallbackUsers = $this->userStorage->loadMultiple($fallbackUserIds);
+    return $fallbackUsers;
   }
 
   /**

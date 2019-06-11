@@ -11,3 +11,13 @@
 function tieto_lifecycle_management_notifications_install() {
   module_set_weight('tieto_lifecycle_management_notifications', 15);
 }
+
+/**
+ * Add the fallback_recipients key to the config.
+ */
+function tieto_lifecycle_management_notifications_update_8601() {
+  $factory = \Drupal::configFactory();
+  $config = $factory->getEditable('tieto_lifecycle_management_notifications.settings');
+  $config->set('fallback_recipients', []);
+  $config->save();
+}
