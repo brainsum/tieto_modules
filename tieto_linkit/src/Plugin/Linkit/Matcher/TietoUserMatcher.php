@@ -70,10 +70,10 @@ class TietoUserMatcher extends TietoEntityMatcher {
     ];
 
     $form['include_blocked'] = [
-      '#title' => t('Include blocked user'),
+      '#title' => $this->t('Include blocked user'),
       '#type' => 'checkbox',
       '#default_value' => $this->configuration['include_blocked'],
-      '#description' => t('In order to see blocked users, the requesting user must also have permissions to do so.'),
+      '#description' => $this->t('In order to see blocked users, the requesting user must also have permissions to do so.'),
     ];
 
     return $form;

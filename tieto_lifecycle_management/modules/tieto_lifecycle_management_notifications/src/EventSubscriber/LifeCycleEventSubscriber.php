@@ -19,7 +19,6 @@ use Drupal\tieto_lifecycle_management_notifications\Service\Mailer;
 use Drupal\tieto_lifecycle_management_notifications\Service\NotificationStorage;
 use Drupal\user\UserInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use function array_keys;
 use function in_array;
 
 /**

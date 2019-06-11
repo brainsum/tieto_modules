@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_linkit\Plugin\Linkit\Matcher;
 
+use Drupal;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\linkit\Utility\LinkitXss;
@@ -81,26 +82,26 @@ class TietoFileMatcher extends TietoEntityMatcher {
 
     $form['images'] = [
       '#type' => 'details',
-      '#title' => t('Image file settings'),
-      '#description' => t('Extra settings for image files in the result.'),
+      '#title' => $this->t('Image file settings'),
+      '#description' => $this->t('Extra settings for image files in the result.'),
       '#tree' => TRUE,
     ];
 
     $form['images']['show_dimensions'] = [
-      '#title' => t('Show pixel dimensions'),
+      '#title' => $this->t('Show pixel dimensions'),
       '#type' => 'checkbox',
       '#default_value' => $this->configuration['images']['show_dimensions'],
     ];
 
     if ($this->moduleHandler->moduleExists('image')) {
       $form['images']['show_thumbnail'] = [
-        '#title' => t('Show thumbnail'),
+        '#title' => $this->t('Show thumbnail'),
         '#type' => 'checkbox',
         '#default_value' => $this->configuration['images']['show_thumbnail'],
       ];
 
       $form['images']['thumbnail_image_style'] = [
-        '#title' => t('Thumbnail image style'),
+        '#title' => $this->t('Thumbnail image style'),
         '#type' => 'select',
         '#default_value' => $this->configuration['images']['thumbnail_image_style'],
         '#options' => image_style_options(FALSE),
@@ -151,7 +152,7 @@ class TietoFileMatcher extends TietoEntityMatcher {
     $file = $entity->getFileUri();
 
     /** @var \Drupal\Core\Image\ImageInterface $image */
-    $image = \Drupal::service('image.factory')->get($file);
+    $image = Drupal::service('image.factory')->get($file);
     if ($image->isValid()) {
       if ($this->configuration['images']['show_dimensions']) {
         $description_array[] = $image->getWidth() . 'x' . $image->getHeight() . 'px';
@@ -165,7 +166,7 @@ class TietoFileMatcher extends TietoEntityMatcher {
           '#uri' => $entity->getFileUri(),
         ];
 
-        $description_array[] = (string) \Drupal::service('renderer')->render($image_element);
+        $description_array[] = (string) Drupal::service('renderer')->render($image_element);
       }
     }
 

@@ -4,6 +4,7 @@ namespace Drupal\tieto_wysiwyg\Plugin\CKEditorPlugin;
 
 use Drupal\editor\Entity\Editor;
 use Drupal\video_embed_wysiwyg\Plugin\CKEditorPlugin\VideoEmbedWysiwyg;
+use function drupal_get_path;
 
 /**
  * Defines the "tieto_wysiwyg" plugin.
@@ -29,7 +30,7 @@ class VideoPopupPlugin extends VideoEmbedWysiwyg {
    * {@inheritdoc}
    */
   public function getFile() {
-    return \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_video/plugin.js';
+    return drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_video/plugin.js';
   }
 
   /**

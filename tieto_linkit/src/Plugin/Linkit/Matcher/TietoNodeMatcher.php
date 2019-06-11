@@ -4,6 +4,7 @@ namespace Drupal\tieto_linkit\Plugin\Linkit\Matcher;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\node\NodeInterface;
+use function count;
 
 /**
  * Tieto Node Matcher.
@@ -55,10 +56,10 @@ class TietoNodeMatcher extends TietoEntityMatcher {
     $form = parent::buildConfigurationForm($form, $form_state);
 
     $form['include_unpublished'] = [
-      '#title' => t('Include unpublished nodes'),
+      '#title' => $this->t('Include unpublished nodes'),
       '#type' => 'checkbox',
       '#default_value' => $this->configuration['include_unpublished'],
-      '#description' => t('In order to see unpublished nodes, the requesting user must also have permissions to do so.'),
+      '#description' => $this->t('In order to see unpublished nodes, the requesting user must also have permissions to do so.'),
     ];
 
     return $form;
@@ -79,7 +80,7 @@ class TietoNodeMatcher extends TietoEntityMatcher {
   protected function buildEntityQuery($match) {
     $query = parent::buildEntityQuery($match);
 
-    $no_access = !$this->currentUser->hasPermission('bypass node access') && !\count($this->moduleHandler->getImplementations('node_grants'));
+    $no_access = !$this->currentUser->hasPermission('bypass node access') && !count($this->moduleHandler->getImplementations('node_grants'));
     if ($no_access || $this->configuration['include_unpublished'] !== TRUE) {
       $query->condition('status', NodeInterface::PUBLISHED);
     }

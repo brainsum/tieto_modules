@@ -2,11 +2,12 @@
 
 namespace Drupal\jquery_ui_datepicker\Plugin\Field\FieldWidget;
 
+use Drupal;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeDefaultWidget;
 use Drupal\Core\Link;
+use Drupal\datetime\Plugin\Field\FieldWidget\DateTimeDefaultWidget;
 
 /**
  * Plugin implementation of the 'datetime_default' widget.
@@ -35,7 +36,7 @@ class JQueryUIDatePickerWidget extends DateTimeDefaultWidget {
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $formats = \Drupal::entityTypeManager()->getStorage('date_format')->loadMultiple();
+    $formats = Drupal::entityTypeManager()->getStorage('date_format')->loadMultiple();
 
     $options = [];
 
@@ -45,7 +46,7 @@ class JQueryUIDatePickerWidget extends DateTimeDefaultWidget {
 
     $element['date_format'] = [
       '#type' => 'select',
-      '#title' => t('Date Format'),
+      '#title' => $this->t('Date Format'),
       '#options' => $options,
       '#default_value' => $this->settings['date_format'],
     ];
@@ -100,9 +101,9 @@ class JQueryUIDatePickerWidget extends DateTimeDefaultWidget {
       'scrollbar' => FALSE,
     ];
 
-    $current_user = \Drupal::currentUser();
+    $current_user = Drupal::currentUser();
     $profile_link = Link::createFromRoute($this->t('profile edit page'), 'entity.user.edit_form', ['user' => $current_user->id()]);
-    $element['value']['#description'] = t('Change timezone preference on your @profile.', ['@profile' => $profile_link->toString()]);
+    $element['value']['#description'] = $this->t('Change timezone preference on your @profile.', ['@profile' => $profile_link->toString()]);
 
     return $element;
   }

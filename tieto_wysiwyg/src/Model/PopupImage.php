@@ -2,6 +2,8 @@
 
 namespace Drupal\tieto_wysiwyg\Model;
 
+use RuntimeException;
+
 /**
  * Class PopupImage.
  *
@@ -50,7 +52,7 @@ final class PopupImage {
     int $height
   ) {
     if ($width < 1 || $height < 1) {
-      throw new \RuntimeException('Illegal dimension for the image!');
+      throw new RuntimeException('Illegal dimension for the image!');
     }
 
     $this->width = $width;

@@ -6,6 +6,7 @@ use Drupal\ckeditor\CKEditorPluginBase;
 use Drupal\editor\Entity\Editor;
 use Drupal\ckeditor\CKEditorPluginContextualInterface;
 use Drupal\ckeditor\CKEditorPluginCssInterface;
+use function drupal_get_path;
 
 /**
  * Defines the "tieto_image" plugin.
@@ -31,7 +32,7 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginConte
    * {@inheritdoc}
    */
   public function getFile() {
-    return \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/plugin.js';
+    return drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/plugin.js';
   }
 
   /**
@@ -46,7 +47,7 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginConte
    */
   public function getCssFiles(Editor $editor) {
     return [
-      \drupal_get_path('module', 'ckeditor') . '/css/plugins/drupalimagecaption/ckeditor.drupalimagecaption.css',
+      drupal_get_path('module', 'ckeditor') . '/css/plugins/drupalimagecaption/ckeditor.drupalimagecaption.css',
     ];
   }
 
@@ -88,8 +89,8 @@ class ImagePopupPlugin extends CKEditorPluginBase implements CKEditorPluginConte
   public function getButtons() {
     return [
       'DoubleImage' => [
-        'label' => \t('Double Image Popup'),
-        'image' => \drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/icons/DoubleImage.png',
+        'label' => $this->t('Double Image Popup'),
+        'image' => drupal_get_path('module', 'tieto_wysiwyg') . '/js/plugins/tieto_image/icons/DoubleImage.png',
       ],
     ];
   }

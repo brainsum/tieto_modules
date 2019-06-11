@@ -3,6 +3,14 @@
 namespace Drupal\tieto_ldap;
 
 use Drupal\tieto_ldap\Processor\DrupalUserImportProcessor;
+use function array_keys;
+use function implode;
+use function in_array;
+use function mb_strtolower;
+use function strlen;
+use function strpos;
+use function user_load_by_name;
+use function user_validate_name;
 
 /**
  * Controller routines for user import from LDAP.
@@ -64,7 +72,7 @@ class UserImporter extends ImporterBase {
           'ldap_context' => 'ldap_user_prov_to_drupal',
         ];
         $userAttributes = $processor->alterUserAttributes($attributes, $params);
-        $ldapServer->attributes = \array_keys($userAttributes);
+        $ldapServer->attributes = array_keys($userAttributes);
 
         $attrsonly = 0;
         $sizelimit = 0;
@@ -72,7 +80,7 @@ class UserImporter extends ImporterBase {
 
         $prefix = '<strong>baseDn:</strong> ' . $ldapServer->baseDn . '</br>';
         $prefix .= '<strong>filter:</strong> ' . $ldapServer->filter . '</br>';
-        $caption = t('LDAP Query Results at %address:%port: count=%count', [
+        $caption = $this->t('LDAP Query Results at %address:%port: count=%count', [
           '%address' => $ldapServer->get('address'),
           '%port' => $ldapServer->get('port'),
           '%count' => (int) $result['count'],
@@ -85,11 +93,11 @@ class UserImporter extends ImporterBase {
             unset($row['objectclass']['count']);
             $rowData = [];
             foreach ($ldapServer->attributes as $attribute) {
-              $attribute = \mb_strtolower($attribute);
+              $attribute = mb_strtolower($attribute);
               $data = '-';
               if (isset($row[$attribute])) {
                 if (isset($row[$attribute]['count']) && $row[$attribute]['count'] > 1) {
-                  $data = \implode(',', $row[$attribute]);
+                  $data = implode(',', $row[$attribute]);
                 }
                 else {
                   $data = $row[$attribute][0];
@@ -100,18 +108,18 @@ class UserImporter extends ImporterBase {
             $searchResultRows[] = $rowData;
 
             if ($import) {
-              $ldapUsername = $row[\mb_strtolower($ldapServerConfig->get('user_attr'))][0];
-              $ldapMail = $row[\mb_strtolower($ldapServerConfig->get('mail_attr'))][0];
+              $ldapUsername = $row[mb_strtolower($ldapServerConfig->get('user_attr'))][0];
+              $ldapMail = $row[mb_strtolower($ldapServerConfig->get('mail_attr'))][0];
               $userValues = [
                 'name' => $ldapUsername,
                 'status' => 1,
               ];
               if ($this->isValidLdapUsername($sid, $ldapUsername) && $this->emailValidator
-                ->isValid($ldapMail) && (\user_validate_name($ldapUsername) === NULL || $this->emailValidator
+                ->isValid($ldapMail) && (user_validate_name($ldapUsername) === NULL || $this->emailValidator
                   ->isValid($ldapUsername))) {
 
                 /** @var \Drupal\user\UserInterface $drupalAccount */
-                $drupalAccount = \user_load_by_name($userValues['name']);
+                $drupalAccount = user_load_by_name($userValues['name']);
                 // Create user in Drupal.
                 if (!$drupalAccount) {
                   $result = $processor->provisionDrupalAccount($userValues);
@@ -196,8 +204,8 @@ class UserImporter extends ImporterBase {
    */
   public function isValidLdapUsername($sid, $ldapUsername): bool {
     return !(
-      \strpos($ldapUsername, '.') !== FALSE
-      || (\in_array($sid, ['tieto', 'tieto_ap']) && \strlen($ldapUsername) > 8)
+      strpos($ldapUsername, '.') !== FALSE
+      || (in_array($sid, ['tieto', 'tieto_ap']) && strlen($ldapUsername) > 8)
     );
   }
 
