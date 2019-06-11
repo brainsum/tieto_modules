@@ -311,10 +311,8 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
       return [];
     }
 
-    // @todo: Add info about this fallback to readme.
-    $fallbackUserIds = array_keys($this->userStorage->loadByProperties(['mail' => $fallbackRecipients]));
     /** @var \Drupal\user\UserInterface[] $fallbackUsers */
-    $fallbackUsers = $this->userStorage->loadMultiple($fallbackUserIds);
+    $fallbackUsers = array_values($this->userStorage->loadByProperties(['mail' => $fallbackRecipients]));
     return $fallbackUsers;
   }
 
