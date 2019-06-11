@@ -5,8 +5,10 @@ namespace Drupal\tieto_lifecycle_management_notifications\EventSubscriber;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
+use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleIgnoreEventInterface;
@@ -39,6 +41,15 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
 
   private $dateFormatter;
 
+  private $notificationConfig;
+
+  /**
+   * User storage.
+   *
+   * @var \Drupal\user\UserStorageInterface
+   */
+  private $userStorage;
+
   /**
    * LifeCycleEventSubscriber constructor.
    *
@@ -52,19 +63,30 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    *   Time service.
    * @param \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
    *   Date formatter service.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $configFactory
+   *   Config factory.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   Entity type manager.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function __construct(
     Mailer $mailer,
     NotificationStorage $notificationStorage,
     ModerationHelper $moderationHelper,
     TimeInterface $time,
-    DateFormatterInterface $dateFormatter
+    DateFormatterInterface $dateFormatter,
+    ConfigFactoryInterface $configFactory,
+    EntityTypeManagerInterface $entityTypeManager
   ) {
     $this->mailer = $mailer;
     $this->notificationStorage = $notificationStorage;
     $this->moderationHelper = $moderationHelper;
     $this->time = $time;
     $this->dateFormatter = $dateFormatter;
+    $this->notificationConfig = $configFactory->get('tieto_lifecycle_management_notifications.settings');
+    $this->userStorage = $entityTypeManager->getStorage('user');
   }
 
   /**
@@ -265,15 +287,11 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     });
 
     if (empty($users)) {
-      // @todo: DI & cleanup.
-      /** @var \Drupal\user\UserStorageInterface $userStorage */
-      $userStorage = \Drupal::entityTypeManager()->getStorage('user');
-      $configFactory = \Drupal::configFactory();
-      $notificationSettings = $configFactory->get('tieto_lifecycle_management_notifications.settings');
+      $notificationSettings = $this->notificationConfig->get('tieto_lifecycle_management_notifications.settings');
       // @todo: Add info about this fallback to readme.
       // @todo: TBD send to multiple users.
-      $fallbackUsers = \array_keys($userStorage->loadByProperties(['mail' => $notificationSettings->get('contact_mail')]));
-      if (!empty($fallbackUsers) && ($fallbackUser = $userStorage->load(\reset($fallbackUsers)))) {
+      $fallbackUsers = \array_keys($this->userStorage->loadByProperties(['mail' => $notificationSettings->get('contact_mail')]));
+      if (!empty($fallbackUsers) && ($fallbackUser = $this->userStorage->load(\reset($fallbackUsers)))) {
         $users[] = $fallbackUser;
       }
     }
