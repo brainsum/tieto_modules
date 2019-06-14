@@ -13,8 +13,8 @@ take a look at `Zalas\Behat\NoExtension` or `FriendsOfBehat\ContextServiceExtens
 ## Setup
 - Initialize a new or use an existing behat suite for your project, e.g in `{project-root}/tests/behat`.
 - Add a new suite, e.g `life-cycle-management`
-- Add `'%paths.base%/../../web/modules/contrib/tieto_modules/tieto_lifecycle_management/tests/src/Behat/features'` to `paths`
-    - Note: This assumes a standard drupal-composer install.
+- Create features files based on `tieto_lifecycle_management/tests/src/Behat/features`
+    - The supplied features are for reference only, you need to adjust dates, content types, roles, etc. to the needs of your site
 - Create a new context
     - Extend `Brainsum\TietoModules\tieto_lifecycle_management\Tests\Behat\Context\BaseContext`
     - Implement the abstract functions that are needed
