@@ -303,6 +303,11 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    */
   private function loadFallbackUsers(): array {
     $notificationSettings = $this->notificationConfig->get('tieto_lifecycle_management_notifications.settings');
+
+    if ($notificationSettings === NULL) {
+      return [];
+    }
+
     /** @var string[] $fallbackRecipients */
     $fallbackRecipients = $notificationSettings->get('fallback_recipients') ?? [];
 
