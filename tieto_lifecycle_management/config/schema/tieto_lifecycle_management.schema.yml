@@ -17,3 +17,15 @@ tieto_lifecycle_management.settings:
                     date:
                       type: string
                       label: 'Date default'
+    messages:
+      type: sequence
+      label: 'Message type'
+      sequence:
+        - type: sequence
+          label: 'Entity type'
+          sequence:
+            - type: sequence
+              label: 'Bundle'
+              sequence:
+                - type: string
+                  label: 'Message'

@@ -1,4 +1,11 @@
 services:
+  tieto_lifecycle_management.moderation_message:
+    class: Drupal\tieto_lifecycle_management\Service\ModerationMessage
+    arguments:
+      - '@date.formatter'
+      - '@string_translation'
+      - '@config.factory'
+
   tieto_lifecycle_management.moderation_helper:
     class: Drupal\tieto_lifecycle_management\Service\ModerationHelper
     arguments:

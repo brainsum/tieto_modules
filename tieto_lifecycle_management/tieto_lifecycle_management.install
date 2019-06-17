@@ -11,3 +11,20 @@
 function tieto_lifecycle_management_install() {
   \module_set_weight('tieto_lifecycle_management', 15);
 }
+
+/**
+ * Clear caches.
+ */
+function tieto_lifecycle_management_notifications_update_8601() {
+  drupal_flush_all_caches();
+}
+
+/**
+ * Add the messages key to the config.
+ */
+function tieto_lifecycle_management_notifications_update_8602() {
+  $factory = \Drupal::configFactory();
+  $config = $factory->getEditable('tieto_lifecycle_management.settings');
+  $config->set('messages', []);
+  $config->save();
+}

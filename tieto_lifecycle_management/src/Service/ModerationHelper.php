@@ -61,6 +61,8 @@ class ModerationHelper {
    *   Date formatter.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   Event dispatcher.
+   *
+   * @todo: Add the tieto_lifecycle_management.moderation_message service.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
