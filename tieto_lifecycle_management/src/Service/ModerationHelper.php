@@ -5,7 +5,6 @@ namespace Drupal\tieto_lifecycle_management\Service;
 use DateInterval;
 use Drupal\Component\Datetime\TimeInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\Core\Datetime\DateFormatterInterface;
 use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
@@ -29,7 +28,7 @@ use function key;
  *
  * @package Drupal\tieto_lifecycle_management\Service
  */
-class ModerationHelper {
+final class ModerationHelper {
 
   use MessengerTrait;
   use StringTranslationTrait;
@@ -42,9 +41,9 @@ class ModerationHelper {
 
   private $logger;
 
-  private $dateFormatter;
-
   private $eventDispatcher;
+
+  private $moderationMessage;
 
   /**
    * ModerationHelper constructor.
@@ -57,28 +56,26 @@ class ModerationHelper {
    *   The config factory.
    * @param \Drupal\Core\Logger\LoggerChannelFactoryInterface $loggerChannelFactory
    *   Logger channel factory.
-   * @param \Drupal\Core\Datetime\DateFormatterInterface $dateFormatter
-   *   Date formatter.
    * @param \Symfony\Component\EventDispatcher\EventDispatcherInterface $dispatcher
    *   Event dispatcher.
-   *
-   * @todo: Add the tieto_lifecycle_management.moderation_message service.
+   * @param \Drupal\tieto_lifecycle_management\Service\ModerationMessage $moderationMessage
+   *   Moderation message service.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
     TimeInterface $time,
     ConfigFactoryInterface $configFactory,
     LoggerChannelFactoryInterface $loggerChannelFactory,
-    DateFormatterInterface $dateFormatter,
-    EventDispatcherInterface $dispatcher
+    EventDispatcherInterface $dispatcher,
+    ModerationMessage $moderationMessage
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->time = $time;
     $this->lifeCycleConfig = $configFactory->get('tieto_lifecycle_management.settings');
     $this->logger = $loggerChannelFactory->get('tieto_lifecycle_management');
-    $this->dateFormatter = $dateFormatter;
 
     $this->eventDispatcher = $dispatcher;
+    $this->moderationMessage = $moderationMessage;
   }
 
   /**
@@ -120,15 +117,7 @@ class ModerationHelper {
    *   The translatable message, or NULL.
    */
   protected function newEntityNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    if ($entity->isNew() === FALSE) {
-      return NULL;
-    }
-
-    if ($entity->bundle() === 'service_alert') {
-      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.');
-    }
-
-    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually.');
+    return $this->moderationMessage->newEntityNotificationMessage($entity);
   }
 
   /**
@@ -150,15 +139,7 @@ class ModerationHelper {
       return NULL;
     }
 
-    if ($entity->bundle() === 'service_alert') {
-      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
-        '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-      ]);
-    }
-
-    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually and by publishing the content. Otherwise, this content will be deleted on @deleteDate', [
-      '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-    ]);
+    return $this->moderationMessage->draftDeleteNotificationMessage($entity, $deleteTime);
   }
 
   /**
@@ -180,15 +161,7 @@ class ModerationHelper {
       return NULL;
     }
 
-    if ($entity->bundle() === 'service_alert') {
-      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be unpublished on @unpublishDate', [
-        '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
-      ]);
-    }
-
-    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be unpublished on @unpublishDate', [
-      '@unpublishDate' => $this->dateFormatter->format($unpublishTime, 'tieto_date'),
-    ]);
+    return $this->moderationMessage->unpublishNotificationMessage($entity, $unpublishTime);
   }
 
   /**
@@ -210,15 +183,7 @@ class ModerationHelper {
       return NULL;
     }
 
-    if ($entity->bundle() === 'service_alert') {
-      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be archived on @archiveDate', [
-        '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
-      ]);
-    }
-
-    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be archived on @archiveDate', [
-      '@archiveDate' => $this->dateFormatter->format($archiveTime, 'tieto_date'),
-    ]);
+    return $this->moderationMessage->archiveNotificationMessage($entity, $archiveTime);
   }
 
   /**
@@ -240,15 +205,7 @@ class ModerationHelper {
       return NULL;
     }
 
-    if ($entity->bundle() === 'service_alert') {
-      return $this->t('Service alerts will be assigned automatic unpublish and deletion dates. This content will be deleted on @deleteDate', [
-        '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-      ]);
-    }
-
-    return $this->t('News items will be assigned automatic unpublish and deletion dates. These dates can be overridden by entering respective dates manually or by re-publishing the content. This article will be deleted on @deleteDate', [
-      '@deleteDate' => $this->dateFormatter->format($deleteTime, 'tieto_date'),
-    ]);
+    return $this->moderationMessage->oldDeleteNotificationMessage($entity, $deleteTime);
   }
 
   /**

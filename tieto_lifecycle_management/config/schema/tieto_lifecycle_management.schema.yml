@@ -17,6 +17,10 @@ tieto_lifecycle_management.settings:
                     date:
                       type: string
                       label: 'Date default'
+                    target_state:
+                      type: string
+                      label: 'Target moderation state'
+
     messages:
       type: sequence
       label: 'Message type'

@@ -13,5 +13,5 @@ services:
       - '@datetime.time'
       - '@config.factory'
       - '@logger.factory'
-      - '@date.formatter'
       - '@event_dispatcher'
+      - '@tieto_lifecycle_management.moderation_message'

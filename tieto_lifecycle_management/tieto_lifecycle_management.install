@@ -15,16 +15,45 @@ function tieto_lifecycle_management_install() {
 /**
  * Clear caches.
  */
-function tieto_lifecycle_management_notifications_update_8601() {
+function tieto_lifecycle_management_update_8601() {
   drupal_flush_all_caches();
 }
 
 /**
  * Add the messages key to the config.
  */
-function tieto_lifecycle_management_notifications_update_8602() {
+function tieto_lifecycle_management_update_8602() {
   $factory = \Drupal::configFactory();
   $config = $factory->getEditable('tieto_lifecycle_management.settings');
   $config->set('messages', []);
   $config->save();
+}
+
+/**
+ * Add the target_state key to the fields config.
+ */
+function tieto_lifecycle_management_update_8603() {
+  $factory = \Drupal::configFactory();
+  $config = $factory->getEditable('tieto_lifecycle_management.settings');
+
+  $fieldsConfig = $config->get('fields');
+  foreach ($fieldsConfig as $contentType => $bundles) {
+    foreach ($bundles as $bundle => $fields) {
+      foreach ($fields as $field => $fieldData) {
+        if (empty($fieldsConfig[$contentType][$bundle][$field]['target_state'])) {
+          $fieldsConfig[$contentType][$bundle][$field]['target_state'] = '';
+        }
+      }
+    }
+  }
+
+  $config->set('fields', $fieldsConfig);
+  $config->save();
+}
+
+/**
+ * Clear caches.
+ */
+function tieto_lifecycle_management_update_8604() {
+  drupal_flush_all_caches();
 }

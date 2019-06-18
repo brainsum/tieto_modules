@@ -122,7 +122,7 @@ final class ModerationMessage {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
    */
-  protected function newEntityNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
+  public function newEntityNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     if ($entity->isNew() === FALSE) {
       return NULL;
     }
@@ -142,7 +142,7 @@ final class ModerationMessage {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
    */
-  protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
+  public function draftDeleteNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
     $message = $this->message($entity->getEntityTypeId(), $entity->bundle(), 'draft_delete');
     return $message === NULL ? NULL : $this->translation->translate($message, [
       '@deleteDate' => $this->formatTimestamp($timestamp),
@@ -160,7 +160,7 @@ final class ModerationMessage {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
    */
-  protected function unpublishNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
+  public function unpublishNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
     $message = $this->message($entity->getEntityTypeId(), $entity->bundle(), 'unpublish');
     return $message === NULL ? NULL : $this->translation->translate($message, [
       '@unpublishDate' => $this->formatTimestamp($timestamp),
@@ -178,7 +178,7 @@ final class ModerationMessage {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
    */
-  protected function archiveNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
+  public function archiveNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
     $message = $this->message($entity->getEntityTypeId(), $entity->bundle(), 'archive');
     return $message === NULL ? NULL : $this->translation->translate($message, [
       '@archiveDate' => $this->formatTimestamp($timestamp),
@@ -196,7 +196,7 @@ final class ModerationMessage {
    * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
    *   The translatable message, or NULL.
    */
-  protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
+  public function oldDeleteNotificationMessage(FieldableEntityInterface $entity, int $timestamp): ?TranslatableMarkup {
     $message = $this->message($entity->getEntityTypeId(), $entity->bundle(), 'old_delete');
     return $message === NULL ? NULL : $this->translation->translate($message, [
       '@deleteDate' => $this->formatTimestamp($timestamp),
