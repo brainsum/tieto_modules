@@ -11,7 +11,6 @@ use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Logger\LoggerChannelFactoryInterface;
 use Drupal\Core\Messenger\MessengerTrait;
-use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Drupal\Core\StringTranslation\TranslatableMarkup;
 use Drupal\tieto_lifecycle_management\Constant\RemovalReason;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleIgnoreEvent;
@@ -31,7 +30,6 @@ use function key;
 final class ModerationHelper {
 
   use MessengerTrait;
-  use StringTranslationTrait;
 
   private $entityTypeManager;
 
