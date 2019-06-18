@@ -76,7 +76,6 @@ final class ModerationHelper {
     $this->time = $time;
     $this->lifeCycleConfig = $configFactory->get('tieto_lifecycle_management.settings');
     $this->logger = $loggerChannelFactory->get('tieto_lifecycle_management');
-
     $this->eventDispatcher = $dispatcher;
     $this->moderationMessage = $moderationMessage;
     $this->entityTime = $entityTime;
@@ -112,107 +111,6 @@ final class ModerationHelper {
   }
 
   /**
-   * Return notification about new entities.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The translatable message, or NULL.
-   */
-  protected function newEntityNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    return $this->moderationMessage->newEntityNotificationMessage($entity);
-  }
-
-  /**
-   * Return notification about draft deletion.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The translatable message, or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   */
-  protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $deleteTime = $this->entityTime->unpublishedEntityDeleteTime($entity);
-
-    if ($deleteTime === NULL) {
-      return NULL;
-    }
-
-    return $this->moderationMessage->draftDeleteNotificationMessage($entity, $deleteTime);
-  }
-
-  /**
-   * Return notification about unpublishing.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The translatable message, or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   */
-  protected function unpublishNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $unpublishTime = $this->entityTime->unpublishTime($entity);
-
-    if ($unpublishTime === NULL) {
-      return NULL;
-    }
-
-    return $this->moderationMessage->unpublishNotificationMessage($entity, $unpublishTime);
-  }
-
-  /**
-   * Return notification about archiving.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The translatable message, or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   */
-  protected function archiveNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $archiveTime = $this->entityTime->archiveTime($entity);
-
-    if ($archiveTime === NULL) {
-      return NULL;
-    }
-
-    return $this->moderationMessage->archiveNotificationMessage($entity, $archiveTime);
-  }
-
-  /**
-   * Return notification about deleting old entities.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return \Drupal\Core\StringTranslation\TranslatableMarkup|null
-   *   The translatable message, or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   */
-  protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $deleteTime = $this->entityTime->deleteTime($entity);
-
-    if ($deleteTime === NULL) {
-      return NULL;
-    }
-
-    return $this->moderationMessage->oldDeleteNotificationMessage($entity, $deleteTime);
-  }
-
-  /**
    * Return the moderation state for the entity if possible.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
@@ -221,7 +119,7 @@ final class ModerationHelper {
    * @return string|null
    *   The state or NULL.
    */
-  protected function entityModerationState(FieldableEntityInterface $entity): ?string {
+  private function entityModerationState(FieldableEntityInterface $entity): ?string {
     if (!$entity->hasField('moderation_state')) {
       return NULL;
     }
@@ -245,7 +143,7 @@ final class ModerationHelper {
    */
   public function notificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     if ($entity->isNew()) {
-      return $this->newEntityNotificationMessage($entity);
+      return $this->moderationMessage->newEntityNotificationMessage($entity);
     }
 
     if ($this->isEntityScheduled($entity)) {
@@ -254,16 +152,20 @@ final class ModerationHelper {
 
     switch ($this->entityModerationState($entity)) {
       case 'unpublished':
-        return $this->draftDeleteNotificationMessage($entity);
+        $deleteTime = $this->entityTime->unpublishedEntityDeleteTime($entity);
+        return $deleteTime === NULL ? NULL : $this->moderationMessage->draftDeleteNotificationMessage($entity, $deleteTime);
 
       case 'published':
-        return $this->unpublishNotificationMessage($entity);
+        $unpublishTime = $this->entityTime->unpublishTime($entity);
+        return $unpublishTime === NULL ? NULL : $this->moderationMessage->unpublishNotificationMessage($entity, $unpublishTime);
 
       case 'unpublished_content':
-        return $this->archiveNotificationMessage($entity);
+        $archiveTime = $this->entityTime->archiveTime($entity);
+        return $archiveTime === NULL ? NULL : $this->moderationMessage->archiveNotificationMessage($entity, $archiveTime);
 
       case 'trash':
-        return $this->oldDeleteNotificationMessage($entity);
+        $deleteTime = $this->entityTime->deleteTime($entity);
+        return $deleteTime === NULL ? NULL : $this->moderationMessage->oldDeleteNotificationMessage($entity, $deleteTime);
 
       default:
         return NULL;
