@@ -34,6 +34,13 @@ abstract class BaseContext extends RawDrupalContext {
   protected const TIMEZONE = 'Europe/Budapest';
 
   /**
+   * Navigate to the edit page of a previous node.
+   */
+  private function visitPreviousNodeEditPage(): void {
+    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+  }
+
+  /**
    * Creates content, then redirects to the edit page.
    *
    * @Given I edit a(n) :moderationState content of type :contentType
@@ -44,7 +51,7 @@ abstract class BaseContext extends RawDrupalContext {
   ): void {
     $newNode = $this->generateProjectNode($contentType, $moderationState);
     $this->setPreviousNode($newNode);
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
@@ -58,7 +65,7 @@ abstract class BaseContext extends RawDrupalContext {
   ): void {
     $newNode = $this->generateProjectNode($contentType, $moderationState);
     $this->setPreviousNode($newNode);
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
@@ -97,7 +104,7 @@ abstract class BaseContext extends RawDrupalContext {
 
     $this->setPreviousNode($newNode);
 
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
@@ -123,7 +130,7 @@ abstract class BaseContext extends RawDrupalContext {
     $newNode->save();
     $this->setPreviousNode($newNode);
 
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
@@ -167,7 +174,7 @@ abstract class BaseContext extends RawDrupalContext {
     );
     $newNode->save();
     $this->setPreviousNode($newNode);
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
@@ -216,7 +223,7 @@ abstract class BaseContext extends RawDrupalContext {
     );
 
     $this->setPreviousNode($newNode);
-    $this->visitPath("/node/{$this->previousNode()->id()}/edit");
+    $this->visitPreviousNodeEditPage();
   }
 
   /**
