@@ -13,6 +13,7 @@ use Drupal\Core\Entity\FieldableEntityInterface;
 use Drupal\Core\Entity\RevisionLogInterface;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleIgnoreEventInterface;
 use Drupal\tieto_lifecycle_management\Event\LifeCycleUpdateEventInterface;
+use Drupal\tieto_lifecycle_management\Service\EntityTime;
 use Drupal\tieto_lifecycle_management\Service\ModerationHelper;
 use Drupal\tieto_lifecycle_management_notifications\Data\EntityLifeCycleData;
 use Drupal\tieto_lifecycle_management_notifications\Service\Mailer;
@@ -36,6 +37,8 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
   private $notificationStorage;
 
   private $moderationHelper;
+
+  private $entityTime;
 
   private $time;
 
@@ -67,6 +70,8 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    *   Config factory.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   Entity type manager.
+   * @param \Drupal\tieto_lifecycle_management\Service\EntityTime $entityTime
+   *   Entity time service.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
@@ -78,11 +83,13 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     TimeInterface $time,
     DateFormatterInterface $dateFormatter,
     ConfigFactoryInterface $configFactory,
-    EntityTypeManagerInterface $entityTypeManager
+    EntityTypeManagerInterface $entityTypeManager,
+    EntityTime $entityTime
   ) {
     $this->mailer = $mailer;
     $this->notificationStorage = $notificationStorage;
     $this->moderationHelper = $moderationHelper;
+    $this->entityTime = $entityTime;
     $this->time = $time;
     $this->dateFormatter = $dateFormatter;
     $this->notificationConfig = $configFactory->get('tieto_lifecycle_management_notifications.settings');
@@ -161,14 +168,14 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    */
   private function entityToData(EntityInterface $entity): EntityLifeCycleData {
     try {
-      $unpublishTime = $this->moderationHelper->entityUnpublishTime($entity);
+      $unpublishTime = $this->entityTime->unpublishTime($entity);
     }
     catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
       $unpublishTime = NULL;
     }
 
     try {
-      $deleteTime = $this->moderationHelper->entityDeleteTime($entity);
+      $deleteTime = $this->entityTime->deleteTime($entity);
     }
     catch (InvalidPluginDefinitionException | PluginNotFoundException $e) {
       $deleteTime = NULL;
@@ -242,12 +249,12 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
     // @todo: Load from config.
     // @todo: Add weight field.
     $notifications = [
-      ['offset' => '-14 days', 'id' => 'reminder.unpublished_content.half_month_before'],
-      ['offset' => '-1 month', 'id' => 'reminder.unpublished_content.one_month_before'],
+      ['offset' => '14 days', 'id' => 'reminder.unpublished_content.half_month_before'],
+      ['offset' => '1 month', 'id' => 'reminder.unpublished_content.one_month_before'],
     ];
 
     foreach ($notifications as $notification) {
-      if ($this->moderationHelper->offsetTimestamp($entityData->unpublishTime, $notification['offset']) <= $requestTime) {
+      if ($this->entityTime->subtractOffset($entityData->unpublishTime, $notification['offset']) <= $requestTime) {
         return $notification['id'];
       }
     }

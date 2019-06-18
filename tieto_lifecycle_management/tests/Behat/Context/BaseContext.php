@@ -298,24 +298,24 @@ abstract class BaseContext extends RawDrupalContext {
     // @see: \Drupal\DrupalExtension\Context\MinkContext::fixStepArgument().
     $parsedText = str_replace('\\"', '"', $message);
 
-    /** @var \Drupal\tieto_lifecycle_management\Service\ModerationHelper $moderationHelper */
-    $moderationHelper = Drupal::service('tieto_lifecycle_management.moderation_helper');
+    /** @var \Drupal\tieto_lifecycle_management\Service\EntityTime $entityTime */
+    $entityTime = Drupal::service('tieto_lifecycle_management.entity_time');
 
     $timestamp = NULL;
     switch ($messageType) {
       case 'delete':
         // @todo: Cleanup.
-        $timestamp = $moderationHelper->entityLastPublishDate($this->previousNode()) === NULL
-          ? $moderationHelper->unpublishedEntityDeleteTime($this->previousNode())
-          : $moderationHelper->entityDeleteTime($this->previousNode());
+        $timestamp = $entityTime->lastPublishTime($this->previousNode()) === NULL
+          ? $entityTime->unpublishedEntityDeleteTime($this->previousNode())
+          : $entityTime->deleteTime($this->previousNode());
         break;
 
       case 'unpublish':
-        $timestamp = $moderationHelper->entityUnpublishTime($this->previousNode());
+        $timestamp = $entityTime->unpublishTime($this->previousNode());
         break;
 
       case 'archive':
-        $timestamp = $moderationHelper->entityArchiveTime($this->previousNode());
+        $timestamp = $entityTime->archiveTime($this->previousNode());
         break;
     }
 
