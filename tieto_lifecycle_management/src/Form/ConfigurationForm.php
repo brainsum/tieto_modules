@@ -80,7 +80,7 @@ final class ConfigurationForm extends ConfigFormBase {
         'field_type' => 'entity_reference',
       ]);
 
-    $scheduledFields = array_filter($scheduledFields, function ($field) {
+    $scheduledFields = array_filter($scheduledFields, static function ($field) {
       /** @var \Drupal\field\FieldConfigInterface $field */
       return $field->getSetting('handler') === 'default:scheduled_update';
     });
