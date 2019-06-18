@@ -15,6 +15,8 @@ take a look at `Zalas\Behat\NoExtension` or `FriendsOfBehat\ContextServiceExtens
 - Add a new suite, e.g `life-cycle-management`
 - Create features files based on `tieto_lifecycle_management/tests/src/Behat/features`
     - The supplied features are for reference only, you need to adjust dates, content types, roles, etc. to the needs of your site
+- (Optional) For modularity, extend traits used by the BaseContext
+    - These can be found in the `drupal-behat-testing` package, under the `Brainsum\DrupalBehatTesting` namespace
 - Create a new context
     - Extend `Brainsum\TietoModules\tieto_lifecycle_management\Tests\Behat\Context\BaseContext`
     - Implement the abstract functions that are needed
