@@ -23,5 +23,6 @@ services:
       - '@date.formatter'
       - '@config.factory'
       - '@entity_type.manager'
+      - '@tieto_lifecycle_management.entity_time'
     tags:
       - { name: 'event_subscriber' }

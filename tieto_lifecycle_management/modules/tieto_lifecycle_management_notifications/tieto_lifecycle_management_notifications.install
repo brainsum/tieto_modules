@@ -21,3 +21,10 @@ function tieto_lifecycle_management_notifications_update_8601() {
   $config->set('fallback_recipients', []);
   $config->save();
 }
+
+/**
+ * Clear caches.
+ */
+function tieto_lifecycle_management_notifications_update_8602() {
+  drupal_flush_all_caches();
+}
