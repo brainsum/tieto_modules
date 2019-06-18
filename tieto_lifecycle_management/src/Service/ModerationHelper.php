@@ -43,6 +43,8 @@ final class ModerationHelper {
 
   private $moderationMessage;
 
+  private $entityTime;
+
   /**
    * ModerationHelper constructor.
    *
@@ -58,6 +60,8 @@ final class ModerationHelper {
    *   Event dispatcher.
    * @param \Drupal\tieto_lifecycle_management\Service\ModerationMessage $moderationMessage
    *   Moderation message service.
+   * @param \Drupal\tieto_lifecycle_management\Service\EntityTime $entityTime
+   *   Entity time service.
    */
   public function __construct(
     EntityTypeManagerInterface $entityTypeManager,
@@ -65,7 +69,8 @@ final class ModerationHelper {
     ConfigFactoryInterface $configFactory,
     LoggerChannelFactoryInterface $loggerChannelFactory,
     EventDispatcherInterface $dispatcher,
-    ModerationMessage $moderationMessage
+    ModerationMessage $moderationMessage,
+    EntityTime $entityTime
   ) {
     $this->entityTypeManager = $entityTypeManager;
     $this->time = $time;
@@ -74,6 +79,7 @@ final class ModerationHelper {
 
     $this->eventDispatcher = $dispatcher;
     $this->moderationMessage = $moderationMessage;
+    $this->entityTime = $entityTime;
   }
 
   /**
@@ -131,7 +137,7 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function draftDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $deleteTime = $this->unpublishedEntityDeleteTime($entity);
+    $deleteTime = $this->entityTime->unpublishedEntityDeleteTime($entity);
 
     if ($deleteTime === NULL) {
       return NULL;
@@ -153,7 +159,7 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function unpublishNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $unpublishTime = $this->entityUnpublishTime($entity);
+    $unpublishTime = $this->entityTime->unpublishTime($entity);
 
     if ($unpublishTime === NULL) {
       return NULL;
@@ -175,7 +181,7 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function archiveNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $archiveTime = $this->entityArchiveTime($entity);
+    $archiveTime = $this->entityTime->archiveTime($entity);
 
     if ($archiveTime === NULL) {
       return NULL;
@@ -197,7 +203,7 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   protected function oldDeleteNotificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
-    $deleteTime = $this->entityDeleteTime($entity);
+    $deleteTime = $this->entityTime->deleteTime($entity);
 
     if ($deleteTime === NULL) {
       return NULL;
@@ -262,73 +268,6 @@ final class ModerationHelper {
       default:
         return NULL;
     }
-  }
-
-  /**
-   * Returns the entity unpublish time if possible.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return int|null
-   *   The unpublish time or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public function entityUnpublishTime(EntityInterface $entity): ?int {
-    $offset = $this->getStateOffset($entity, 'unpublished_content');
-
-    if ($offset === NULL) {
-      return NULL;
-    }
-
-    return $this->offsetLastPublishTime($entity, $offset);
-  }
-
-  /**
-   * Returns the entity archive time if possible.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return int|null
-   *   The archive time or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public function entityArchiveTime(EntityInterface $entity): ?int {
-    $offset = $this->getStateOffset($entity, 'trash');
-
-    if ($offset === NULL) {
-      return NULL;
-    }
-
-    return $this->offsetLastPublishTime($entity, $offset);
-  }
-
-  /**
-   * Return the offset for a state.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   * @param string $state
-   *   The state.
-   *
-   * @return string|null
-   *   The date offset or NULL.
-   */
-  private function getStateOffset(EntityInterface $entity, string $state): ?string {
-    $config = $this->lifeCycleConfig->get('fields')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
-
-    foreach ($config as $setting) {
-      if ($setting['target_state'] === $state && !empty($setting['date'])) {
-        return $setting['date'];
-      }
-    }
-
-    return NULL;
   }
 
   /**
@@ -489,67 +428,6 @@ final class ModerationHelper {
   }
 
   /**
-   * Offsets a timestamp.
-   *
-   * @param int $timestamp
-   *   The timestamp.
-   * @param string $offset
-   *   The offset string, e.g "+1 month".
-   *
-   * @return int
-   *   The timestamp with the offset added.
-   */
-  public function offsetTimestamp(int $timestamp, string $offset): int {
-    return DrupalDateTime::createFromTimestamp($timestamp)
-      ->add(DateInterval::createFromDateString($offset))
-      ->getTimestamp();
-  }
-
-  /**
-   * Return the latest published revision, if possible.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return int|null
-   *   The last published date or NULL.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public function entityLastPublishDate(EntityInterface $entity): ?int {
-    if ($entity->isNew()) {
-      return NULL;
-    }
-
-    $keys = $entity->getEntityType()->getKeys();
-
-    /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
-    $storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
-    $query = $storage->getQuery();
-    $query->condition($keys['id'], $entity->id());
-    $query->condition($keys['status'], 1);
-    $query->condition('moderation_state', 'published');
-    $query->sort($keys['revision'], 'desc');
-    $query->range(0, 1);
-    $query->allRevisions();
-    $data = $query->execute();
-
-    if (empty($data)) {
-      return NULL;
-    }
-
-    /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface $revision */
-    $revision = $storage->loadRevision(key($data));
-
-    if ($revision === NULL) {
-      return NULL;
-    }
-
-    return $revision->getChangedTime();
-  }
-
-  /**
    * Returns whether the unpublished entity should be removed or not.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -562,37 +440,13 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function shouldDeleteUnpublishedEntity(EntityInterface $entity): bool {
-    $draftDeleteTime = $this->unpublishedEntityDeleteTime($entity);
+    $draftDeleteTime = $this->entityTime->unpublishedEntityDeleteTime($entity);
 
     if ($draftDeleteTime === NULL) {
       return FALSE;
     }
 
     return $draftDeleteTime <= $this->time->getRequestTime();
-  }
-
-  /**
-   * Returns the delete time of a never unpublished entity.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return int|null
-   *   Return the delete time, if possible.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public function unpublishedEntityDeleteTime(EntityInterface $entity): ?int {
-    $lastPublishDate = $this->entityLastPublishDate($entity);
-
-    // If it has a published date, ignore.
-    if ($lastPublishDate !== NULL) {
-      return NULL;
-    }
-
-    // @todo: Make offset configurable.
-    return $this->offsetTimestamp($entity->getChangedTime(), '+1 year');
   }
 
   /**
@@ -608,30 +462,13 @@ final class ModerationHelper {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function shouldDeleteOldEntity(EntityInterface $entity): bool {
-    $entityDeleteTime = $this->entityDeleteTime($entity);
+    $entityDeleteTime = $this->entityTime->deleteTime($entity);
 
     if ($entityDeleteTime === NULL) {
       return FALSE;
     }
 
     return $entityDeleteTime <= $this->time->getRequestTime();
-  }
-
-  /**
-   * Returns the delete time of an entity.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return int|null
-   *   Return the delete time, if possible.
-   *
-   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
-   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
-   */
-  public function entityDeleteTime(EntityInterface $entity): ?int {
-    // @todo: Make offset configurable.
-    return $this->offsetLastPublishTime($entity, '+3 years');
   }
 
   /**
@@ -681,7 +518,7 @@ final class ModerationHelper {
       return FALSE;
     }
 
-    $moderationUpdateTime = $this->offsetLastPublishTime($entity, $fieldSettings['date']);
+    $moderationUpdateTime = $this->entityTime->offsetLastPublishTime($entity, $fieldSettings['date']);
 
     // Was not yet published.
     if ($moderationUpdateTime === NULL) {
@@ -692,28 +529,140 @@ final class ModerationHelper {
   }
 
   /**
-   * Return the last published timestamp with an offset.
+   * Returns the entity unpublish time if possible.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
    *   The entity.
-   * @param string $offset
-   *   The offset.
    *
    * @return int|null
-   *   The last publish date timestamp with the offset applied, or NULL.
+   *   The unpublish time or NULL.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
    */
-  private function offsetLastPublishTime(EntityInterface $entity, string $offset): ?int {
-    $lastPublishDate = $this->entityLastPublishDate($entity);
+  public function entityUnpublishTime(EntityInterface $entity): ?int {
+    return $this->entityTime->unpublishTime($entity);
+  }
 
-    // Was not yet published.
-    if ($lastPublishDate === NULL) {
+  /**
+   * Returns the entity archive time if possible.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return int|null
+   *   The archive time or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
+   */
+  public function entityArchiveTime(EntityInterface $entity): ?int {
+    return $this->entityTime->archiveTime($entity);
+  }
+
+  /**
+   * Returns the delete time of an entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return int|null
+   *   Return the delete time, if possible.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
+   */
+  public function entityDeleteTime(EntityInterface $entity): ?int {
+    return $this->entityTime->deleteTime($entity);
+  }
+
+  /**
+   * Return the latest published revision, if possible.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return int|null
+   *   The last published date or NULL.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
+   */
+  public function entityLastPublishDate(EntityInterface $entity): ?int {
+    if ($entity->isNew()) {
       return NULL;
     }
 
-    return $this->offsetTimestamp($lastPublishDate, $offset);
+    $keys = $entity->getEntityType()->getKeys();
+
+    /** @var \Drupal\Core\Entity\EntityStorageInterface $storage */
+    $storage = $this->entityTypeManager->getStorage($entity->getEntityTypeId());
+    $query = $storage->getQuery();
+    $query->condition($keys['id'], $entity->id());
+    $query->condition($keys['status'], 1);
+    $query->condition('moderation_state', 'published');
+    $query->sort($keys['revision'], 'desc');
+    $query->range(0, 1);
+    $query->allRevisions();
+    $data = $query->execute();
+
+    if (empty($data)) {
+      return NULL;
+    }
+
+    /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface $revision */
+    $revision = $storage->loadRevision(key($data));
+
+    if ($revision === NULL) {
+      return NULL;
+    }
+
+    return $revision->getChangedTime();
+  }
+
+  /**
+   * Returns the delete time of a never unpublished entity.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return int|null
+   *   Return the delete time, if possible.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
+   */
+  public function unpublishedEntityDeleteTime(EntityInterface $entity): ?int {
+    return $this->entityTime->unpublishedEntityDeleteTime($entity);
+  }
+
+  /**
+   * Offsets a timestamp.
+   *
+   * @param int $timestamp
+   *   The timestamp.
+   * @param string $offset
+   *   The offset string, e.g "+1 month".
+   *
+   * @return int
+   *   The timestamp with the offset added.
+   *
+   * @deprecated Use tieto_lifecycle_management.entity_time instead.
+   */
+  public function offsetTimestamp(int $timestamp, string $offset): int {
+    return DrupalDateTime::createFromTimestamp($timestamp)
+      ->add(DateInterval::createFromDateString($offset))
+      ->getTimestamp();
   }
 
 }

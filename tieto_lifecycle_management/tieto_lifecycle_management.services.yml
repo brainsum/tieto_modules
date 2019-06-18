@@ -1,4 +1,10 @@
 services:
+  tieto_lifecycle_management.entity_time:
+    class: Drupal\tieto_lifecycle_management\Service\EntityTime
+    arguments:
+      - '@config.factory'
+      - '@entity_type.manager'
+
   tieto_lifecycle_management.moderation_message:
     class: Drupal\tieto_lifecycle_management\Service\ModerationMessage
     arguments:
@@ -15,3 +21,4 @@ services:
       - '@logger.factory'
       - '@event_dispatcher'
       - '@tieto_lifecycle_management.moderation_message'
+      - '@tieto_lifecycle_management.entity_time'
