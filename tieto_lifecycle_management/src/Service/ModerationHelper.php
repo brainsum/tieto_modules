@@ -82,52 +82,6 @@ final class ModerationHelper {
   }
 
   /**
-   * Determines whether a transition is correct or not.
-   *
-   * @param string $currentState
-   *   The current state.
-   * @param string $targetState
-   *   The desired state.
-   *
-   * @return bool
-   *   TRUE for correct transitions, FALSE otherwise.
-   *
-   * @todo: temporary
-   * @todo: FIXME, move to config.
-   */
-  public function isCorrectTransition(string $currentState, string $targetState): bool {
-    switch ($currentState) {
-      case 'unpublished':
-        return TRUE;
-
-      case 'published':
-        return in_array($targetState, ['unpublished_content', 'trash'], TRUE);
-
-      case 'unpublished_content':
-        return $targetState === 'trash';
-    }
-
-    return FALSE;
-  }
-
-  /**
-   * Return the moderation state for the entity if possible.
-   *
-   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
-   *   The entity.
-   *
-   * @return string|null
-   *   The state or NULL.
-   */
-  private function entityModerationState(FieldableEntityInterface $entity): ?string {
-    if (!$entity->hasField('moderation_state')) {
-      return NULL;
-    }
-
-    return $entity->get('moderation_state')->target_id ?? NULL;
-  }
-
-  /**
    * Return the notification message.
    *
    * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
@@ -170,6 +124,48 @@ final class ModerationHelper {
       default:
         return NULL;
     }
+  }
+
+  /**
+   * Check if an entity is scheduled or not.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return bool
+   *   TRUE, if it's scheduled.
+   */
+  public function isEntityScheduled(EntityInterface $entity): bool {
+    $entityConfig = $this->lifeCycleConfig->get('fields')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
+
+    foreach (array_keys($entityConfig) as $scheduleFieldName) {
+      /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
+      if ($entity->hasField($scheduleFieldName)
+        && ($field = $entity->get($scheduleFieldName))
+        && !$field->isEmpty()
+      ) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  /**
+   * Return the moderation state for the entity if possible.
+   *
+   * @param \Drupal\Core\Entity\FieldableEntityInterface $entity
+   *   The entity.
+   *
+   * @return string|null
+   *   The state or NULL.
+   */
+  private function entityModerationState(FieldableEntityInterface $entity): ?string {
+    if (!$entity->hasField('moderation_state')) {
+      return NULL;
+    }
+
+    return $entity->get('moderation_state')->target_id ?? NULL;
   }
 
   /**
@@ -305,31 +301,6 @@ final class ModerationHelper {
   }
 
   /**
-   * Check if an entity is scheduled or not.
-   *
-   * @param \Drupal\Core\Entity\EntityInterface $entity
-   *   The entity.
-   *
-   * @return bool
-   *   TRUE, if it's scheduled.
-   */
-  public function isEntityScheduled(EntityInterface $entity): bool {
-    $entityConfig = $this->lifeCycleConfig->get('fields')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
-
-    foreach (array_keys($entityConfig) as $scheduleFieldName) {
-      /** @var \Drupal\Core\Entity\FieldableEntityInterface $entity */
-      if ($entity->hasField($scheduleFieldName)
-        && ($field = $entity->get($scheduleFieldName))
-        && !$field->isEmpty()
-      ) {
-        return TRUE;
-      }
-    }
-
-    return FALSE;
-  }
-
-  /**
    * Returns whether the unpublished entity should be removed or not.
    *
    * @param \Drupal\Core\Entity\EntityInterface $entity
@@ -428,6 +399,35 @@ final class ModerationHelper {
     }
 
     return $this->time->getRequestTime() >= $moderationUpdateTime;
+  }
+
+  /**
+   * Determines whether a transition is correct or not.
+   *
+   * @param string $currentState
+   *   The current state.
+   * @param string $targetState
+   *   The desired state.
+   *
+   * @return bool
+   *   TRUE for correct transitions, FALSE otherwise.
+   *
+   * @todo: temporary
+   * @todo: FIXME, move to config.
+   */
+  public function isCorrectTransition(string $currentState, string $targetState): bool {
+    switch ($currentState) {
+      case 'unpublished':
+        return TRUE;
+
+      case 'published':
+        return in_array($targetState, ['unpublished_content', 'trash'], TRUE);
+
+      case 'unpublished_content':
+        return $targetState === 'trash';
+    }
+
+    return FALSE;
   }
 
   /**
