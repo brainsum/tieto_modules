@@ -391,6 +391,11 @@ final class ModerationHelper {
       return FALSE;
     }
 
+    // @todo: Unify.
+    if (((bool) $fieldSettings['enabled']) === FALSE) {
+      return FALSE;
+    }
+
     $moderationUpdateTime = $this->entityTime->offsetLastPublishTime($entity, $fieldSettings['date']);
 
     // Was not yet published.
