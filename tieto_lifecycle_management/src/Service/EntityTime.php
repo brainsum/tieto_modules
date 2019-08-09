@@ -88,7 +88,7 @@ final class EntityTime {
   public function offsetLastPublishTime(EntityInterface $entity, string $offset): ?int {
     $lastPublishDate = $this->lastPublishTime($entity);
 
-    return $lastPublishDate === NULL
+    return $lastPublishDate
       ? $this->addOffset($lastPublishDate, $offset)
       : NULL;
   }
