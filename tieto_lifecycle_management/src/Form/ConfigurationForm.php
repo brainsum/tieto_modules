@@ -71,7 +71,75 @@ final class ConfigurationForm extends ConfigFormBase {
     $form = parent::buildForm($form, $form_state);
 
     $form['#tree'] = TRUE;
+    $form['fields'] = $this->fieldsElement();
+    $form['actions'] = $this->actionsElement();
+    return $form;
+  }
 
+  /**
+   * Returns the "actions" element for the form.
+   *
+   * @return array
+   *   The array.
+   */
+  protected function actionsElement(): array {
+    // @todo: Allow adding new ones.
+    $element = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Actions'),
+    ];
+
+    foreach ($this->config('tieto_lifecycle_management.settings')->get('actions') as $targetEntityId => $typeData) {
+
+      if (!isset($element[$targetEntityId])) {
+        $element[$targetEntityId] = [
+          '#type' => 'fieldset',
+          '#title' => $targetEntityId,
+        ];
+      }
+
+      foreach ($typeData as $targetBundleId => $bundleData) {
+
+        if (!isset($element[$targetEntityId][$targetBundleId])) {
+          $element[$targetEntityId][$targetBundleId] = [
+            '#type' => 'fieldset',
+            '#title' => $targetBundleId,
+          ];
+        }
+
+        foreach ($bundleData as $actionId => $settings) {
+          $element[$targetEntityId][$targetBundleId][$actionId] = [
+            '#type' => 'fieldset',
+            '#title' => $actionId,
+            'enabled' => [
+              '#type' => 'checkbox',
+              '#title' => $this->t('Enabled'),
+              '#default_value' => $settings['enabled'] ?? TRUE,
+            ],
+            'date' => [
+              '#type' => 'textfield',
+              '#title' => $this->t('Date'),
+              '#placeholder' => '+6 months',
+              '#default_value' => $settings['date'] ?? '',
+            ],
+          ];
+        }
+      }
+    }
+
+    return $element;
+  }
+
+  /**
+   * Returns the "fields" element for the form.
+   *
+   * @return array
+   *   The array.
+   *
+   * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
+   * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
+   */
+  protected function fieldsElement(): array {
     /** @var \Drupal\field\FieldConfigInterface[] $scheduledFields */
     $scheduledFields = $this
       ->entityTypeManager
@@ -87,30 +155,39 @@ final class ConfigurationForm extends ConfigFormBase {
 
     $values = $this->config('tieto_lifecycle_management.settings')->get('fields');
 
-    $form['fields'] = [];
+
+    $element = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Fields'),
+    ];
 
     foreach ($scheduledFields as $scheduledField) {
       $targetEntityId = $scheduledField->getTargetEntityTypeId();
       $targetBundleId = $scheduledField->getTargetBundle();
       $fieldId = $scheduledField->getName();
 
-      if (!isset($form['fields'][$targetEntityId])) {
-        $form['fields'][$targetEntityId] = [
+      if (!isset($element[$targetEntityId])) {
+        $element[$targetEntityId] = [
           '#type' => 'fieldset',
           '#title' => $targetEntityId,
         ];
       }
 
-      if (!isset($form['fields'][$targetEntityId][$targetBundleId])) {
-        $form['fields'][$targetEntityId][$targetBundleId] = [
+      if (!isset($element[$targetEntityId][$targetBundleId])) {
+        $element[$targetEntityId][$targetBundleId] = [
           '#type' => 'fieldset',
           '#title' => $targetBundleId,
         ];
       }
 
-      $form['fields'][$targetEntityId][$targetBundleId][$fieldId] = [
+      $element[$targetEntityId][$targetBundleId][$fieldId] = [
         '#type' => 'fieldset',
         '#title' => $fieldId,
+        'enabled' => [
+          '#type' => 'checkbox',
+          '#title' => $this->t('Enabled'),
+          '#default_value' => $values[$targetEntityId][$targetBundleId][$fieldId]['enabled'] ?? TRUE,
+        ],
         'date' => [
           '#type' => 'textfield',
           '#title' => $this->t('Date'),
@@ -125,10 +202,9 @@ final class ConfigurationForm extends ConfigFormBase {
           '#default_value' => $values[$targetEntityId][$targetBundleId][$fieldId]['target_state'] ?? '',
         ],
       ];
-
     }
 
-    return $form;
+    return $element;
   }
 
   /**
@@ -173,6 +249,23 @@ final class ConfigurationForm extends ConfigFormBase {
       }
     }
 
+    foreach ($values['actions'] as $entityType => $bundles) {
+      foreach ($bundles as $bundle => $fields) {
+        foreach ($fields as $field => $fieldValues) {
+          $dateValue = $fieldValues['date'] ?? NULL;
+
+          if (
+            !empty($dateValue)
+            && !$this->isRelativeDate($dateValue)
+          ) {
+            $form_state->setError($form['actions'][$entityType][$bundle][$field]['date'], $this->t('@value is not a valid relative date.', [
+              '@value' => $dateValue,
+            ]));
+          }
+        }
+      }
+    }
+
     parent::validateForm($form, $form_state);
   }
 
@@ -182,9 +275,11 @@ final class ConfigurationForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
 
-    $this->config('tieto_lifecycle_management.settings')
-      ->set('fields', $values['fields'])
-      ->save();
+    $config = $this->config('tieto_lifecycle_management.settings');
+
+    $config->set('actions', $values['actions']);
+    $config->set('fields', $values['fields']);
+    $config->save();
 
     parent::submitForm($form, $form_state);
   }

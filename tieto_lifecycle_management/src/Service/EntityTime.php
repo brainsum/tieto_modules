@@ -88,12 +88,9 @@ final class EntityTime {
   public function offsetLastPublishTime(EntityInterface $entity, string $offset): ?int {
     $lastPublishDate = $this->lastPublishTime($entity);
 
-    // Was not yet published.
-    if ($lastPublishDate === NULL) {
-      return NULL;
-    }
-
-    return $this->addOffset($lastPublishDate, $offset);
+    return $lastPublishDate === NULL
+      ? $this->addOffset($lastPublishDate, $offset)
+      : NULL;
   }
 
   /**
@@ -109,8 +106,11 @@ final class EntityTime {
    * @throws \Drupal\Component\Plugin\Exception\PluginNotFoundException
    */
   public function deleteTime(EntityInterface $entity): ?int {
-    // @todo: Make offset configurable.
-    return $this->offsetLastPublishTime($entity, '+3 years');
+    $offset = $this->getActionOffset($entity, 'delete_published_entity');
+
+    return $offset
+      ? $this->offsetLastPublishTime($entity, $offset)
+      : NULL;
   }
 
   /**
@@ -133,8 +133,12 @@ final class EntityTime {
       return NULL;
     }
 
-    // @todo: Make offset configurable.
-    return $this->addOffset($entity->getChangedTime(), '+1 year');
+    $offset = $this->getActionOffset($entity, 'delete_unpublished_entity');
+    // @todo: Don't assume EntityChangedInterface, enforce it.
+    /** @var \Drupal\Core\Entity\EntityChangedInterface $entity */
+    return $offset
+      ? $this->addOffset($entity->getChangedTime(), $offset)
+      : NULL;
   }
 
   /**
@@ -174,11 +178,9 @@ final class EntityTime {
     /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface $revision */
     $revision = $storage->loadRevision(key($data));
 
-    if ($revision === NULL) {
-      return NULL;
-    }
-
-    return $revision->getChangedTime();
+    return $revision
+      ? $revision->getChangedTime()
+      : NULL;
   }
 
   /**
@@ -196,11 +198,9 @@ final class EntityTime {
   public function unpublishTime(EntityInterface $entity): ?int {
     $offset = $this->getStateOffset($entity, 'unpublished_content');
 
-    if ($offset === NULL) {
-      return NULL;
-    }
-
-    return $this->offsetLastPublishTime($entity, $offset);
+    return $offset
+      ? $this->offsetLastPublishTime($entity, $offset)
+      : NULL;
   }
 
   /**
@@ -218,11 +218,9 @@ final class EntityTime {
   public function archiveTime(EntityInterface $entity): ?int {
     $offset = $this->getStateOffset($entity, 'trash');
 
-    if ($offset === NULL) {
-      return NULL;
-    }
-
-    return $this->offsetLastPublishTime($entity, $offset);
+    return $offset
+      ? $this->offsetLastPublishTime($entity, $offset)
+      : NULL;
   }
 
   /**
@@ -240,9 +238,37 @@ final class EntityTime {
     $config = $this->lifeCycleConfig->get('fields')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
 
     foreach ($config as $setting) {
-      if ($setting['target_state'] === $state && !empty($setting['date'])) {
+      if (
+        $setting['target_state'] === $state
+        && !empty($setting['date'])
+        && ((bool) $setting['enabled']) === TRUE
+      ) {
         return $setting['date'];
       }
+    }
+
+    return NULL;
+  }
+
+  /**
+   * Return the offset for an action.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   * @param string $action
+   *   The action.
+   *
+   * @return string|null
+   *   The date offset or NULL.
+   */
+  private function getActionOffset(EntityInterface $entity, string $action): ?string {
+    $config = $this->lifeCycleConfig->get('actions')[$entity->getEntityTypeId()][$entity->bundle()] ?? [];
+
+    if (
+      isset($config[$action])
+      && ((bool) $config[$action]['enabled']) === TRUE
+    ) {
+      return $config[$action]['date'];
     }
 
     return NULL;
