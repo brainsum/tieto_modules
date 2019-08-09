@@ -2,13 +2,13 @@
 
 namespace Drupal\tieto_lifecycle_management\Form;
 
-use function array_filter;
-use function date_parse;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function array_filter;
+use function date_parse;
 
 /**
  * Class ConfigurationForm.
@@ -69,10 +69,9 @@ final class ConfigurationForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildForm($form, $form_state);
-
     $form['#tree'] = TRUE;
     $form['fields'] = $this->fieldsElement();
-    $form['actions'] = $this->actionsElement();
+    $form['lfc_actions'] = $this->actionsElement();
     return $form;
   }
 
@@ -153,9 +152,8 @@ final class ConfigurationForm extends ConfigFormBase {
       return $field->getSetting('handler') === 'default:scheduled_update';
     });
 
-    $values = $this->config('tieto_lifecycle_management.settings')->get('fields');
-
-
+    $values = $this->config('tieto_lifecycle_management.settings')
+      ->get('fields');
     $element = [
       '#type' => 'fieldset',
       '#title' => $this->t('Fields'),
@@ -249,7 +247,7 @@ final class ConfigurationForm extends ConfigFormBase {
       }
     }
 
-    foreach ($values['actions'] as $entityType => $bundles) {
+    foreach ($values['lfc_actions'] as $entityType => $bundles) {
       foreach ($bundles as $bundle => $fields) {
         foreach ($fields as $field => $fieldValues) {
           $dateValue = $fieldValues['date'] ?? NULL;
@@ -258,7 +256,7 @@ final class ConfigurationForm extends ConfigFormBase {
             !empty($dateValue)
             && !$this->isRelativeDate($dateValue)
           ) {
-            $form_state->setError($form['actions'][$entityType][$bundle][$field]['date'], $this->t('@value is not a valid relative date.', [
+            $form_state->setError($form['lfc_actions'][$entityType][$bundle][$field]['date'], $this->t('@value is not a valid relative date.', [
               '@value' => $dateValue,
             ]));
           }
@@ -274,10 +272,8 @@ final class ConfigurationForm extends ConfigFormBase {
    */
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
-
     $config = $this->config('tieto_lifecycle_management.settings');
-
-    $config->set('actions', $values['actions']);
+    $config->set('actions', $values['lfc_actions']);
     $config->set('fields', $values['fields']);
     $config->save();
 
