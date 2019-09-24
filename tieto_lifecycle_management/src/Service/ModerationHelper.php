@@ -96,6 +96,10 @@ final class ModerationHelper {
    * @todo: Generalize.
    */
   public function notificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
+    if ($this->moderationIsIgnored($entity)) {
+      NULL;
+    }
+
     if ($entity->isNew()) {
       return $this->moderationMessage->newEntityNotificationMessage($entity);
     }
@@ -169,6 +173,20 @@ final class ModerationHelper {
   }
 
   /**
+   * Checks whether an entity is ignored from moderation.
+   *
+   * @param \Drupal\Core\Entity\EntityInterface $entity
+   *   The entity.
+   *
+   * @return bool
+   *   TRUE if ignored.
+   */
+  protected function moderationIsIgnored(EntityInterface $entity): bool {
+    return $entity->hasField('ignore_lifecycle_management')
+      && (bool) $entity->get('ignore_lifecycle_management')->value === TRUE;
+  }
+
+  /**
    * Run moderation updates.
    *
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
@@ -195,10 +213,7 @@ final class ModerationHelper {
         // @todo: EntityCreatedInterface; see: https://www.drupal.org/node/2833378
         /** @var \Drupal\Core\Entity\EntityInterface|\Drupal\Core\Entity\EntityChangedInterface|\Drupal\Core\Entity\FieldableEntityInterface $entity */
         foreach ($entityStorage->loadMultiple($entityIds) as $entity) {
-          if (
-            $entity->hasField('ignore_lifecycle_management')
-            && (bool) $entity->get('ignore_lifecycle_management')->value === TRUE
-          ) {
+          if ($this->moderationIsIgnored($entity)) {
             continue;
           }
 
