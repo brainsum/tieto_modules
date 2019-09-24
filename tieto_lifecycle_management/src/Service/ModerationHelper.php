@@ -97,7 +97,7 @@ final class ModerationHelper {
    */
   public function notificationMessage(FieldableEntityInterface $entity): ?TranslatableMarkup {
     if ($this->moderationIsIgnored($entity)) {
-      NULL;
+      return NULL;
     }
 
     if ($entity->isNew()) {
