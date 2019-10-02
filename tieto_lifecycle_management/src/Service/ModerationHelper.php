@@ -196,6 +196,13 @@ final class ModerationHelper {
    * @throws \Drupal\Core\Entity\EntityMalformedException
    */
   public function runOperations(): void {
+    if (
+      ($isDisabled = $this->lifeCycleConfig->get('disabled'))
+      && $isDisabled === TRUE
+    ) {
+      return;
+    }
+
     // @todo: Optimize; maybe set state variables on entity update,
     // iterate through that only. E.g:
     // - tieto_lifecycle_management.operations: id => [timestamp, state].
