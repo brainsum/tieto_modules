@@ -118,6 +118,13 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    * @throws \Exception
    */
   public function onIgnore(LifeCycleIgnoreEventInterface $event): void {
+    if (
+      ($isDisabled = $this->notificationConfig->get('disabled'))
+      && $isDisabled === TRUE
+    ) {
+      return;
+    }
+
     $entityData = $this->entityToData($event->entity());
 
     if ($notificationId = $this->determineNotificationId($entityData)) {
@@ -138,6 +145,13 @@ final class LifeCycleEventSubscriber implements EventSubscriberInterface {
    * @throws \Exception
    */
   public function onUpdate(LifeCycleUpdateEventInterface $event): void {
+    if (
+      ($isDisabled = $this->notificationConfig->get('disabled'))
+      && $isDisabled === TRUE
+    ) {
+      return;
+    }
+
     if ($event->targetState() === 'unpublished_content') {
       $entityData = $this->entityToData($event->entity());
 

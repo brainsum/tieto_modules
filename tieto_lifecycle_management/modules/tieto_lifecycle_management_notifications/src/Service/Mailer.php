@@ -104,6 +104,13 @@ final class Mailer {
     array $entityData,
     string $reminderType
   ): void {
+    if (
+      ($isDisabled = $this->notificationSettings->get('disabled'))
+      && $isDisabled === TRUE
+    ) {
+      return;
+    }
+
     if ($user->getEmail() === NULL) {
       return;
     }
@@ -213,6 +220,13 @@ final class Mailer {
     array $entityData,
     string $notificationType
   ): void {
+    if (
+      ($isDisabled = $this->notificationSettings->get('disabled'))
+      && $isDisabled === TRUE
+    ) {
+      return;
+    }
+
     if ($user->getEmail() === NULL) {
       return;
     }
