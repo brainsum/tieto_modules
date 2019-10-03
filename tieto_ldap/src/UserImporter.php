@@ -119,7 +119,19 @@ class UserImporter extends ImporterBase {
                   ->isValid($ldapUsername))) {
 
                 /** @var \Drupal\user\UserInterface $drupalAccount */
-                $drupalAccount = user_load_by_name($userValues['name']);
+                $drupalAccount = \user_load_by_name($userValues['name']);
+                // Fix LDAP username changes based on email.
+                if (!$drupalAccount) {
+                  \Drupal::database()->update('users_field_data')
+                    ->fields([
+                      'ldap_user_current_dn' => $row['dn'],
+                      'ldap_user_puid' => $ldapUsername,
+                    ])
+                    ->condition('ldap_user_puid_sid', $ldapServer->id())
+                    ->condition('mail', $ldapMail)
+                    ->execute();
+                  $drupalAccount = \user_load_by_name($userValues['name']);
+                }
                 // Create user in Drupal.
                 if (!$drupalAccount) {
                   $result = $processor->provisionDrupalAccount($userValues);
