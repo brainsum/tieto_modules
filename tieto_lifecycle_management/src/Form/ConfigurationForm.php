@@ -70,6 +70,12 @@ final class ConfigurationForm extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state): array {
     $form = parent::buildForm($form, $form_state);
     $form['#tree'] = TRUE;
+    $form['disabled'] = [
+      '#type' => 'checkbox',
+      '#title' => $this->t('Disabled'),
+      '#description' => $this->t('Check if you want to disable life-cycle management globally.'),
+      '#default_value' => $this->config('tieto_lifecycle_management.settings')->get('disabled') ?? FALSE,
+    ];
     $form['fields'] = $this->fieldsElement();
     $form['lfc_actions'] = $this->actionsElement();
     return $form;
@@ -273,6 +279,7 @@ final class ConfigurationForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state): void {
     $values = $form_state->getValues();
     $config = $this->config('tieto_lifecycle_management.settings');
+    $config->set('disabled', (bool) $values['disabled']);
     $config->set('actions', $values['lfc_actions']);
     $config->set('fields', $values['fields']);
     $config->save();
