@@ -124,8 +124,9 @@ class UserImporter extends ImporterBase {
                 if (!$drupalAccount) {
                   \Drupal::database()->update('users_field_data')
                     ->fields([
+                      'name' => $userValues['name'],
                       'ldap_user_current_dn' => $row['dn'],
-                      'ldap_user_puid' => $ldapUsername,
+                      'ldap_user_puid' => $userValues['name'],
                     ])
                     ->condition('ldap_user_puid_sid', $ldapServer->id())
                     ->condition('mail', $ldapMail)
