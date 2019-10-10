@@ -128,7 +128,7 @@ final class ModerationMessage {
     }
 
     $message = $this->message($entity->getEntityTypeId(), $entity->bundle(), 'new');
-    return $this->translation->translate($message);
+    return $message === NULL ? NULL : $this->translation->translate($message);
   }
 
   /**
