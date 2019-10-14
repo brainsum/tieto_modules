@@ -51,10 +51,5 @@
             "merge-extra-deep": false,
             "merge-scripts": false
         }
-    },
-    "autoload": {
-        "psr-4": {
-            "Brainsum\\TietoModules\\tieto_lifecycle_management\\Tests\\Behat\\": "tieto_lifecycle_management/tests/Behat/"
-        }
     }
 }
