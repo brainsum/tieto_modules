@@ -165,6 +165,7 @@ class UserImporter extends ImporterBase {
                     || ($drupalAccount->hasField('field_user_fullname') && !$drupalAccount->get('field_user_fullname')->value)
                     || ($drupalAccount->hasField('field_location') && !$drupalAccount->get('field_location')->target_id)
                   ) {
+                    $drupalAccount->set('status', 1);
                     $processor->drupalUserLogsIn($drupalAccount);
                   }
                 }
