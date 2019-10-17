@@ -128,7 +128,6 @@ class UserImporter extends ImporterBase {
                       'ldap_user_current_dn' => $row['dn'],
                       'ldap_user_puid' => $userValues['name'],
                     ])
-                    ->condition('ldap_user_puid_sid', $ldapServer->id())
                     ->condition('mail', $ldapMail)
                     ->execute();
                   $drupalAccount = \user_load_by_name($userValues['name']);
