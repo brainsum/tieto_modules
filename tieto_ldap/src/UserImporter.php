@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_ldap;
 
+use Drupal\externalauth\Authmap;
 use Drupal\tieto_ldap\Processor\DrupalUserImportProcessor;
 use function array_keys;
 use function implode;
@@ -122,6 +123,8 @@ class UserImporter extends ImporterBase {
                 $drupalAccount = \user_load_by_name($userValues['name']);
                 // Fix LDAP username changes based on email.
                 if (!$drupalAccount) {
+                  /** @var \Drupal\user\UserInterface $oldDrupalAccount */
+                  $oldDrupalAccount = \user_load_by_mail($ldapMail);
                   \Drupal::database()->update('users_field_data')
                     ->fields([
                       'name' => $userValues['name'],
@@ -131,6 +134,13 @@ class UserImporter extends ImporterBase {
                     ->condition('mail', $ldapMail)
                     ->execute();
                   $drupalAccount = \user_load_by_name($userValues['name']);
+                  // Log user rename and update authmap table too.
+                  if ($drupalAccount) {
+                    $this->logger
+                      ->info('User was renamed from: %old to: %new.', ['%old' => $oldDrupalAccount->getAccountName(), '%new' => $userValues['name']]);
+                    $authmap = new Authmap($this->database);
+                    $authmap->save($drupalAccount, 'ldap_user', $userValues['name']);
+                  }
                 }
                 // Create user in Drupal.
                 if (!$drupalAccount) {
