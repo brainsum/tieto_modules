@@ -4,7 +4,7 @@ namespace Drupal\tieto_ldap\Plugin\Validation\Constraint;
 
 use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\user\UserInterface;
-use Egulias\EmailValidator\EmailValidatorInterface;
+use Drupal\Component\Utility\EmailValidatorInterface;
 use function mb_strlen;
 use function preg_match;
 use function strpos;
@@ -22,9 +22,9 @@ use Symfony\Component\Validator\ConstraintValidator;
 class TietoLdapUserNameConstraintValidator extends ConstraintValidator implements ContainerInjectionInterface {
 
   /**
-   * Email validator.
+   * The email validator.
    *
-   * @var \Egulias\EmailValidator\EmailValidatorInterface
+   * @var \Drupal\Component\Utility\EmailValidatorInterface
    */
   protected $emailValidator;
 
@@ -40,7 +40,7 @@ class TietoLdapUserNameConstraintValidator extends ConstraintValidator implement
   /**
    * TietoLdapUserNameConstraintValidator constructor.
    *
-   * @param \Egulias\EmailValidator\EmailValidatorInterface $emailValidator
+   * @param \Drupal\Component\Utility\EmailValidatorInterface $emailValidator
    *   Email validator.
    */
   public function __construct(
