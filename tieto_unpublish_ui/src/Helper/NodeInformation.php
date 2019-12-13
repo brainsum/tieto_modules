@@ -2,6 +2,7 @@
 
 namespace Drupal\tieto_unpublish_ui\Helper;
 
+use Drupal\Core\Datetime\DrupalDateTime;
 use Drupal\Core\Link;
 use Drupal\Core\Url;
 use Drupal\node\NodeInterface;
@@ -282,8 +283,9 @@ class NodeInformation extends NodeFormAlterHelperBase {
     $firstPublishValue = reset($firstPublishValue);
     $firstPublishDate = $this->t('Not available');
     if (isset($firstPublishValue['value'])) {
-      $firstPublishValue = strtotime($firstPublishValue['value']);
-      $firstPublishDate = $this->dateFormatter->format($firstPublishValue, 'tieto_date');
+      $dateTime = new DrupalDateTime($firstPublishValue['value'], 'GMT');
+      $timestamp = $dateTime->getTimestamp();
+      $firstPublishDate = $this->dateFormatter->format($timestamp, 'tieto_date');
     }
 
     return [
